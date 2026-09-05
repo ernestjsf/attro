@@ -9,8 +9,8 @@ repository does not patch or bespoke-install submodule checkouts.
 Use private GitHub authentication and recurse into the pinned sources:
 
 ```sh
-git clone --recurse-submodules git@github.com:ernestjsf/pi-customizations.git
-cd pi-customizations
+git clone --recurse-submodules https://github.com/ernestjsf/pi-customizations.git ~/projects/pi-customizations
+cd ~/projects/pi-customizations
 python3 scripts/verify.py
 ```
 
