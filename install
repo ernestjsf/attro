@@ -1,0 +1,273 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import json
+import os
+import shlex
+import stat
+import subprocess
+import sys
+from contextlib import contextmanager
+from pathlib import Path
+
+SUPPORTED_PLATFORMS = frozenset({"darwin", "linux"})
+PYTHON_MIN = (3, 10)
+LAUNCHERS = ("pi", "piattro")
+INSTALL_LOCK = ".piattro-install.lock"
+
+
+class InstallError(Exception):
+    pass
+
+
+def eprint(*args: object) -> None:
+    print(*args, file=sys.stderr)
+
+
+def repo_root() -> Path:
+    return Path(__file__).resolve().parent
+
+
+def managed_root() -> Path:
+    return Path(os.environ.get("PIATTRO_HOME") or Path.home() / ".piattro").expanduser()
+
+
+def default_bin_dir() -> Path:
+    return Path.home() / ".local" / "bin"
+
+
+def check_platform() -> None:
+    if sys.platform not in SUPPORTED_PLATFORMS:
+        raise InstallError(f"unsupported platform: {sys.platform}")
+
+
+def check_python() -> None:
+    if sys.version_info[:2] < PYTHON_MIN:
+        raise InstallError(f"Python {PYTHON_MIN[0]}.{PYTHON_MIN[1]}+ required")
+
+
+def paths_overlap(left: Path, right: Path) -> bool:
+    left = left.resolve()
+    right = right.resolve()
+    return left == right or left in right.parents or right in left.parents
+
+
+def validate_bin_dir(bin_dir: Path, checkout: Path, managed: Path) -> None:
+    bin_dir = bin_dir.expanduser().resolve()
+    protected = [
+        checkout.resolve(),
+        (Path.home() / ".pi").resolve(),
+        managed.resolve(),
+        (managed / "releases").resolve(),
+        (managed / "staging").resolve(),
+        (managed / "agent").resolve(),
+        (managed / "state.json").resolve(),
+    ]
+    for path in protected:
+        if paths_overlap(bin_dir, path):
+            raise InstallError(f"bin directory overlaps protected path: {path}")
+
+
+def launcher_targets(checkout: Path) -> dict[str, Path]:
+    return {name: (checkout / "bin" / name).resolve() for name in LAUNCHERS}
+
+
+def link_identity(dest: Path, target: Path) -> bool:
+    if not dest.is_symlink():
+        return False
+    try:
+        return dest.resolve() == target.resolve()
+    except (OSError, RuntimeError):
+        return False
+
+
+def launcher_conflict(dest: Path, target: Path) -> str | None:
+    if dest.is_symlink():
+        if link_identity(dest, target):
+            return None
+        return f"conflicting launcher symlink: {dest}"
+    if dest.exists():
+        return f"conflicting launcher file: {dest}"
+    return None
+
+
+def check_launcher_destinations(bin_dir: Path, targets: dict[str, Path]) -> None:
+    for name, target in targets.items():
+        conflict = launcher_conflict(bin_dir / name, target)
+        if conflict:
+            raise InstallError(conflict)
+
+
+def piattro_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["PIATTRO_HOME"] = str(managed_root().resolve())
+    return env
+
+
+def run_piattro(checkout: Path, *args: str) -> tuple[dict[str, object], str]:
+    cmd = [str(checkout / "bin" / "piattro"), *args]
+    result = subprocess.run(cmd, capture_output=True, text=True, env=piattro_env())
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    data: dict[str, object] | None = None
+    if stdout:
+        try:
+            parsed = json.loads(stdout)
+            if isinstance(parsed, dict):
+                data = parsed
+        except json.JSONDecodeError:
+            pass
+    if result.returncode != 0:
+        message = data.get("error") if data else None
+        if not isinstance(message, str) or not message:
+            message = stderr or stdout or f"piattro exited {result.returncode}"
+        raise InstallError(message)
+    if data is None:
+        raise InstallError("piattro did not emit JSON")
+    return data, stderr
+
+
+def preflight(checkout: Path) -> None:
+    report, _ = run_piattro(checkout, "--json", "doctor", "--repo", str(checkout))
+    if not report.get("healthy"):
+        issues = report.get("issues")
+        if isinstance(issues, list) and issues:
+            raise InstallError("; ".join(str(item) for item in issues))
+        raise InstallError("doctor reported unhealthy")
+
+
+def prepare_release(checkout: Path) -> str:
+    manifest, _ = run_piattro(checkout, "--json", "setup", "--repo", str(checkout))
+    release_id = manifest.get("releaseId")
+    if not isinstance(release_id, str) or not release_id:
+        raise InstallError("setup did not return releaseId")
+    return release_id
+
+
+def activate_release(checkout: Path, release_id: str) -> None:
+    run_piattro(checkout, "--json", "activate", release_id)
+
+
+@contextmanager
+def bin_install_lock(bin_dir: Path):
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    lock_path = bin_dir / INSTALL_LOCK
+    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK, 0o600)
+    try:
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1:
+            raise InstallError(f"launcher lock must be an unaliased regular file: {lock_path}")
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise InstallError(f"another launcher installation is running in {bin_dir}") from exc
+        try:
+            yield
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
+
+
+def create_missing_links(bin_dir: Path, targets: dict[str, Path]) -> list[tuple[Path, Path]]:
+    created: list[tuple[Path, Path]] = []
+    try:
+        for name, target in targets.items():
+            dest = bin_dir / name
+            if link_identity(dest, target):
+                continue
+            conflict = launcher_conflict(dest, target)
+            if conflict:
+                raise InstallError(conflict)
+            dest.symlink_to(target)
+            created.append((dest, target))
+    except BaseException:
+        cleanup_links(created)
+        raise
+    return created
+
+
+def cleanup_links(created: list[tuple[Path, Path]]) -> None:
+    for dest, target in created:
+        if dest.is_symlink() and dest.resolve() == target.resolve():
+            dest.unlink()
+
+
+def print_success(bin_dir: Path) -> None:
+    print(f"Installed pi and piattro launchers to {bin_dir}")
+    print()
+    print("Add to PATH (once per shell, or in ~/.profile / ~/.zshrc):")
+    print()
+    print(f'  export PATH={shlex.quote(str(bin_dir))}:"$PATH"')
+    print()
+    custom = os.environ.get("PIATTRO_HOME")
+    if custom:
+        print("Custom PIATTRO_HOME is set; export it in every shell that runs pi/piattro:")
+        print()
+        print(f"  export PIATTRO_HOME={shlex.quote(str(managed_root().resolve()))}")
+        print()
+    print("Launchers symlink this checkout's bin/pi and bin/piattro; keep the checkout at its current path.")
+    print("Run pi, then /login for the providers you use. Updates keep this shared profile.")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Prepare a pinned Piattro release and install pi/piattro launchers.",
+        epilog=(
+            "PIATTRO_HOME selects the managed state directory (default ~/.piattro). "
+            "If you set a custom PIATTRO_HOME for installation, export the same value "
+            "whenever you run pi or piattro later."
+        ),
+    )
+    parser.add_argument("--bin-dir", type=Path, default=None, help="launcher directory (default: ~/.local/bin)")
+    parser.add_argument("--dry-run", action="store_true", help="show actions without writing state or links")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    try:
+        check_platform()
+        check_python()
+        args = build_parser().parse_args(argv)
+        checkout = repo_root()
+        managed = managed_root()
+        bin_dir = (args.bin_dir or default_bin_dir()).expanduser().resolve()
+        targets = launcher_targets(checkout)
+        validate_bin_dir(bin_dir, checkout, managed)
+        check_launcher_destinations(bin_dir, targets)
+
+        if args.dry_run:
+            preflight(checkout)
+            print(f"would install launchers in {bin_dir}")
+            for name, target in targets.items():
+                dest = bin_dir / name
+                if not link_identity(dest, target):
+                    print(f"would link {dest} -> {target}")
+            print(f"would run: piattro setup --repo {checkout}")
+            print("would run: piattro activate <releaseId>")
+            return 0
+
+        preflight(checkout)
+        release_id = prepare_release(checkout)
+        with bin_install_lock(bin_dir):
+            check_launcher_destinations(bin_dir, targets)
+            created: list[tuple[Path, Path]] = []
+            try:
+                created = create_missing_links(bin_dir, targets)
+                activate_release(checkout, release_id)
+            except BaseException:
+                cleanup_links(created)
+                raise
+
+        print_success(bin_dir)
+        return 0
+    except (InstallError, OSError, RuntimeError) as exc:
+        eprint(f"error: {exc}")
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
