@@ -1,5 +1,10 @@
 # Setup and manual migration
 
+For the isolated Piattro manager, use the [main README](../README.md). This page
+retains the legacy workbench's source-preparation and manual live-migration
+reference. Managed setup builds its own copies; do not perform the live migration
+below merely to try a managed release.
+
 This repository is a reviewed, private source manifest. Preparation is separate
 from activation: setup commands below do not edit Pi settings, install/remove live
 packages, or bypass guarded settings writes.

@@ -1,61 +1,112 @@
-# pi-customizations
+# Piattro
 
-Private Quattro workbench manifest for seven reviewed Pi sources. The sources are
-standard Git submodules pinned by the root gitlinks and `sources.lock.json`; this
-repository does not patch or bespoke-install submodule checkouts.
+An opinionated distribution of Pi: a pinned Pi runtime, customized plugins,
+Quattro themes, and an isolated release manager. Use `pi` to work and `piattro`
+to manage prepared releases. Pi core remains upstream; customizations live in
+plugins and the distribution profile.
 
-## Checkout and preparation
+**Development status:** local-checkout installation and update discovery are the
+first milestone. This repository still references the existing fork mirrors;
+it is **not yet a publicly installable, fully validated stable distribution**.
+No remote stable feed, automatic release PRs, or public artifacts are published
+by the current workflows. See [publication gates](docs/publication.md).
 
-Use private GitHub authentication and recurse into the pinned sources:
+## Try the local manager
+
+Requires Python 3.10+, Git, npm, and a Node version satisfying the pinned Pi
+engine (currently Node 22.19.0+). macOS and Linux are the target platforms;
+real fresh-install and combined-UI validation are required before support is
+advertised. Windows is not supported by this first implementation.
+
+Start with a trusted, clean, recursive checkout whose pinned forks you can
+access. Review its sources before executing dependency installation or builds.
+The current workbench checkout instructions are in [source setup](docs/setup.md).
 
 ```sh
-git clone --recurse-submodules https://github.com/ernestjsf/pi-customizations.git ~/projects/pi-customizations
-cd ~/projects/pi-customizations
+./bin/piattro --help
+./bin/piattro doctor
+./bin/piattro setup --repo "$PWD"
+./bin/piattro status
+```
+
+`setup` installs/builds a **separate managed release**; it does not replace your
+existing global Pi or activate the candidate by default. It can download npm
+packages and Lens grammars and execute the reviewed build steps. Disabled npm
+lifecycle scripts do not sandbox those builds or the resulting extensions.
+
+Use the release ID printed by setup:
+
+```sh
+./bin/piattro try --release-id <release-id>
+./bin/piattro activate <release-id>
+./bin/pi
+```
+
+Only after validating the candidate, put this checkout's `bin/` directory before
+your existing Pi on PATH. This is an explicit shell choice; the installer does
+not edit shell startup files or overwrite an existing `pi` command. Keep the
+manager checkout available.
+
+```sh
+export PATH="/absolute/path/to/piattro/bin:$PATH"
+command -v pi
+pi
+```
+
+Provider authentication and personal settings are not copied from `~/.pi/agent`.
+A trial uses temporary Pi state and discards it on exit; it is not a sandbox and
+can still access environment credentials, project resources, and host tools.
+See [managed state](profile/MANAGED.md) before adopting the setup for daily work.
+
+## Update and rollback
+
+```sh
+piattro update --repo /path/to/reviewed-clean-checkout
+piattro try --release-id <new-release-id>
+piattro activate <new-release-id>
+piattro rollback
+```
+
+`update` currently prepares the **explicit checkout's recipe**, not the latest
+upstream versions. Old prepared code is retained locally; rollback switches the
+active pointer. It does not undo shared plugin data changes, external side
+effects, or modifications made by an agent. Never delete old releases while
+sessions still use them.
+
+[Update automation](docs/automation.md) explains scheduled candidate discovery,
+optional disposable fork-merge assessment, and the remaining release-PR lane.
+
+## Structure
+
+```text
+bin/                    piattro manager and pi launcher
+piattro/                preparation, validation, activation, and launch code
+piattro.json            distribution/core/npm version recipe
+sources.lock.json       canonical seven-fork pins and copied config hashes
+plugins/                seven Git submodules (customized upstream plugins)
+profile/                portable defaults and managed-state guidance
+config/ + themes/       reviewed display configuration and Quattro themes
+scripts/                source verification and upstream update discovery
+tests/                  isolated runtime and discovery regression tests
+.github/workflows/      macOS/Linux tests and weekly update reports
+docs/                   setup, maintenance, design, and publication gates
+```
+
+The legacy root npm manifest remains private and exports themes only. Install the
+whole environment with the manager, not `pi install` on that theme-only package.
+Original Piattro code is [MIT](LICENSE); upstream notices remain authoritative
+([third-party inventory](THIRD_PARTY_NOTICES.md)).
+
+## Developer checks
+
+```sh
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 scripts/verify.py
+python3 scripts/verify.py --runtime
+git diff --check
 ```
 
-The verifier is read-only. Its default check covers gitlinks, checked-out HEADs,
-clean submodules, approved private origins, source entry files, and copied config
-hashes. It deliberately does **not** claim runtime readiness: Lens `dist/` and
-core grammars are generated preparation artifacts. Run the documented build and
-then `python3 scripts/verify.py --runtime` to check that the listed runtime files
-are present. That optional check does not prove dependency or host compatibility.
-
-Install dependencies only from the lockfiles, without lifecycle scripts:
-
-```sh
-for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-web-access \
-  plugins/pi-lens plugins/rpiv-mono plugins/pi-ask-user; do
-  (cd "$p" && npm ci --ignore-scripts --no-audit --no-fund)
-done
-```
-
-`pi-subagents` has no lockfile or external runtime dependencies; it uses host-provided
-Pi APIs, so no npm install is needed for that submodule. Lens must be prepared
-explicitly; see [setup](docs/setup.md). Do not install all seven dependencies just
-to run the root source checker.
-
-## Manifest and configs
-
-The root `package.json` is private `0.1.0` and declares the Quattro Amber and
-Quattro Green themes only. It does not auto-activate extensions. The five copied
-files in `themes/` and `config/` are the explicit allowlist; no auth, session,
-safety-policy, or full global settings files are captured. The existing Zentui safety
-footer-label placement is unchanged because that setting is display-only, not a
-policy change.
-
-The live global settings now select all seven local package paths in `plugins/`;
-old npm copies are not registered alongside them. Quattro Green is the active
-live theme. See [transcript UI](docs/transcript-ui.md) for display ownership,
-configuration, verification, and rollback. The gitlinks and source manifest pin
-the reviewed local commits. No commits were pushed by the UI cleanup.
-
-## Validation evidence
-
-The pinned source `QUATTRO.md` reports: Zentui 1,383 passed/1 skipped; CC 181;
-web 633; rpiv-todo 232; ask-user 82; subagents full suite passed; Lens 75 targeted
-plus lint/build/import and 12 core + 1 vendored grammar checks. Lens was not a full
-suite or live combined-TUI run.
-
-See [setup](docs/setup.md) for non-activating preparation and [updating](docs/updating.md)
-for the fetch/review/merge workflow.
+The source verifier requires clean, pinned submodules. `--runtime` additionally
+checks listed generated-file presence after the documented Lens preparation;
+it does not certify dependency compatibility or the combined interactive UI.
+Unit tests use isolated fixtures and do not install or alter the live Pi setup.

@@ -1,5 +1,10 @@
 # Updating pinned sources
 
+This page is the manual maintainer workflow for source pins. For automated
+candidate discovery see [automation](automation.md); for preparing and switching
+managed Piattro releases see the [README](../README.md). A consumer update does
+not merge upstream branches into these workbench sources.
+
 The root branch is `quattro`. Submodule gitlinks and `sources.lock.json` are the
 canonical pins. Do not rewrite a source pin, force-reset, or discard dirty
 submodule work. The existing `~/projects/pi-forks` directories are preparation
