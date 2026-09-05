@@ -30,7 +30,8 @@ for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-web-access \
 done
 ```
 
-`pi-subagents` has no lockfile or dependency install. Lens must be prepared
+`pi-subagents` has no lockfile or external runtime dependencies; it uses host-provided
+Pi APIs, so no npm install is needed for that submodule. Lens must be prepared
 explicitly; see [setup](docs/setup.md). Do not install all seven dependencies just
 to run the root source checker.
 

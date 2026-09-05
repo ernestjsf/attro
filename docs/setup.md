@@ -6,12 +6,14 @@ packages, or bypass guarded settings writes.
 
 ## Fresh checkout
 
-Authenticate to the private GitHub repositories, then clone the root with its
-canonical submodules:
+Authenticate to the private GitHub repositories with the GitHub credential
+helper/PAT or SSH, then clone the root with its canonical submodules into the
+explicit migration location:
 
 ```sh
-git clone --recurse-submodules git@github.com:ernestjsf/pi-customizations.git
-cd pi-customizations
+git clone --recurse-submodules https://github.com/ernestjsf/pi-customizations.git \
+  ~/projects/pi-customizations
+cd ~/projects/pi-customizations
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
@@ -40,8 +42,9 @@ for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-web-access \
 done
 ```
 
-There is no dependency lockfile for `pi-subagents`; do not install it just for the
-root checker. The root package has no runtime dependency installation.
+`pi-subagents` has no dependency lockfile because it has no external runtime
+dependencies: it uses host-provided Pi APIs/peer facilities. No `npm ci` is needed
+for that submodule. The root package has no runtime dependency installation.
 
 ## Lens preparation
 
@@ -81,11 +84,23 @@ check:grammars` is the separate Lens grammar provenance check.
 ## Manual migration (not performed here)
 
 The live installation is unchanged and pending migration. When intentionally
-migrating, replace each matching one of the seven package entries with its local
-path under this repository. Preserve every unrelated package, filter, and safety
-setting. Never keep both an old source and its replacement; never paste a fragment
-over the global settings document; and never run `pi remove`, because it would
-remove the original dirty repository registration.
+migrating, replace only the matching package entry with the exact local path below;
+this table is a package-entry map, not a replacement full settings JSON:
+
+| Existing package identity | Replacement local path |
+| --- | --- |
+| `pi-zentui` | `~/projects/pi-customizations/plugins/pi-zentui` |
+| `pi-cc-extensions` | `~/projects/pi-customizations/plugins/pi-cc-extensions` |
+| `pi-web-access` | `~/projects/pi-customizations/plugins/pi-web-access` |
+| `pi-lens` | `~/projects/pi-customizations/plugins/pi-lens` |
+| `@juicesharp/rpiv-todo` | `~/projects/pi-customizations/plugins/rpiv-mono/packages/rpiv-todo` |
+| `pi-ask-user` | `~/projects/pi-customizations/plugins/pi-ask-user` |
+| `@williamcr01/pi-subagents` | `~/projects/pi-customizations/plugins/pi-subagents` |
+
+Preserve every unrelated package, filter, and safety setting. Never keep both an
+old source and its replacement; never paste a fragment over the global settings
+document; and never run `pi remove`, because it would remove the original dirty
+repository registration.
 
 The root package may be added only for the theme if desired. The live old config is
 already correct. This setup does not auto-edit settings or install/remove any live
