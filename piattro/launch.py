@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import json
 import os
-import shutil
 from pathlib import Path
 
-from piattro.constants import TRY_AGENT_COPY_ALLOWLIST
 from piattro.guard import MANAGED_REFUSAL, blocked_pi_command
 from piattro.paths import safe_child
+from piattro.profile import RESOURCE_FLAGS, require_shared_release, seed_agent
 from piattro.state import prepared_manifest, release_env
-from piattro.validate import ValidationError, check_node, load_json, write_json_atomic
+from piattro.validate import ValidationError, check_node, load_json
+
+MANAGED_RESOURCE_ARGV_ENV = "PIATTRO_MANAGED_RESOURCE_ARGV"
+KNOWN_RESOURCE_FLAGS = frozenset(RESOURCE_FLAGS.values())
 
 
 def normalize_pi_command(command: list[str]) -> list[str]:
@@ -32,9 +35,40 @@ def resolve_pi_binary(release_path: Path) -> str:
     return core["piBinary"]
 
 
-def build_exec_env(release_path: Path) -> dict[str, str]:
+def validate_managed_resource_argv(argv: list[str], release_root: Path) -> list[str]:
+    if len(argv) % 2:
+        raise ValidationError("managed resource argv must be flag/path pairs")
+    root = release_root.resolve()
+    validated: list[str] = []
+    for index in range(0, len(argv), 2):
+        flag = argv[index]
+        path_value = argv[index + 1]
+        if flag not in KNOWN_RESOURCE_FLAGS:
+            raise ValidationError(f"unknown managed resource flag: {flag!r}")
+        if not isinstance(path_value, str) or not path_value:
+            raise ValidationError("managed resource path must be a non-empty string")
+        path = Path(path_value)
+        if not path.is_absolute():
+            raise ValidationError(f"managed resource path must be absolute: {path_value!r}")
+        try:
+            canonical = path.resolve(strict=True)
+        except OSError as exc:
+            raise ValidationError(f"managed resource path missing: {path_value!r}") from exc
+        if not canonical.is_relative_to(root):
+            raise ValidationError(f"managed resource path escapes release root: {path_value!r}")
+        validated.extend([flag, str(canonical)])
+    return validated
+
+
+def managed_resource_argv_envelope(release_path: Path) -> str:
+    argv = managed_resource_args(release_path)
+    return json.dumps(validate_managed_resource_argv(argv, release_path.resolve()))
+
+
+def build_exec_env(release_path: Path, *, agent_dir: Path | None = None) -> dict[str, str]:
     env = os.environ.copy()
-    env.update(release_env(release_path))
+    env.update(release_env(release_path, agent_dir=agent_dir))
+    env[MANAGED_RESOURCE_ARGV_ENV] = managed_resource_argv_envelope(release_path)
     env["PI_SKIP_VERSION_CHECK"] = "1"
     for key in (
         "PI_CODING_AGENT_SESSION_DIR",
@@ -50,25 +84,22 @@ def build_exec_env(release_path: Path) -> dict[str, str]:
 
 
 def build_try_env(release_path: Path, isolated_agent: Path) -> dict[str, str]:
-    env = build_exec_env(release_path)
-    env["PI_CODING_AGENT_DIR"] = str(isolated_agent.resolve())
+    env = build_exec_env(release_path, agent_dir=isolated_agent.resolve())
     env["PIATTRO_TRY"] = "1"
     return env
 
 
 def populate_try_agent(release_path: Path, isolated_agent: Path) -> None:
-    prepared_manifest(release_path)
+    require_shared_release(prepared_manifest(release_path))
     if isolated_agent.exists() or isolated_agent.is_symlink():
         raise ValidationError("try agent target already exists")
-    isolated_agent.mkdir(parents=True)
-    for name in TRY_AGENT_COPY_ALLOWLIST:
-        src = safe_child(release_path, "config", name)
-        if src.is_file():
-            shutil.copyfile(src, isolated_agent / name)
-    settings = load_json(isolated_agent / "settings.json")
-    for key in ("sessionDir", "defaultProvider", "defaultModel", "defaultThinkingLevel", "modelThinkingLevels", "defaultProjectTrust"):
-        settings.pop(key, None)
-    write_json_atomic(isolated_agent / "settings.json", settings)
+    seed_agent(release_path, isolated_agent)
+
+
+def managed_resource_args(release_path: Path) -> list[str]:
+    require_shared_release(prepared_manifest(release_path))
+    settings = load_json(safe_child(release_path, "config/settings.json"))
+    return [arg for key, flag in RESOURCE_FLAGS.items() for value in settings.get(key, []) for arg in (flag, value)]
 
 
 def exec_pi(pi_bin: str, command: list[str], env: dict[str, str]) -> None:

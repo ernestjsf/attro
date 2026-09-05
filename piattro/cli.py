@@ -11,7 +11,7 @@ from pathlib import Path
 
 from piattro import __version__
 from piattro.doctor import run_doctor
-from piattro.launch import build_exec_env, build_try_env, exec_pi, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
+from piattro.launch import build_exec_env, build_try_env, exec_pi, managed_resource_args, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
 from piattro.lock import operation_lock
 from piattro.paths import home, release_dir, validate_state_root
 from piattro.prepare import prepare_release
@@ -89,11 +89,12 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
     command = normalize_pi_command(list(args.command))
     refuse_managed_mutation(command)
     pi_bin = resolve_pi_binary(release)
+    command = [*managed_resource_args(release), *command]
 
     def run(env: dict[str, str]) -> int:
         if args.dry_run:
-            data = {"argv": [pi_bin, *command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["PIATTRO_RELEASE_ROOT"]}
-            emit(args, data, f"would run: {' '.join(data['argv'])}\nPI_CODING_AGENT_DIR={data['agentDir']}\nPIATTRO_RELEASE_ROOT={data['releaseRoot']}")
+            data = {"argv": [pi_bin, *command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["PIATTRO_RELEASE_ROOT"], "resourceDir": env["PIATTRO_RESOURCE_DIR"]}
+            emit(args, data, f"would run: {' '.join(data['argv'])}\nPI_CODING_AGENT_DIR={data['agentDir']}\nPIATTRO_RELEASE_ROOT={data['releaseRoot']}\nPIATTRO_RESOURCE_DIR={data['resourceDir']}")
             return 0
         if trial:
             return subprocess.run([pi_bin, *command], env=env, check=False).returncode
@@ -102,6 +103,8 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
 
     if not trial:
         return run(build_exec_env(release))
+    if args.dry_run:
+        return run(build_try_env(release, Path(tempfile.gettempdir()) / "piattro-try-<temporary>" / "agent"))
     with tempfile.TemporaryDirectory(prefix="piattro-try-") as tmp:
         agent = Path(tmp) / "agent"
         populate_try_agent(release, agent)

@@ -7,17 +7,28 @@
   "tuiMode": "fullscreen",
   "fullscreenScrollbar": "auto",
   "fullscreenExitOutput": "resume-hint",
-  "collapseChangelog": true,
-  "markdown": {"mermaid": "final"},
+  "showCacheMissNotices": true,
+  "terminal": {
+    "showImages": false,
+    "imageWidthCells": 24
+  },
   "packages": [
-    "{{PLUGIN_PI_ZENTUI}}",
-    "{{PLUGIN_PI_CC_EXTENSIONS}}",
-    "{{PLUGIN_PI_WEB_ACCESS}}",
-    "{{PLUGIN_PI_LENS}}",
-    "{{PLUGIN_RPIV_TODO}}",
+    "{{NPM:@narumitw/pi-caffeinate}}",
+    "{{NPM:pi-btw}}",
     "{{PLUGIN_PI_ASK_USER}}",
-    "{{PLUGIN_PI_SUBAGENTS}}"
+    "{{PLUGIN_PI_LENS}}",
+    "{{PLUGIN_PI_WEB_ACCESS}}",
+    "{{NPM:@narumitw/pi-goal}}",
+    "{{NPM:pi-cursor-sdk}}",
+    "{{PLUGIN_PI_SUBAGENTS}}",
+    "{{PLUGIN_RPIV_TODO}}",
+    "{{PLUGIN_PI_CC_EXTENSIONS}}",
+    "{{PLUGIN_PI_ZENTUI}}"
   ],
+  "collapseChangelog": true,
+  "markdown": {
+    "mermaid": "final"
+  },
   "themes": [
     "{{THEME_QUATTRO_GREEN}}",
     "{{THEME_QUATTRO_AMBER}}"

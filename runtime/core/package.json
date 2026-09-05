@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "0.85.0"
+  },
+  "name": "piattro-release-pi",
+  "private": true
+}

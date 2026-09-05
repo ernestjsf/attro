@@ -10,22 +10,50 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from piattro.constants import AGENT_SEED_CONFIGS, LENS_BUILD, LENS_CHECK_GRAMMARS, LENS_GRAMMARS, MANIFEST_FILE, NPM_CI, NPM_INSTALL, PREPARED_MARKER
+from piattro.constants import LENS_BUILD, LENS_CHECK_GRAMMARS, LENS_GRAMMARS, MANIFEST_FILE, NPM_CI, NPM_INSTALL, PREPARED_MARKER
 from piattro.git_export import export_tracked_tree
 from piattro.npm_packages import npm_dependencies_from_entries, npm_spec
 from piattro.paths import release_dir, releases_dir, safe_child, staging_dir, validate_state_root
-from piattro.validate import ValidationError, check_node, compute_release_id, fsync_dir, git, load_json, render_profile, run_command, sha256_file, validate_checkout, validate_descriptor, write_json_atomic
+from piattro.profile import validate_profile_tree, validate_resource_package
+from piattro.validate import ValidationError, check_node, compute_release_id, fsync_dir, git, load_json, render_profile, run_command, sha256_file, validate_checkout, validate_descriptor, validate_public_npm_lock, validate_runtime_lock_package, write_json_atomic
 
 
-def _install_packages(stage: Path, final: Path, entries: list[dict[str, str]], *, core: bool = False) -> list[dict[str, Any]]:
+def _install_packages(
+    stage: Path,
+    final: Path,
+    entries: list[dict[str, str]],
+    *,
+    core: bool = False,
+    snapshot: Path | None = None,
+    lock_rel: str | None = None,
+) -> list[dict[str, Any]]:
     name = "pi" if core else "npm"
     install_root = stage / name
     install_root.mkdir()
-    write_json_atomic(install_root / "package.json", {"name": f"piattro-release-{name}", "private": True, "dependencies": npm_dependencies_from_entries(entries)})
-    run_command(NPM_INSTALL, install_root)
-    lock = safe_child(install_root, "package-lock.json")
-    if not lock.is_file():
-        raise ValidationError(f"npm did not create a dependency lock in {install_root}")
+    lock_source = None
+    if lock_rel is not None:
+        if snapshot is None:
+            raise ValidationError("internal: runtime lock requires snapshot")
+        lock_dir = safe_child(snapshot, lock_rel)
+        package_json = safe_child(lock_dir, "package.json")
+        lock_file = safe_child(lock_dir, "package-lock.json")
+        package = load_json(package_json)
+        validate_runtime_lock_package(package, entries, label=lock_rel)
+        validate_public_npm_lock(lock_file)
+        input_lock_sha = sha256_file(lock_file)
+        shutil.copyfile(package_json, install_root / "package.json")
+        shutil.copyfile(lock_file, install_root / "package-lock.json")
+        run_command(NPM_CI, install_root)
+        lock = safe_child(install_root, "package-lock.json")
+        if sha256_file(lock) != input_lock_sha:
+            raise ValidationError(f"dependency lock changed during npm ci: {name}")
+        lock_source = lock_rel
+    else:
+        write_json_atomic(install_root / "package.json", {"name": f"piattro-release-{name}", "private": True, "dependencies": npm_dependencies_from_entries(entries)})
+        run_command(NPM_INSTALL, install_root)
+        lock = safe_child(install_root, "package-lock.json")
+        if not lock.is_file():
+            raise ValidationError(f"npm did not create a dependency lock in {install_root}")
     records = []
     for entry in entries:
         target = safe_child(install_root, "node_modules", entry["package"])
@@ -38,9 +66,15 @@ def _install_packages(stage: Path, final: Path, entries: list[dict[str, str]], *
             "lockFile": str(final / name / "package-lock.json"),
             "lockSha256": sha256_file(lock),
         }
+        if lock_source is not None:
+            record["lockSource"] = lock_source
         if core:
             cli = safe_child(target, "dist/bundle/cli.js")
-            if not cli.is_file() or not os.access(cli, os.X_OK):
+            try:
+                executable = cli.is_file() and os.access(cli, os.X_OK)
+            except OSError as exc:
+                raise ValidationError(f"cannot inspect release-local Pi CLI: {cli}") from exc
+            if not executable:
                 raise ValidationError(f"release-local Pi CLI missing or not executable: {cli}")
             record.update({"expectedVersion": entry["version"], "installedVersion": entry["version"], "piBinary": str(final / cli.relative_to(stage)), "installMethod": "npm"})
         records.append(record)
@@ -117,28 +151,61 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
             if not src.is_file() or sha256_file(src) != config["sha256"]:
                 raise ValidationError(f"config missing or hash mismatch in snapshot: {config['path']}")
             shutil.copyfile(src, config_dir / Path(config["path"]).name)
-        npm = _install_packages(stage, final, descriptor["npmPackages"]) if descriptor["npmPackages"] else []
+        runtime_locks = descriptor.get("runtimeLocks")
+        core_lock = runtime_locks["core"] if runtime_locks else None
+        npm_lock = runtime_locks["npm"] if runtime_locks else None
+        npm = _install_packages(stage, final, descriptor["npmPackages"], snapshot=snapshot, lock_rel=npm_lock) if descriptor["npmPackages"] else []
         if not npm:
             (stage / "npm").mkdir()
-        core = _install_packages(stage, final, [{"package": descriptor["core"]["package"], "version": descriptor["core"]["version"]}], core=True)[0]
+        core = _install_packages(
+            stage,
+            final,
+            [{"package": descriptor["core"]["package"], "version": descriptor["core"]["version"]}],
+            core=True,
+            snapshot=snapshot,
+            lock_rel=core_lock,
+        )[0]
         core["nodeMinimum"] = descriptor["core"]["engines"]["node"]
+        for key, name in (("profileResources", "resources"), ("profileSeed", "agent")):
+            destination = stage / "profile" / name
+            if key in descriptor:
+                source = safe_child(snapshot, descriptor[key])
+                validate_profile_tree(source, seed=name == "agent")
+                if name == "resources":
+                    validate_resource_package(source)
+                shutil.copytree(source, destination)
+            else:
+                destination.mkdir(parents=True)
         profile = safe_child(snapshot, descriptor["profile"]).read_text()
-        settings = json.loads(render_profile(profile, final, checkout_root, descriptor))
+        try:
+            settings = json.loads(render_profile(profile, final, checkout_root, descriptor))
+        except json.JSONDecodeError as exc:
+            raise ValidationError("invalid rendered profile JSON") from exc
         _validate_resources(stage, final, settings)
         write_json_atomic(config_dir / "settings.json", settings)
-        agent_dir = stage / "agent"
-        agent_dir.mkdir()
-        write_json_atomic(agent_dir / "settings.json", settings)
-        for name in AGENT_SEED_CONFIGS:
-            if (config_dir / name).is_file():
-                shutil.copyfile(config_dir / name, agent_dir / name)
+        profile_files = {path.relative_to(stage).as_posix(): sha256_file(path) for path in (stage / "profile").rglob("*") if path.is_file()}
         prepared_at = datetime.now(timezone.utc).isoformat()
         manifest = {
             "schemaVersion": 1, "releaseId": rid, "preparedAt": prepared_at,
             "checkoutRoot": str(checkout_root), "descriptorVersion": descriptor["version"], "distribution": descriptor["distribution"],
-            "layout": {name: str(final / name) for name in ("pi", "plugins", "config", "agent", "npm")},
-            "provenance": {"checkoutHead": head, "sourcesLock": descriptor["sourcesLock"], "sources": sources, "nodeVersion": node_version, "core": core, "npmPackages": npm, "pluginDependencyLocks": dependency_locks,
-                           "dependencyResolution": "Plugin npm ci uses committed locks; core/npm locks are newly resolved per preparation, not globally reproducible."},
+            "agentMode": "shared-v1",
+            "layout": {name: str(final / name) for name in ("pi", "plugins", "config", "profile", "npm")},
+            "profileFiles": profile_files, "settingsSha256": sha256_file(config_dir / "settings.json"),
+            "provenance": {
+                "checkoutHead": head,
+                "sourcesLock": descriptor["sourcesLock"],
+                "sources": sources,
+                "nodeVersion": node_version,
+                "core": core,
+                "npmPackages": npm,
+                "pluginDependencyLocks": dependency_locks,
+                "dependencyResolution": (
+                    "Core, npm packages, and plugins use committed dependency locks."
+                    if runtime_locks
+                    else "Plugin npm ci uses committed locks; core/npm locks are newly resolved per preparation, not globally reproducible."
+                ),
+                **({"runtimeLocks": runtime_locks} if runtime_locks else {}),
+            },
         }
         write_json_atomic(stage / "pi/core.json", core)
         write_json_atomic(stage / "npm/packages.json", {"packages": npm})

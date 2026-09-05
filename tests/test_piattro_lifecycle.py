@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,8 @@ from unittest import mock
 from piattro.cli import main
 from piattro.validate import ValidationError, run_command, sha256_file
 from piattro.launch import build_exec_env, populate_try_agent
+
+REAL_NODE = shutil.which("node")
 
 
 class LifecycleTests(unittest.TestCase):
@@ -216,7 +219,7 @@ install_deps()
     def test_setup_activate_rollback_without_checkout(self):
         a = self.setup_release()
         release_a = self.state / "releases" / a["releaseId"]
-        settings_before = (release_a / "agent/settings.json").read_bytes()
+        settings_before = (release_a / "config/settings.json").read_bytes()
         settings = json.loads(settings_before)
         self.assertEqual(settings["packages"], [str(release_a / "plugins/rpiv-mono/packages/rpiv-todo"), str(release_a / "npm/node_modules/fixture-addon")])
         for value in settings["packages"] + settings["themes"]:
@@ -235,10 +238,250 @@ install_deps()
         state = json.loads(self.cli("--json", "status")[0])
         self.assertEqual(state["active"], a["releaseId"])
         self.assertEqual(state["previous"], b["releaseId"])
-        self.assertEqual((release_a / "agent/settings.json").read_bytes(), settings_before)
+        self.assertEqual((release_a / "config/settings.json").read_bytes(), settings_before)
         self.cli("doctor")
         self.cli("exec", "--dry-run", "--", "--version")
         self.cli("try", "--dry-run", "--", "--version")
+
+    def configure_profile_bundle(self):
+        config = self.repo / "config/rpiv-todo.json"
+        config.parent.mkdir()
+        config.write_text('{"fixture":"rpiv-preferences"}')
+        self.lock["configs"].append({"path": "config/rpiv-todo.json", "sha256": sha256_file(config)})
+        self.descriptor.update({"profileResources": "profile/resources", "profileSeed": "profile/agent"})
+        resources = self.repo / "profile/resources"
+        resources.mkdir()
+        (resources / "extensions").mkdir()
+        (resources / "extensions/example.ts").write_text("export default () => {};\n")
+        (resources / "skills/example").mkdir(parents=True)
+        (resources / "skills/example/SKILL.md").write_text("---\nname: example\ndescription: Example\n---\nExample")
+        (resources / "prompts").mkdir()
+        (resources / "prompts/example.md").write_text("Example prompt")
+        (resources / "package.json").write_text(json.dumps({"name": "fixture-profile", "pi": {"extensions": ["./extensions/example.ts"], "skills": ["./skills"], "prompts": ["./prompts"]}}))
+        seed = self.repo / "profile/agent"
+        (seed / "agents").mkdir(parents=True)
+        (seed / "AGENTS.md").write_text("Use $PIATTRO_RESOURCE_DIR and $PI_CODING_AGENT_DIR")
+        (seed / "agents/worker.md").write_text("Fixture agent")
+        (seed / "models.json").write_text('{"providers":{}}')
+        (seed / "rpiv-config/rpiv-todo").mkdir(parents=True)
+        (seed / "rpiv-config/rpiv-todo/config.json").write_bytes(config.read_bytes())
+        (seed / "subagents.json").write_text('{"agentDir":"{{PIATTRO_AGENT_DIR}}/agents"}')
+        profile = self.repo / "profile/settings.json"
+        settings = json.loads(profile.read_text())
+        settings.update({"defaultProvider": "fixture", "defaultModel": "fixture-model", "defaultThinkingLevel": "high", "defaultProjectTrust": "always", "sessionDir": "/never/use/this"})
+        settings["packages"].insert(0, "{{NPM:fixture-addon}}")
+        profile.write_text(json.dumps(settings))
+        self.commit_inputs()
+
+    def test_shared_profile_continuity_and_pinned_argv(self):
+        self.configure_profile_bundle()
+        a = self.setup_release()
+        release_a = self.state / "releases" / a["releaseId"]
+        agent = self.state / "agent"
+        self.assertFalse((release_a / "agent").exists())
+        self.assertEqual(agent.stat().st_mode & 0o777, 0o700)
+        settings = json.loads((agent / "settings.json").read_text())
+        self.assertEqual(settings["defaultModel"], "fixture-model")
+        for key in ("packages", "extensions", "skills", "prompts", "themes", "sessionDir", "defaultProjectTrust"):
+            self.assertNotIn(key, settings)
+        self.assertEqual(json.loads((agent / "subagents.json").read_text())["agentDir"], str(agent / "agents"))
+        self.assertEqual(json.loads((agent / "rpiv-config/rpiv-todo/config.json").read_text()), {"fixture": "rpiv-preferences"})
+        self.assertFalse((agent / "skills").exists())
+        self.assertFalse((agent / "extensions").exists())
+        settings.update({"theme": "user-theme", "defaultModel": "user-model", "skills": ["/user/skill"], "defaultProjectTrust": "never"})
+        (agent / "settings.json").write_text(json.dumps(settings))
+        (agent / "auth.json").write_text('{"fixture":{"type":"oauth","access":"synthetic","refresh":"synthetic","expires":1}}')
+        (agent / "sessions/project").mkdir(parents=True)
+        (agent / "sessions/project/history.jsonl").write_text('{"synthetic":"history"}\n')
+        before = {p.relative_to(agent): p.read_bytes() for p in agent.rglob("*") if p.is_file()}
+        launch_a = json.loads(self.cli("--json", "exec", "--dry-run", "--", "--model", "explicit", "-c")[0])
+        self.assertEqual(launch_a["agentDir"], str(agent))
+        self.assertEqual(launch_a["resourceDir"], str(release_a / "profile/resources"))
+        self.assertEqual(launch_a["argv"][-3:], ["--model", "explicit", "-c"])
+        self.assertEqual(launch_a["argv"][1:5], ["-e", str(release_a / "npm/node_modules/fixture-addon"), "-e", str(release_a / "plugins/rpiv-mono/packages/rpiv-todo")])
+        self.assertEqual(launch_a["argv"].count(str(release_a / "npm/node_modules/fixture-addon")), 1)
+        self.assertIn(str(release_a / "profile/resources"), launch_a["argv"])
+        for flag in ("--no-extensions", "--no-skills", "--no-prompt-templates", "--no-themes", "--session-dir", "--approve"):
+            self.assertNotIn(flag, launch_a["argv"])
+        env_a = build_exec_env(release_a)
+        self.assertEqual(env_a["RPIV_CONFIG_HOME"], str(agent / "rpiv-config"))
+        self.descriptor["version"] = "0.2.0"
+        self.commit_inputs()
+        b = self.setup_release()
+        launch_b = json.loads(self.cli("--json", "exec", "--dry-run")[0])
+        self.assertEqual(launch_a["agentDir"], launch_b["agentDir"])
+        self.assertNotEqual(launch_a["resourceDir"], launch_b["resourceDir"])
+        self.assertEqual(env_a, build_exec_env(release_a))
+        from piattro.launch import managed_resource_args
+        self.assertEqual(launch_a["argv"][1:-3], managed_resource_args(release_a))
+        self.cli("rollback")
+        self.assertEqual(launch_a, json.loads(self.cli("--json", "exec", "--dry-run", "--", "--model", "explicit", "-c")[0]))
+        self.assertEqual(before, {p.relative_to(agent): p.read_bytes() for p in agent.rglob("*") if p.is_file()})
+        self.assertNotEqual(a["releaseId"], b["releaseId"])
+
+    def test_prepare_without_activation_try_pristine_and_read_only_dry_run(self):
+        self.configure_profile_bundle()
+        a = json.loads(self.cli("--json", "setup", "--repo", str(self.repo))[0])
+        self.assertFalse((self.state / "agent").exists())
+        before = {p.relative_to(self.state): p.read_bytes() for p in self.state.rglob("*") if p.is_file()}
+        with mock.patch("piattro.cli.tempfile.TemporaryDirectory", side_effect=AssertionError("dry-run must not allocate user state")):
+            trial = json.loads(self.cli("--json", "try", "--release-id", a["releaseId"], "--dry-run")[0])
+        self.assertNotEqual(trial["agentDir"], str(self.state / "agent"))
+        self.assertEqual(before, {p.relative_to(self.state): p.read_bytes() for p in self.state.rglob("*") if p.is_file()})
+        captured = {}
+        def run(argv, *, env, check):
+            isolated = Path(env["PI_CODING_AGENT_DIR"])
+            captured.update({"agent": isolated, "settings": json.loads((isolated / "settings.json").read_text()), "argv": argv})
+            self.assertEqual(json.loads((isolated / "subagents.json").read_text())["agentDir"], str(isolated / "agents"))
+            self.assertEqual(env["RPIV_CONFIG_HOME"], str(isolated / "rpiv-config"))
+            self.assertEqual(json.loads((isolated / "rpiv-config/rpiv-todo/config.json").read_text()), {"fixture": "rpiv-preferences"})
+            self.assertFalse((isolated / "auth.json").exists())
+            self.assertFalse((isolated / "trust.json").exists())
+            self.assertFalse((isolated / "sessions").exists())
+            return subprocess.CompletedProcess(argv, 0)
+        with mock.patch("piattro.cli.subprocess.run", side_effect=run):
+            self.cli("try", "--release-id", a["releaseId"], "--", "--model", "explicit")
+        self.assertEqual(captured["settings"]["defaultModel"], "fixture-model")
+        self.assertEqual(captured["settings"]["defaultThinkingLevel"], "high")
+        self.assertNotIn("defaultProjectTrust", captured["settings"])
+        self.assertEqual(captured["argv"][:-2], trial["argv"])
+        self.assertFalse(captured["agent"].exists())
+        self.assertFalse((self.state / "agent").exists())
+
+    def test_initial_seed_failure_is_atomic_and_retry_idempotent(self):
+        self.configure_profile_bundle()
+        a = json.loads(self.cli("--json", "setup", "--repo", str(self.repo))[0])
+        before = (self.state / "state.json").read_bytes()
+        with mock.patch("piattro.profile.Path.write_text", side_effect=OSError("seed failed")):
+            self.cli("activate", a["releaseId"], success=False)
+        self.assertFalse((self.state / "agent").exists())
+        self.assertEqual(before, (self.state / "state.json").read_bytes())
+        self.assertEqual(list(self.state.glob(".agent-init-*")), [])
+        self.cli("activate", a["releaseId"])
+        settings = self.state / "agent/settings.json"
+        settings.write_text('{"theme":"mine"}')
+        with mock.patch("piattro.profile.seed_agent", side_effect=AssertionError("must not reseed")):
+            self.cli("activate", a["releaseId"])
+        self.assertEqual(settings.read_text(), '{"theme":"mine"}')
+
+    def test_existing_unmanaged_shared_directory_is_preserved(self):
+        a = json.loads(self.cli("--json", "setup", "--repo", str(self.repo))[0])
+        (self.state / "agent").mkdir()
+        sentinel = self.state / "agent/settings.json"
+        sentinel.write_text('{"preserve":true}')
+        _, error = self.cli("activate", a["releaseId"], success=False)
+        self.assertIn("unmanaged shared agent", error)
+        self.assertEqual(sentinel.read_text(), '{"preserve":true}')
+        self.assertIsNone(json.loads(self.cli("--json", "status")[0])["active"])
+
+    def test_user_skill_symlinks_allowed_but_sensitive_aliases_refused(self):
+        self.setup_release()
+        target = self.base / "user-skills"
+        target.mkdir()
+        (self.state / "agent/skills").symlink_to(target, target_is_directory=True)
+        self.cli("exec", "--dry-run")
+        for name in ("auth.json", "settings.json", "trust.json", "sessions"):
+            with self.subTest(name=name):
+                path = self.state / "agent" / name
+                original = path.read_bytes() if path.is_file() else None
+                path.unlink(missing_ok=True)
+                path.symlink_to(target)
+                self.cli("exec", "--dry-run", success=False)
+                path.unlink()
+                if original is not None:
+                    path.write_bytes(original)
+
+    def test_legacy_release_refs_preserved_but_not_implicitly_migrated(self):
+        from test_piattro_activation import _write_release
+        from piattro.state import register_release, save_state
+        legacy = _write_release(self.state, "piattro-0.1.0-legacy", marker="legacy", legacy=True)
+        (legacy / "agent/auth.json").write_text('{"synthetic":"preserve"}')
+        register_release(self.state, legacy.name, legacy)
+        state = json.loads(self.cli("--json", "status")[0])
+        state["active"] = legacy.name
+        save_state(self.state, state)
+        before = (self.state / "state.json").read_bytes()
+        for args in (("activate", legacy.name), ("exec", "--dry-run"), ("try", "--release-id", legacy.name, "--dry-run")):
+            _, error = self.cli(*args, success=False)
+            self.assertIn("legacy v0.1", error)
+        self.assertEqual(before, (self.state / "state.json").read_bytes())
+        self.assertFalse((self.state / "agent").exists())
+        self.assertEqual((legacy / "agent/auth.json").read_text(), '{"synthetic":"preserve"}')
+        self.setup_release()
+        before = (self.state / "state.json").read_bytes()
+        self.cli("rollback", success=False)
+        self.assertEqual(before, (self.state / "state.json").read_bytes())
+
+    def test_concurrent_real_pi_storage_uses_same_canonical_paths(self):
+        pi_root = Path(os.environ.get("PIATTRO_TEST_PI_ROOT", "/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent"))
+        auth_module = pi_root / "dist/core/auth-storage.js"
+        settings_module = pi_root / "dist/core/settings-manager.js"
+        if not REAL_NODE or not auth_module.is_file() or not settings_module.is_file():
+            self.skipTest("set PIATTRO_TEST_PI_ROOT to an installed Pi 0.85 storage fixture")
+        a = self.setup_release()
+        env_a = build_exec_env(self.state / "releases" / a["releaseId"])
+        self.descriptor["version"] = "0.2.0"
+        self.commit_inputs()
+        b = self.setup_release()
+        env_b = build_exec_env(self.state / "releases" / b["releaseId"])
+        self.assertEqual(env_a["PI_CODING_AGENT_DIR"], env_b["PI_CODING_AGENT_DIR"])
+        agent = self.state / "agent"
+        (agent / "auth.json").write_text('{"fixture":{"type":"oauth","access":"synthetic","refresh":"synthetic","expires":0}}')
+        code = f'''import {{ AuthStorage }} from {json.dumps(auth_module.as_uri())};
+import {{ SettingsManager }} from {json.dumps(settings_module.as_uri())};
+const settings = SettingsManager.create(process.cwd(), process.env.PI_CODING_AGENT_DIR, {{projectTrusted:false}});
+const auth = AuthStorage.create();
+console.log("ready");
+await new Promise(resolve => process.stdin.once("data", resolve));
+for (let i=0; i<5; i++) {{
+  await auth.modify("fixture", async current => {{
+    await new Promise(resolve => setTimeout(resolve, 10));
+    return {{...current, expires: current.expires+1}};
+  }});
+}}
+if (process.argv[1] === "a") settings.setTheme("concurrent-theme");
+else settings.setDefaultModel("concurrent-model");
+await settings.flush();
+if (settings.drainErrors().length) process.exit(2);
+process.stdin.destroy();
+'''
+        processes = []
+        try:
+            for label, env in (("a", env_a), ("b", env_b)):
+                process = subprocess.Popen([REAL_NODE, "--input-type=module", "-e", code, label], cwd=self.base, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                processes.append(process)
+                assert process.stdout is not None
+                self.assertEqual(process.stdout.readline().strip(), "ready")
+            for process in processes:
+                assert process.stdin is not None
+                process.stdin.write("go\n")
+                process.stdin.flush()
+            for process in processes:
+                _, error = process.communicate(timeout=30)
+                self.assertEqual(process.returncode, 0, error)
+        finally:
+            for process in processes:
+                if process.poll() is None:
+                    process.kill()
+                    process.communicate()
+        self.assertEqual(json.loads((agent / "auth.json").read_text())["fixture"]["expires"], 10)
+        settings = json.loads((agent / "settings.json").read_text())
+        self.assertEqual(settings["theme"], "concurrent-theme")
+        self.assertEqual(settings["defaultModel"], "concurrent-model")
+
+    def test_profile_seed_sensitive_paths_and_package_escape_refused(self):
+        self.configure_profile_bundle()
+        bad = self.repo / "profile/agent/auth.json"
+        bad.write_text('{"synthetic":"must-not-export"}')
+        self.commit_inputs()
+        self.cli("setup", "--repo", str(self.repo), success=False)
+        self.assertFalse((self.state / "agent").exists())
+        bad.unlink()
+        package = self.repo / "profile/resources/package.json"
+        package.write_text('{"pi":{"extensions":["../agent/AGENTS.md"]}}')
+        self.commit_inputs()
+        self.cli("setup", "--repo", str(self.repo), success=False)
+        self.assertFalse((self.state / "state.json").exists())
 
     def test_failed_prepare_preserves_state(self):
         self.setup_release()
@@ -345,11 +588,11 @@ install_deps()
     def test_try_uses_pristine_config_and_no_tokens(self):
         a = self.setup_release()
         release = self.state / "releases" / a["releaseId"]
-        (release / "agent/auth.json").write_text('{"token":"do-not-copy"}')
-        (release / "agent/trust.json").write_text('{}')
-        settings = json.loads((release / "agent/settings.json").read_text())
+        (self.state / "agent/auth.json").write_text('{"token":"do-not-copy"}')
+        (self.state / "agent/trust.json").write_text('{}')
+        settings = json.loads((self.state / "agent/settings.json").read_text())
         settings.update({"sessionDir": "/live/sessions", "defaultProvider": "example", "defaultModel": "example"})
-        (release / "agent/settings.json").write_text(json.dumps(settings))
+        (self.state / "agent/settings.json").write_text(json.dumps(settings))
         isolated = self.base / "trial-agent"
         populate_try_agent(release, isolated)
         trial = json.loads((isolated / "settings.json").read_text())
@@ -369,7 +612,7 @@ install_deps()
         release = self.state / "releases" / a["releaseId"]
         credential = self.base / "auth.json"
         credential.write_text('{"token":"preserve"}')
-        alias = release / "agent/auth.json"
+        alias = self.state / "agent/auth.json"
         alias.symlink_to(credential)
         self.cli("exec", "--dry-run", success=False)
         alias.unlink()
@@ -414,12 +657,13 @@ install_deps()
     def test_profile_ui_and_package_order(self):
         root = Path(__file__).resolve().parents[1]
         profile = json.loads((root / "profile/settings.json").read_text())
-        self.assertEqual(profile["packages"], ["{{PLUGIN_PI_ZENTUI}}", "{{PLUGIN_PI_CC_EXTENSIONS}}", "{{PLUGIN_PI_WEB_ACCESS}}", "{{PLUGIN_PI_LENS}}", "{{PLUGIN_RPIV_TODO}}", "{{PLUGIN_PI_ASK_USER}}", "{{PLUGIN_PI_SUBAGENTS}}"])
+        self.assertEqual(profile["packages"], ["{{NPM:@narumitw/pi-caffeinate}}", "{{NPM:pi-btw}}", "{{PLUGIN_PI_ASK_USER}}", "{{PLUGIN_PI_LENS}}", "{{PLUGIN_PI_WEB_ACCESS}}", "{{NPM:@narumitw/pi-goal}}", "{{NPM:pi-cursor-sdk}}", "{{PLUGIN_PI_SUBAGENTS}}", "{{PLUGIN_RPIV_TODO}}", "{{PLUGIN_PI_CC_EXTENSIONS}}", "{{PLUGIN_PI_ZENTUI}}"])
         expected = {"quietStartup": True, "hideThinkingBlock": False, "editorPaddingX": 0, "outputPad": 1, "tuiMode": "fullscreen", "fullscreenScrollbar": "auto", "fullscreenExitOutput": "resume-hint", "collapseChangelog": True, "markdown": {"mermaid": "final"}}
         for key, value in expected.items():
             self.assertEqual(profile[key], value)
-        for key in ("defaultProvider", "defaultModel", "defaultProjectTrust"):
-            self.assertNotIn(key, profile)
+        for key in ("defaultProvider", "defaultModel"):
+            self.assertIsInstance(profile[key], str)
+        self.assertNotIn("defaultProjectTrust", profile)
 
     def test_committed_plugin_dependency_lock_preserved(self):
         digest = self.configure_locked_plugin()

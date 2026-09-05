@@ -38,18 +38,10 @@ PROFILE_PLACEHOLDERS = {
     "{{THEME_QUATTRO_AMBER}}": "config/quattro-amber.json",
 }
 
-# Plugin configs Pi reads from PI_CODING_AGENT_DIR — seeded into agent/ during prepare.
 AGENT_SEED_CONFIGS = (
     "zentui.json",
     "claude-code-style.json",
-)
-
-# Files copied from release agent/ into an isolated try sandbox.
-TRY_AGENT_COPY_ALLOWLIST = frozenset(
-    {
-        "settings.json",
-        *AGENT_SEED_CONFIGS,
-    }
+    "rpiv-todo.json",
 )
 
 # Private files we never copy into managed releases.

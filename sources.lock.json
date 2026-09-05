@@ -83,7 +83,7 @@
       "name": "rpiv-mono",
       "origin": "https://github.com/ernestjsf/rpiv-mono.git",
       "upstream": "https://github.com/juicesharp/rpiv-mono.git",
-      "pin": "0d700ba9ca477b3f36d62bba3172ea3da71edc59",
+      "pin": "289265df6e67ec5af33dc49c8fb606a49035c6f6",
       "baseCommit": "59100c75f256a004fe4bb0ce8eb6266d79f0791a",
       "baseVersion": "0.0.0",
       "packageName": "@juicesharp/rpiv-todo",
@@ -95,7 +95,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "232 passed for rpiv-todo",
+      "testReport": "263 files / 5185 tests passed with isolated RPIV_CONFIG_HOME; Biome and TypeScript passed; independent isolation review found no blockers",
       "provenance": "QUATTRO.md"
     },
     {
@@ -120,7 +120,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/pi-subagents-quattro.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "e6f4eaddc98d4db16859e2ca24b4fb9e585b53d1",
+      "pin": "69272a1bab16573d786920f0d3fe5895135db7d7",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -128,7 +128,7 @@
       "runtimeEntryFiles": ["index.ts"],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "full subagents.test.cjs suite passed on Node 26.5.0, including responsive panel widths, overlay interaction and name/role mapping",
+      "testReport": "full subagents.test.cjs suite passed on Node 26.7.0, including panel labels and managed child resource/core pinning; isolated public spawn RED/GREEN verified; independent safety review found no blockers",
       "provenance": "QUATTRO.md"
     }
   ],

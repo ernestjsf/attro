@@ -9,6 +9,7 @@ from typing import Any
 
 from piattro.constants import MANIFEST_FILE, PREPARED_MARKER
 from piattro.paths import release_dir, safe_child, state_path
+from piattro.profile import initialize_shared_agent, require_shared_release, validate_profile_tree, validate_shared_agent
 from piattro.validate import ValidationError, load_json, sha256_file, validate_manifest, validate_release_id, validate_sources_lock, validate_state, write_json_atomic
 
 
@@ -48,12 +49,21 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
         raise ValidationError("manifest release identity mismatch")
     if not safe_child(path, PREPARED_MARKER).is_file():
         raise ValidationError(f"release not prepared: {path}")
-    for name in ("pi", "plugins", "config", "agent", "npm"):
+    shared = manifest.get("agentMode") == "shared-v1"
+    for name in ("pi", "plugins", "config", "profile" if shared else "agent", "npm"):
         if manifest["layout"].get(name) != str(final / name) or not safe_child(path, name).is_dir():
             raise ValidationError(f"invalid or missing release layout: {name}")
-    for resource in safe_child(path, "agent").rglob("*"):
-        if resource.is_symlink() or (resource.is_file() and resource.stat().st_nlink != 1):
-            raise ValidationError(f"agent state must not alias files outside this release: {resource}")
+    if shared:
+        files = validate_profile_tree(safe_child(path, "profile"))
+        validate_profile_tree(safe_child(path, "profile/agent"), seed=True)
+        if manifest.get("profileFiles") != {resource.relative_to(path).as_posix(): sha256_file(resource) for resource in files}:
+            raise ValidationError("release profile digest mismatch")
+        if manifest.get("settingsSha256") != sha256_file(safe_child(path, "config/settings.json")):
+            raise ValidationError("release settings digest mismatch")
+    else:
+        for resource in safe_child(path, "agent").rglob("*"):
+            if resource.is_symlink() or (resource.is_file() and resource.stat().st_nlink != 1):
+                raise ValidationError(f"agent state must not alias files outside this release: {resource}")
     provenance = manifest["provenance"]
     for record in [provenance["core"], *provenance["npmPackages"]]:
         is_core = record is provenance["core"]
@@ -72,8 +82,13 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
             raise ValidationError("installed package pin mismatch")
         if sha256_file(safe_child(path, f"{name}/package-lock.json")) != record["lockSha256"]:
             raise ValidationError("installed dependency lock digest mismatch")
-        if is_core and not os.access(safe_child(path, expected["piBinary"]), os.X_OK):
-            raise ValidationError("Pi CLI is not executable")
+        if is_core:
+            try:
+                executable = os.access(safe_child(path, expected["piBinary"]), os.X_OK)
+            except OSError as exc:
+                raise ValidationError("cannot inspect Pi CLI") from exc
+            if not executable:
+                raise ValidationError("Pi CLI is not executable")
     sources = provenance.get("sources")
     if not isinstance(sources, dict):
         raise ValidationError("manifest lacks source provenance")
@@ -86,7 +101,7 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
         target = safe_child(path, "config", Path(config["path"]).name)
         if not target.is_file() or sha256_file(target) != config["sha256"]:
             raise ValidationError(f"release config digest mismatch: {config['path']}")
-    for agent_settings in ("config/settings.json", "agent/settings.json"):
+    for agent_settings in (("config/settings.json",) if shared else ("config/settings.json", "agent/settings.json")):
         settings = load_json(safe_child(path, agent_settings))
         for key in ("packages", "themes", "extensions", "skills", "prompts"):
             entries = settings.get(key, [])
@@ -118,7 +133,9 @@ def activate_release(state_root: Path, release_id: str) -> None:
     state = load_state(state_root)
     if release_id not in state["releases"]:
         raise ValidationError(f"unknown release: {release_id}")
-    prepared_manifest(release_dir(release_id, state_root), release_id)
+    path = release_dir(release_id, state_root)
+    require_shared_release(prepared_manifest(path, release_id))
+    initialize_shared_agent(state_root, path)
     if state["active"] == release_id:
         return
     state["previous"], state["active"] = state["active"], release_id
@@ -144,10 +161,15 @@ def active_release_path(state_root: Path) -> Path | None:
     return path
 
 
-def release_env(release_path: Path) -> dict[str, str]:
+def release_env(release_path: Path, *, agent_dir: Path | None = None) -> dict[str, str]:
     manifest = prepared_manifest(release_path)
+    require_shared_release(manifest)
+    agent = agent_dir or validate_shared_agent(release_path.resolve().parents[1])
     return {
-        "PI_CODING_AGENT_DIR": str(release_path.resolve() / "agent"),
+        "PI_CODING_AGENT_DIR": str(agent),
+        "RPIV_CONFIG_HOME": str(agent / "rpiv-config"),
+        "PI_LENS_CONFIG_PATH": str(agent / "lens-config.json"),
+        "PIATTRO_RESOURCE_DIR": str(release_path.resolve() / "profile/resources"),
         "PIATTRO_RELEASE_ID": manifest["releaseId"],
         "PIATTRO_RELEASE_ROOT": str(release_path.resolve()),
         "PIATTRO_PI_BIN": manifest["provenance"]["core"]["piBinary"],

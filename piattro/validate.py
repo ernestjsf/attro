@@ -96,6 +96,9 @@ def validate_descriptor(path: Path) -> dict[str, Any]:
     validate_version(text(data.get("version"), "version"))
     for key in ("profile", "sourcesLock"):
         relative_path(data.get(key), key)
+    for key in ("profileResources", "profileSeed"):
+        if key in data:
+            relative_path(data[key], key)
     core = data.get("core")
     if not isinstance(core, dict) or core.get("package") != CORE_PACKAGE:
         raise ValidationError(f"core.package must be {CORE_PACKAGE}")
@@ -109,6 +112,14 @@ def validate_descriptor(path: Path) -> dict[str, Any]:
     if sys.platform not in supported:
         raise ValidationError(f"unsupported platform {sys.platform}")
     data["npmPackages"] = normalize_npm_packages(data.get("npmPackages", []))
+    runtime_locks = data.get("runtimeLocks")
+    if runtime_locks is not None:
+        if not isinstance(runtime_locks, dict):
+            raise ValidationError("runtimeLocks must be an object")
+        data["runtimeLocks"] = {
+            "core": relative_path(runtime_locks.get("core"), "runtimeLocks.core"),
+            "npm": relative_path(runtime_locks.get("npm"), "runtimeLocks.npm"),
+        }
     return data
 
 
@@ -139,6 +150,8 @@ def validate_manifest(data: dict[str, Any]) -> None:
     validate_release_id(text(data.get("releaseId"), "releaseId"))
     for key in ("preparedAt", "checkoutRoot", "distribution", "descriptorVersion"):
         text(data.get(key), key)
+    if "agentMode" in data and data["agentMode"] != "shared-v1":
+        raise ValidationError("unsupported release agentMode")
     provenance = data.get("provenance")
     if not isinstance(provenance, dict) or not isinstance(data.get("layout"), dict):
         raise ValidationError("manifest requires provenance and layout objects")
@@ -166,6 +179,37 @@ def validate_manifest(data: dict[str, Any]) -> None:
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_public_npm_lock(path: Path) -> None:
+    if not path.is_file():
+        raise ValidationError(f"runtime lock missing: {path}")
+    pending: list[Any] = [load_json(path)]
+    while pending:
+        value = pending.pop()
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key in {"npm_auth", "_authToken", "_auth"} or (key == "link" and (not isinstance(item, bool) or item)):
+                    raise ValidationError(f"runtime lock contains credentials or local links: {path}")
+                if key == "resolved":
+                    if not isinstance(item, str) or not item.startswith("https://registry.npmjs.org/"):
+                        raise ValidationError(f"runtime lock resolved URL is not public registry: {path}")
+                    if "?" in item or "#" in item or any(character.isspace() for character in item):
+                        raise ValidationError(f"runtime lock resolved URL is not canonical: {path}")
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+        elif isinstance(value, str) and value.startswith(("file:", "git+", "git://")):
+            raise ValidationError(f"runtime lock contains unsupported source: {path}")
+
+
+def validate_runtime_lock_package(package: dict[str, Any], entries: list[dict[str, str]], *, label: str) -> None:
+    from piattro.npm_packages import npm_dependencies_from_entries
+
+    expected = npm_dependencies_from_entries(entries)
+    deps = package.get("dependencies")
+    if deps != expected:
+        raise ValidationError(f"{label} package.json dependencies do not match descriptor pins")
 
 
 def run_command(cmd: list[str], cwd: Path, timeout: int = 900) -> subprocess.CompletedProcess:
@@ -305,6 +349,8 @@ def render_profile(profile_text: str, release_root: Path, checkout_root: Path, d
         raise ValidationError("profile must be an object")
     release_root = release_root.resolve()
     replacements = {key: str(release_root / value) for key, value in PROFILE_PLACEHOLDERS.items()}
+    npm_paths = {entry["package"]: str(npm_package_install_dir(release_root, entry["package"])) for entry in (descriptor or {}).get("npmPackages", [])}
+    replacements.update({"{{NPM:" + package + "}}": path for package, path in npm_paths.items()})
     for key in ("packages", "themes", "extensions", "skills", "prompts"):
         values = payload.get(key, [])
         if not isinstance(values, list) or any(not isinstance(v, str) for v in values):
@@ -312,6 +358,9 @@ def render_profile(profile_text: str, release_root: Path, checkout_root: Path, d
         payload[key] = [replacements.get(value, value) for value in values]
         if any("{{" in value for value in payload[key]):
             raise ValidationError(f"unresolved profile placeholder in {key}")
-    for entry in (descriptor or {}).get("npmPackages", []):
-        payload["packages"].append(str(npm_package_install_dir(release_root, entry["package"])))
+    for path in npm_paths.values():
+        if path not in payload["packages"]:
+            payload["packages"].append(path)
+    if (descriptor or {}).get("profileResources"):
+        payload["packages"].append(str(release_root / "profile/resources"))
     return json.dumps(payload, indent=2) + "\n"

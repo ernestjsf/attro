@@ -33,7 +33,7 @@ def validate_state_root(root: Path, checkout: Path | None = None) -> Path:
     for ancestor in (root, *root.parents):
         if (ancestor / ".git").exists():
             raise ValidationError(f"managed root cannot be inside a Git checkout: {root}")
-    for name in ("releases", "staging", "state.json", ".operations.lock"):
+    for name in ("releases", "staging", "state.json", ".operations.lock", "agent"):
         safe_child(root, name)
     return root
 

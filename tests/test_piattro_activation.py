@@ -16,13 +16,15 @@ from piattro.state import activate_release, register_release, release_env  # noq
 from piattro.validate import sha256_file
 
 
-def _write_release(root: Path, release_id: str, *, marker: str) -> Path:
+def _write_release(root: Path, release_id: str, *, marker: str, legacy: bool = False) -> Path:
     release_path = root.resolve() / "releases" / release_id
     agent_dir = release_path / "agent"
     agent_dir.mkdir(parents=True)
     for name in ("config", "plugins", "npm"):
         (release_path / name).mkdir()
     (release_path / "plugins/pi-lens").mkdir()
+    (release_path / "profile/agent").mkdir(parents=True)
+    (release_path / "profile/resources").mkdir()
     settings = {
         "theme": "quattro-green",
         "packages": [str(release_path / "plugins/pi-lens")],
@@ -60,6 +62,10 @@ def _write_release(root: Path, release_id: str, *, marker: str) -> Path:
             }
         },
     }
+    if not legacy:
+        manifest.update({"agentMode": "shared-v1", "profileFiles": {}, "settingsSha256": sha256_file(release_path / "config/settings.json")})
+        manifest["layout"].pop("agent")
+        manifest["layout"]["profile"] = str(release_path / "profile")
     (release_path / MANIFEST_FILE).write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     (release_path / PREPARED_MARKER).write_text("prepared\n", encoding="utf-8")
     return release_path
