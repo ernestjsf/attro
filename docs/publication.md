@@ -4,13 +4,18 @@ Piattro's original code is MIT, as selected by its owner. See `LICENSE` and
 `THIRD_PARTY_NOTICES.md`. That does not make the existing private workbench or
 fork histories automatically safe to publish.
 
+**Current status:** the root repository `ernestjsf/pi-customizations` remains
+**private**. No visibility change, public tag, or consumer release feed has been
+published. Audits of the final committed candidate and full intended histories
+are **pending**.
+
 ## Current source topology
 
 The root checkout is `pi-customizations`, with a `quattro` branch and GitHub
-remote `ernestjsf/pi-customizations`. Its seven submodule URLs point to the
-maintainer's fork mirrors. Setup documentation currently requires private GitHub
-authentication. This implementation does not rename repositories, change
-visibility, push branches, or certify anonymous retrieval.
+remote `https://github.com/ernestjsf/pi-customizations.git`. Its seven submodule
+URLs point to the maintainer's fork mirrors. Setup documentation currently
+requires private GitHub authentication. This implementation does not rename
+repositories, change visibility, push branches, or certify anonymous retrieval.
 
 A public launch must choose canonical public URLs. Either audit and publish the
 existing histories with explicit approval, or create sanitized public repositories
@@ -27,34 +32,46 @@ The audit also found:
 
 | Live resource | Distribution treatment |
 | --- | --- |
-| `pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk` | Include only as exact npm pins in `piattro.json`; never rely on an existing global install. |
+| `pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk` | Exact npm pins in `piattro.json`; never rely on an existing global install. |
 | `auto-session-name.ts`, `turn-status.ts` | Standalone personal extensions; not automatically copied. Audit and package separately if selected for the public profile. |
-| `safety-guard.ts`, `pi-automode` | Personal behavior/policy extensions; do not silently transplant policy into public defaults. |
-| Herdr extensions and externally installed skills | Host integrations; not part of the core portable profile. |
-| Agent definitions, personal `AGENTS.md`, custom skills/prompts | Personal orchestration and provider assumptions; keep local until explicitly sanitized for sharing. |
+| `safety-guard.ts`, `pi-automode` | Personal behavior/policy extensions; seed config may ship without implementation; do not silently transplant policy into public defaults. |
+| Herdr extensions and externally installed skills | Herdr **skill and pi integration assets** are bundled in `profile/resources` under Apache-2.0 with notices; the **Herdr binary** is a host tool and is **not** bundled. |
+| bb-cli skill | Bundled in `profile/resources/skills/bb-cli` under MIT with notices; the **bb** CLI/server is a host tool and is **not** bundled. |
+| Agent definitions, personal `AGENTS.md`, custom skills/prompts | Reviewed subsets seed `profile/agent/` and `profile/resources/`; not an exact live clone. |
 | Models, provider login, trust and safety state | Machine/user-local. Never publish credentials or granted trust. |
 | Sessions, histories, caches, backups | Excluded from distribution source. |
 
-Inspect the actual descriptor/profile for the current inclusion list; this table
-is a migration inventory, not a claim that every component is already supported.
-The portable profile is intentionally not an exact clone of the maintainer's
-personal behavior.
+Inspect `profile/inventory.json` and the actual descriptor/profile for the current
+inclusion list. The portable profile is intentionally not an exact clone of the
+maintainer's personal behavior. Opinionated model routes (including Sol high for
+the reviewer agent) are user-config metadata in the seed profile; availability
+depends on the installer's own provider accounts.
+
+Piattro **0.2.0** uses a separate canonical `~/.piattro/agent` profile. Publication
+docs must not imply credential migration from live `~/.pi/agent`.
 
 ## Required evidence before publication
 
 1. Run a maintained secret scanner over **all intended public history**, and
    review findings without printing credentials into CI logs or issue reports.
-   No full-history secret scan has been completed by this implementation.
-2. Inspect fork-specific changes, copied assets, attribution, and any generated
+   Preliminary scans found fixture-like patterns requiring explicit
+   content/context review; **no final committed-candidate scan is complete**.
+2. Inspect fork-specific changes, copied assets, attribution, bundled
+   `profile/resources` (bb, Herdr, and other vendored files), and any generated
    artifacts. The initial source license audit is not a complete dependency SBOM.
 3. In a credential-free environment, clone the candidate recursively and verify
-   every pinned commit is available. Validate the source manifest.
+   every pinned commit is available. Validate the source manifest. Prove
+   `./install` end-to-end.
 4. Run clean preparation and combined runtime checks on each supported platform.
    Offline fixture tests do not demonstrate successful real dependency downloads
    or interactive TUI compatibility.
 5. Review a candidate release on another machine, including login, long-running
-   sessions, configuration preservation, and rollback.
-6. Publish reviewed source references before publishing a root release that
+   sessions, shared-profile continuity across update/rollback, and rollback.
+6. Verify subagent managed-resource inheritance before claiming portable
+   subagent parity.
+7. Publish reviewed source references before publishing a root release that
    points at them. Never publish a release with inaccessible gitlinks.
 
 Keep the stable consumer update feed disabled until these gates are satisfied.
+Scheduled update **discovery** (see [automation](automation.md)) is not an
+automatic consumer release feed.

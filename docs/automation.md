@@ -2,6 +2,7 @@
 
 Piattro separates maintainer update discovery from consumer release activation.
 Updating a source pin is not the same as publishing a new stable distribution.
+A weekly discovery report is **not** an automatic consumer release feed.
 
 ## Implemented discovery
 
@@ -41,7 +42,7 @@ not describe a failed lookup as "up to date".
   does not need fork checkout credentials for the default upstream-only check.
 - `.github/workflows/ci.yml` runs offline lifecycle/discovery tests on macOS and
   Linux. It does not require private submodules and does not certify real plugin
-  installation or combined TUI readiness.
+  installation, `./install`, or combined TUI readiness.
 
 Both workflows use pinned action commits. No privileged `pull_request_target`
 job executes contributor code. No deployment or cross-repository write token is
@@ -58,7 +59,7 @@ identity to be established first. The intended next lane is:
 3. Open reviewable fork PRs; preserve customizations and surface conflicts.
 4. After approval, publish the fork commits, then update root gitlinks and recipe
    pins together in a root PR.
-5. Run fresh-install and rollback checks for the candidate release.
+5. Run fresh `./install` and rollback checks for the candidate release.
 6. Approve and publish a Piattro tag; only then advertise it to consumers.
 
 Grant any future GitHub App only the specific repositories and permissions it
@@ -67,4 +68,5 @@ an update merely because it merges cleanly or its unit tests pass.
 
 Until a public stable feed exists, `piattro update --repo /trusted/checkout`
 prepares that explicit local recipe; it does not fetch the newest upstream
-versions. See [publication gates](publication.md) and [design](piattro-design.md).
+versions. Shared-profile state at `~/.piattro/agent` persists across consumer
+updates. See [publication gates](publication.md) and [design](piattro-design.md).

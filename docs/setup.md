@@ -1,19 +1,65 @@
 # Setup and manual migration
 
-For the isolated Piattro manager, use the [main README](../README.md). This page
-retains the legacy workbench's source-preparation and manual live-migration
-reference. Managed setup builds its own copies; do not perform the live migration
-below merely to try a managed release.
+For the isolated Piattro manager, start with the [main README](../README.md).
+This page covers consumer install, developer source preparation, and the legacy
+workbench live-migration reference. Managed setup builds its own copies; do not
+perform the live migration below merely to try a managed release.
 
 This repository is a reviewed, private source manifest. Preparation is separate
 from activation: setup commands below do not edit Pi settings, install/remove live
 packages, or bypass guarded settings writes.
 
-## Fresh checkout
+## Consumer install (Piattro 0.2.0)
+
+After prerequisites (Python 3.10+, Git, npm, Node 22.19.0+) and private GitHub
+authentication for the recursive clone:
+
+```sh
+git clone --recurse-submodules https://github.com/ernestjsf/pi-customizations.git \
+  ~/projects/pi-customizations
+cd ~/projects/pi-customizations
+./install
+```
+
+`./install`:
+
+1. Runs `piattro doctor --repo` on this checkout.
+2. Prepares a pinned release (`piattro setup --repo`).
+3. Activates it.
+4. Symlinks `pi` and `piattro` into `~/.local/bin` (override with `--bin-dir`).
+
+The installer refuses conflicting existing launchers (non-matching symlinks or
+regular files) and does not modify PATH or shell startup files. Add the printed
+`export PATH=...` line yourself. Launchers resolve to this checkout's
+`bin/pi` and `bin/piattro`; keep the checkout at its current path.
+
+If you set `PIATTRO_HOME` during install, export the same value whenever you run
+`pi` or `piattro` later.
+
+After install, run `pi`, then `/login` for the providers you use. Piattro does
+not copy credentials or session history from `~/.pi/agent`. The shared profile at
+`~/.piattro/agent` is seeded once on first activation; updates and rollback
+preserve it.
+
+Dry-run without writing state or links:
+
+```sh
+./install --dry-run
+```
+
+Manual equivalent:
+
+```sh
+./bin/piattro doctor --repo "$PWD"
+./bin/piattro setup --repo "$PWD" --activate
+export PATH="$HOME/.local/bin:$PATH"   # after symlinking launchers yourself
+pi /login
+```
+
+## Developer fresh checkout
 
 Authenticate to the private GitHub repositories with the GitHub credential
-helper/PAT or SSH, then clone the root with its canonical submodules into the
-explicit migration location:
+helper/PAT or SSH, then clone the root with its canonical submodules:
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/pi-customizations.git \
@@ -90,7 +136,8 @@ check:grammars` is the separate Lens grammar provenance check.
 
 The live global settings now use the seven local paths below. This table remains
 the migration reference for a fresh machine: replace only matching package entries;
-it is not a replacement full settings JSON:
+it is not a replacement full settings JSON. **Piattro managed install does not
+perform this migration** and does not copy live credentials or history:
 
 | Existing package identity | Replacement local path |
 | --- | --- |

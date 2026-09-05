@@ -35,6 +35,21 @@ Additional upstream notices inside those trees remain authoritative:
   the **Unsplash License**, not MIT. Do not treat that image as Piattro artwork
   or imply that all repository assets use the source-code license.
 
+## Bundled profile resources (Piattro 0.2.0)
+
+Piattro ships selected redistributable skills and extensions in
+`profile/resources/`. Provenance is recorded in `profile/inventory.json`.
+
+| Component | License | Notice / license file |
+| --- | --- | --- |
+| bb-cli skill | MIT ([get-bb/bb](https://github.com/get-bb/bb)) | `profile/resources/skills/bb-cli/NOTICE.md`, `profile/resources/licenses/get-bb-bb-MIT` |
+| Herdr skill | Apache-2.0 ([herdrdev/herdr](https://github.com/herdrdev/herdr)) | `profile/resources/skills/herdr/NOTICE.md`, `profile/resources/licenses/herdrdev-herdr-Apache-2.0` |
+| Herdr pi integration extensions | Apache-2.0 (upstream `@ 5eab32da`) | `profile/resources/extensions/herdr-agent-state.NOTICE.md` |
+
+The bundled **bb-cli** and **Herdr** skills document optional host integrations.
+The **`bb` CLI/server** and **`herdr` binary** are **not** bundled; users install
+those host tools separately if needed.
+
 ## Runtime and dependency notices
 
 Upstream Pi and the inspected optional npm plugins (`pi-caffeinate`, `pi-btw`,
@@ -60,3 +75,4 @@ A permissive source license does not establish that private fork histories are
 safe to expose. Audit the intended public files and history, verify anonymous
 access to every pinned source, and obtain approval before changing visibility
 or pushing a public release. No repository visibility is changed by this file.
+The root repository remains **private** as of the latest documentation refresh.
