@@ -3,7 +3,8 @@
 
 Default mode is intentionally a source/configuration check.  It does not install,
 build, authenticate, fetch, or write anything.  Use --runtime after performing the
-documented Lens build to require generated runtime files too.
+documented Lens build to require listed runtime files to be present; that option
+still does not check dependencies or host compatibility.
 """
 
 from __future__ import annotations
