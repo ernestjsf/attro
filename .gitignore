@@ -25,6 +25,7 @@ __pycache__/
 **/__pycache__/
 *.pyc
 *.log
+update-discovery-report.json
 logs/
 **/logs/
 *.tmp

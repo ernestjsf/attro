@@ -1,0 +1,36 @@
+name: Check upstream updates
+
+# Maintainer-facing discovery only. Does not mutate pins, open PRs, or publish
+# releases. Uploads a bounded JSON report artifact for manual review.
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Discover upstream and npm updates
+        run: |
+          cd "${{ github.workspace }}"
+          python3 scripts/check_updates.py \
+            --report update-discovery-report.json
+
+      - name: Upload discovery report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: update-discovery-report
+          path: update-discovery-report.json
+          if-no-files-found: error
+          retention-days: 14
