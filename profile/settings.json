@@ -1,0 +1,25 @@
+{
+  "theme": "quattro-green",
+  "quietStartup": true,
+  "hideThinkingBlock": false,
+  "editorPaddingX": 0,
+  "outputPad": 1,
+  "tuiMode": "fullscreen",
+  "fullscreenScrollbar": "auto",
+  "fullscreenExitOutput": "resume-hint",
+  "collapseChangelog": true,
+  "markdown": {"mermaid": "final"},
+  "packages": [
+    "{{PLUGIN_PI_ZENTUI}}",
+    "{{PLUGIN_PI_CC_EXTENSIONS}}",
+    "{{PLUGIN_PI_WEB_ACCESS}}",
+    "{{PLUGIN_PI_LENS}}",
+    "{{PLUGIN_RPIV_TODO}}",
+    "{{PLUGIN_PI_ASK_USER}}",
+    "{{PLUGIN_PI_SUBAGENTS}}"
+  ],
+  "themes": [
+    "{{THEME_QUATTRO_GREEN}}",
+    "{{THEME_QUATTRO_AMBER}}"
+  ]
+}

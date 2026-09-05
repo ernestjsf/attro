@@ -1,0 +1,6 @@
+{
+  "include": ["piattro", "scripts", "tests"],
+  "extraPaths": ["."],
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "basic"
+}
