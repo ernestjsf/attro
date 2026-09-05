@@ -81,11 +81,11 @@ This checks only that the manifest's listed runtime files exist. It does not pro
 runtime readiness, dependency installation, or host compatibility; `npm run
 check:grammars` is the separate Lens grammar provenance check.
 
-## Manual migration (not performed here)
+## Active installation and migration reference
 
-The live installation is unchanged and pending migration. When intentionally
-migrating, replace only the matching package entry with the exact local path below;
-this table is a package-entry map, not a replacement full settings JSON:
+The live global settings now use the seven local paths below. This table remains
+the migration reference for a fresh machine: replace only matching package entries;
+it is not a replacement full settings JSON:
 
 | Existing package identity | Replacement local path |
 | --- | --- |
@@ -102,8 +102,12 @@ old source and its replacement; never paste a fragment over the global settings
 document; and never run `pi remove`, because it would remove the original dirty
 repository registration.
 
-The root package may be added only for the theme if desired. The live old config is
-already correct. This setup does not auto-edit settings or install/remove any live
-package. Until the manual switch is made, old npm-managed live sources remain
-subject to their old update behavior. Do not implement a workaround around guarded
-settings writes.
+The root package may be added only for themes if desired. The current machine
+loads Quattro Green from `~/.pi/agent/themes/`; its tracked copy is in `themes/`.
+These setup commands do not auto-edit settings or install/remove live packages.
+Old npm copies may remain on disk without being active; do not delete them as
+part of UI cleanup. Do not bypass guarded settings writes.
+
+See [transcript UI](transcript-ui.md) for the active display ownership and reload
+instructions. Changes inside a registered local source tree require `/reload`
+(or a restart) to load; theme file edits hot-reload separately.

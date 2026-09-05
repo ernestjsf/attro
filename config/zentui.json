@@ -48,12 +48,12 @@
       }
     },
     "thinkingSteps": {
-      "enabled": true,
+      "enabled": false,
       "mode": "tree"
     },
     "workingLine": {
       "enabled": true,
-      "turnSummary": true,
+      "turnSummary": false,
       "spinner": "pulse",
       "spinnerIntervalMs": 160,
       "animateSpinnerColor": false,
@@ -63,28 +63,13 @@
       "messages": {
         "custom": true,
         "values": [
-          "Sautéing…",
-          "Cooking…",
-          "Ionizing…",
-          "Zigzagging…",
-          "Razzle-dazzling…",
-          "Photosynthesizing…",
-          "Nucleating…",
-          "Brewing…",
-          "Combobulating…",
-          "Boogieing…",
-          "Befuddling…",
-          "Alchemizing…",
-          "Conjuring…",
-          "Baking…",
-          "Simmering…",
-          "Blanching…"
+          "Working…"
         ]
       },
       "segments": {
         "tool": true,
         "elapsed": true,
-        "thought": true,
+        "thought": false,
         "tokens": true
       }
     },

@@ -37,20 +37,22 @@ to run the root source checker.
 
 ## Manifest and configs
 
-The root `package.json` is private `0.1.0` and declares the Quattro Amber theme
-only. It does not auto-activate extensions. The four copied files in `themes/`
-and `config/` are the explicit allowlist; no auth, session, safety-policy, global
-settings, or live installation files are captured. The existing Zentui safety
+The root `package.json` is private `0.1.0` and declares the Quattro Amber and
+Quattro Green themes only. It does not auto-activate extensions. The five copied
+files in `themes/` and `config/` are the explicit allowlist; no auth, session,
+safety-policy, or full global settings files are captured. The existing Zentui safety
 footer-label placement is unchanged because that setting is display-only, not a
 policy change.
 
-The live installation is unchanged and migration is pending. Until a deliberate
-manual migration to these local paths, existing live packages remain vulnerable to
-updates of their old npm sources.
+The live global settings now select all seven local package paths in `plugins/`;
+old npm copies are not registered alongside them. Quattro Green is the active
+live theme. See [transcript UI](docs/transcript-ui.md) for display ownership,
+configuration, verification, and rollback. The gitlinks and source manifest pin
+the reviewed local commits. No commits were pushed by the UI cleanup.
 
 ## Validation evidence
 
-The pinned source `QUATTRO.md` reports: Zentui 1,383 passed/1 skipped; CC 176;
+The pinned source `QUATTRO.md` reports: Zentui 1,383 passed/1 skipped; CC 181;
 web 633; rpiv-todo 232; ask-user 82; subagents full suite passed; Lens 75 targeted
 plus lint/build/import and 12 core + 1 vendored grammar checks. Lens was not a full
 suite or live combined-TUI run.

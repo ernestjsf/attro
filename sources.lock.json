@@ -5,7 +5,7 @@
     "name": "pi-customizations",
     "version": "0.1.0",
     "manifestResources": {
-      "themes": ["themes/quattro-amber.json"]
+      "themes": ["themes/quattro-amber.json", "themes/quattro-green.json"]
     }
   },
   "submodules": [
@@ -31,7 +31,7 @@
       "name": "pi-cc-extensions",
       "origin": "https://github.com/ernestjsf/pi-cc-extensions.git",
       "upstream": "https://github.com/minuque/pi-cc-extensions.git",
-      "pin": "bad8ec138b95073d871ee0ef86e06b3f172c1260",
+      "pin": "80aed670119b8861665af1fbd01987058055af76",
       "baseCommit": "5d7a2666f51da9f450bd019af10200c88cc1df98",
       "baseVersion": "0.8.69",
       "packagePath": ".",
@@ -40,7 +40,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "176 passed",
+      "testReport": "181 passed; typecheck and lint passed on Node 26.5.0; 40/80-column installed-Pi component smoke checks passed",
       "provenance": "QUATTRO.md"
     },
     {
@@ -120,7 +120,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/pi-subagents-quattro.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "a23b7db9e9ce82cf15d2e62e7cb44c2862f75277",
+      "pin": "e6f4eaddc98d4db16859e2ca24b4fb9e585b53d1",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -128,11 +128,17 @@
       "runtimeEntryFiles": ["index.ts"],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "full suite passed",
+      "testReport": "full subagents.test.cjs suite passed on Node 26.5.0, including responsive panel widths, overlay interaction and name/role mapping",
       "provenance": "QUATTRO.md"
     }
   ],
   "configs": [
+    {
+      "path": "themes/quattro-green.json",
+      "source": "~/.pi/agent/themes/quattro-green.json",
+      "sha256": "328326430c758fa5713ae2dfdd6a6c2dd1cf3a96eea2897bf5f27aa84014605e",
+      "provenance": "Active Quattro Green display theme with distinct user, tool, pending and error surfaces."
+    },
     {
       "path": "themes/quattro-amber.json",
       "source": "~/.pi/agent/themes/quattro-amber.json",
@@ -142,8 +148,8 @@
     {
       "path": "config/zentui.json",
       "source": "~/.pi/agent/zentui.json",
-      "sha256": "f21bf40519e6f34e80a3a8d81ddf777a3e616e912f743e9a3ad194ea909e3a9f",
-      "provenance": "Allowlisted live zentui display configuration read and copied unchanged; safety footer-label placement remains unchanged."
+      "sha256": "7ef5d08bda4d072a0a912c45b9c8966e7c31b7a9e8df8c646019af01f866f1a7",
+      "provenance": "Live display configuration: CC owns thinking, Zentui owns live progress, turn-status owns completion. Safety footer-label placement remains unchanged."
     },
     {
       "path": "config/claude-code-style.json",

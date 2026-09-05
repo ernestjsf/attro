@@ -175,7 +175,7 @@ def main() -> int:
         return 1
     if type(package.get("private")) != bool or not package.get("private") or package.get("version") != "0.1.0":
         fail("root package must be private at version 0.1.0", failures)
-    if package.get("pi") != {"themes": ["./themes/quattro-amber.json"]}:
+    if package.get("pi") != {"themes": ["./themes/quattro-amber.json", "./themes/quattro-green.json"]}:
         fail("root pi manifest must declare themes only", failures)
 
     expected_gitmodules = {
@@ -205,7 +205,7 @@ def main() -> int:
             print(f"FAIL: {failure}", file=sys.stderr)
         return 1
     print("PASS: source pins, clean submodules, approved origins, entry files, and config hashes verified")
-    print("NOTE: setup is not activated; no live settings or package installation was performed")
+    print("NOTE: this check does not inspect activation or modify live settings/packages")
     if not args.runtime:
         print("NOTE: runtime-file presence is not checked; run the documented Lens build, then verify.py --runtime")
         print("NOTE: --runtime checks file presence only; it does not prove dependency or host compatibility")

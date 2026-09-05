@@ -4,6 +4,6 @@
   "version": "0.1.0",
   "keywords": ["pi-package"],
   "pi": {
-    "themes": ["./themes/quattro-amber.json"]
+    "themes": ["./themes/quattro-amber.json", "./themes/quattro-green.json"]
   }
 }
