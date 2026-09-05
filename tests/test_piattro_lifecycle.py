@@ -66,30 +66,70 @@ class LifecycleTests(unittest.TestCase):
             "configs": [{"path": "themes/quattro-green.json", "sha256": sha256_file(theme)}],
         }
         self.commit_inputs()
+        self.npm_log = self.base / "fixture-npm.log"
         fakebin = self.base / "fakebin"
         fakebin.mkdir()
         npm = fakebin / "npm"
-        npm.write_text("#!/usr/bin/env python3\n" + '''import json, os, pathlib, sys
+        npm.write_text("#!/usr/bin/env python3\n" + f'''import json, os, pathlib, sys
 root = pathlib.Path.cwd()
+log = pathlib.Path({json.dumps(str(self.npm_log))})
+args = sys.argv[1:]
+log.parent.mkdir(parents=True, exist_ok=True)
+with log.open("a") as fh:
+    fh.write("npm " + " ".join(args) + "\\n")
+
+def install_deps():
+    package_path = root / "package.json"
+    if not package_path.is_file():
+        return
+    package = json.loads(package_path.read_text())
+    for name, version in package.get("dependencies", {{}}).items():
+        target = root / "node_modules" / name
+        target.mkdir(parents=True, exist_ok=True)
+        if os.environ.get("FIXTURE_NPM_MISMATCH") in ("1", name):
+            version = "0.0.0"
+        (target / "package.json").write_text(json.dumps({{"name": name, "version": version}}))
+        if name == "@earendil-works/pi-coding-agent":
+            cli = target / "dist/bundle/cli.js"
+            cli.parent.mkdir(parents=True, exist_ok=True)
+            cli.write_text("#!/usr/bin/env node\\nconsole.log('fixture pi');\\n")
+            cli.chmod(0o755)
+
 if os.environ.get("FIXTURE_NPM_FAIL"):
     sys.exit("fixture npm failed")
-package = json.loads((root / "package.json").read_text())
-for name, version in package.get("dependencies", {}).items():
-    target = root / "node_modules" / name
-    target.mkdir(parents=True, exist_ok=True)
-    if os.environ.get("FIXTURE_NPM_MISMATCH") in ("1", name):
-        version = "0.0.0"
-    (target / "package.json").write_text(json.dumps({"name": name, "version": version}))
-    if name == "@earendil-works/pi-coding-agent":
-        cli = target / "dist/bundle/cli.js"
-        cli.parent.mkdir(parents=True)
-        cli.write_text("#!/usr/bin/env node\\nconsole.log('fixture pi');\\n")
-        cli.chmod(0o755)
-(root / "package-lock.json").write_text(json.dumps({"lockfileVersion": 3, "packages": {}}))
+
+if args[:1] == ["ci"]:
+    lock_path = root / "package-lock.json"
+    if not lock_path.is_file():
+        sys.exit("fixture npm ci: missing package-lock.json")
+    before = lock_path.read_bytes()
+    install_deps()
+    if os.environ.get("FIXTURE_NPM_LOCK_REWRITE"):
+        lock_path.write_text(json.dumps({{"lockfileVersion": 3, "packages": {{}}, "fixture": "rewritten"}}))
+    elif lock_path.read_bytes() != before:
+        sys.exit("fixture npm ci: unexpected lock mutation")
+    sys.exit(0)
+
+if args[:2] == ["run", "build:dist"]:
+    if os.environ.get("FIXTURE_LENS_BUILD_FAIL"):
+        sys.exit("fixture Lens build failed")
+    dist = root / "dist" / "index.js"
+    dist.parent.mkdir(parents=True, exist_ok=True)
+    dist.write_text("export {{}};\\n")
+    sys.exit(0)
+
+if args[:2] == ["run", "check:grammars"]:
+    gram = root / "grammars" / "tree-sitter-typescript.wasm"
+    if not gram.is_file():
+        sys.exit("fixture check:grammars: missing grammar")
+    sys.exit(0)
+
+install_deps()
+(root / "package-lock.json").write_text(json.dumps({{"lockfileVersion": 3, "packages": {{}}}}))
 ''')
         npm.chmod(0o755)
         node = fakebin / "node"
-        node.write_text('#!/bin/sh\nif [ "$1" = "--version" ]; then echo "${FIXTURE_NODE_VERSION:-v26.0.0}"; else echo "fixture pi"; fi\n')
+        node.write_text('#!/bin/sh\nif [ "$1" = "--version" ]; then echo "${FIXTURE_NODE_VERSION:-v26.0.0}"; exit 0; fi\ncase "$1" in\n  scripts/download-grammars.js|*/download-grammars.js)\n    dest=grammars\n    i=1\n    while [ $i -le $# ]; do eval "arg=\\$$i"; if [ "$arg" = "--dest" ]; then i=$((i+1)); eval "dest=\\$$i"; fi; i=$((i+1)); done\n    mkdir -p "$dest"\n    printf wasm > "$dest/tree-sitter-typescript.wasm"\n    exit 0\n    ;;\nesac\necho "fixture pi"\n')
         node.chmod(0o755)
         env = mock.patch.dict(os.environ, {"PATH": str(fakebin) + os.pathsep + os.environ["PATH"]})
         env.start()
@@ -103,6 +143,61 @@ for name, version in package.get("dependencies", {}).items():
         (self.repo / "sources.lock.json").write_text(json.dumps(self.lock))
         self.git("add", ".")
         self.git("commit", "-m", "inputs")
+
+    def configure_locked_plugin(self):
+        plugin = self.repo / "plugins/rpiv-mono"
+        lock_path = plugin / "package-lock.json"
+        lock_path.write_text(json.dumps({"lockfileVersion": 3, "packages": {}}))
+        self.git("add", ".", cwd=plugin)
+        self.git("commit", "-m", "plugin lock", cwd=plugin)
+        pin = self.git("rev-parse", "HEAD", cwd=plugin)
+        entry = self.lock["submodules"][0]
+        entry.update({"pin": pin, "dependencyLock": "package-lock.json", "dependencyLockVersion": 3})
+        self.git("add", "plugins/rpiv-mono")
+        self.commit_inputs()
+        return sha256_file(lock_path)
+
+    def configure_lens_plugin(self):
+        import shutil
+        rpiv = self.repo / "plugins/rpiv-mono"
+        if rpiv.exists():
+            shutil.rmtree(rpiv)
+        lens = self.repo / "plugins/pi-lens"
+        lens.mkdir(parents=True)
+        self.git("init", cwd=lens)
+        self.git("config", "user.name", "Fixture", cwd=lens)
+        self.git("config", "user.email", "fixture@example.invalid", cwd=lens)
+        self.git("remote", "add", "origin", "https://example.invalid/pi-lens.git", cwd=lens)
+        (lens / "index.ts").write_text("export default () => {};\n")
+        (lens / "tools").mkdir()
+        (lens / "tools/render-compact.ts").write_text("export default () => {};\n")
+        (lens / "scripts").mkdir()
+        (lens / "scripts/download-grammars.js").write_text("")
+        (lens / "package.json").write_text(json.dumps({
+            "name": "pi-lens-fixture",
+            "scripts": {"build:dist": "true", "check:grammars": "true"},
+        }))
+        (lens / "package-lock.json").write_text(json.dumps({"lockfileVersion": 3, "packages": {}}))
+        self.git("add", ".", cwd=lens)
+        self.git("commit", "-m", "lens plugin", cwd=lens)
+        pin = self.git("rev-parse", "HEAD", cwd=lens)
+        self.lock["submodules"][0] = {
+            "path": "plugins/pi-lens", "origin": "https://example.invalid/pi-lens.git", "pin": pin,
+            "packagePath": ".", "runtimeGenerated": True,
+            "sourceEntryFiles": ["index.ts", "tools/render-compact.ts"],
+            "runtimeEntryFiles": ["dist/index.js", "grammars/tree-sitter-typescript.wasm"],
+            "dependencyLock": "package-lock.json", "dependencyLockVersion": 3,
+        }
+        profile = self.repo / "profile/settings.json"
+        profile.write_text(json.dumps({"packages": ["{{PLUGIN_PI_LENS}}"], "themes": ["{{THEME_QUATTRO_GREEN}}"]}))
+        self.git("add", "plugins/pi-lens", "profile/settings.json")
+        self.commit_inputs()
+        return lens
+
+    def npm_calls(self):
+        if not self.npm_log.is_file():
+            return []
+        return [line.strip() for line in self.npm_log.read_text().splitlines() if line.strip()]
 
     def cli(self, *args, success=True):
         stdout, stderr = io.StringIO(), io.StringIO()
@@ -325,6 +420,76 @@ for name, version in package.get("dependencies", {}).items():
             self.assertEqual(profile[key], value)
         for key in ("defaultProvider", "defaultModel", "defaultProjectTrust"):
             self.assertNotIn(key, profile)
+
+    def test_committed_plugin_dependency_lock_preserved(self):
+        digest = self.configure_locked_plugin()
+        output, _ = self.cli("--json", "setup", "--repo", str(self.repo), "--activate")
+        release = json.loads(output)
+        locks = release["provenance"]["pluginDependencyLocks"]
+        self.assertEqual(len(locks), 1)
+        record = locks[0]
+        self.assertEqual(record["sha256"], digest)
+        self.assertTrue(record["path"].endswith("plugins/rpiv-mono/package-lock.json"))
+        release_root = self.state / "releases" / release["releaseId"]
+        lock_file = release_root / "plugins/rpiv-mono/package-lock.json"
+        self.assertTrue(lock_file.is_file())
+        self.assertEqual(sha256_file(lock_file), digest)
+
+    def test_npm_ci_lock_change_preserves_active_state(self):
+        self.configure_locked_plugin()
+        first = self.setup_release()
+        before = (self.state / "state.json").read_bytes()
+        self.descriptor["version"] = "0.2.0"
+        self.commit_inputs()
+        with mock.patch.dict(os.environ, {"FIXTURE_NPM_LOCK_REWRITE": "1"}):
+            self.cli("setup", "--repo", str(self.repo), "--activate", success=False)
+        self.assertEqual((self.state / "state.json").read_bytes(), before)
+        self.assertEqual(list((self.state / "staging").iterdir()), [])
+        active = json.loads(self.cli("--json", "status")[0])
+        self.assertEqual(active["active"], first["releaseId"])
+
+    def test_npm_ci_failure_preserves_active_state(self):
+        self.configure_locked_plugin()
+        first = self.setup_release()
+        before = (self.state / "state.json").read_bytes()
+        self.descriptor["version"] = "0.2.0"
+        self.commit_inputs()
+        with mock.patch.dict(os.environ, {"FIXTURE_NPM_FAIL": "1"}):
+            self.cli("setup", "--repo", str(self.repo), "--activate", success=False)
+        self.assertEqual((self.state / "state.json").read_bytes(), before)
+        self.assertEqual(list((self.state / "staging").iterdir()), [])
+        active = json.loads(self.cli("--json", "status")[0])
+        self.assertEqual(active["active"], first["releaseId"])
+
+    def test_lens_runtime_generated_build_success(self):
+        lens = self.configure_lens_plugin()
+        output, _ = self.cli("--json", "setup", "--repo", str(self.repo), "--activate")
+        release = json.loads(output)
+        release_root = self.state / "releases" / release["releaseId"]
+        dist = release_root / "plugins/pi-lens/dist/index.js"
+        gram = release_root / "plugins/pi-lens/grammars/tree-sitter-typescript.wasm"
+        self.assertTrue(dist.is_file(), dist)
+        self.assertTrue(gram.is_file(), gram)
+        self.assertFalse((lens / "dist/index.js").exists())
+        self.assertFalse((lens / "grammars/tree-sitter-typescript.wasm").exists())
+        calls = self.npm_calls()
+        build_idx = next(i for i, line in enumerate(calls) if line == "npm run build:dist")
+        check_idx = next(i for i, line in enumerate(calls) if line == "npm run check:grammars")
+        self.assertLess(build_idx, check_idx)
+
+    def test_lens_build_failure_preserves_active_state(self):
+        self.configure_lens_plugin()
+        first = self.setup_release()
+        before = (self.state / "state.json").read_bytes()
+        self.descriptor["version"] = "0.2.0"
+        self.commit_inputs()
+        with mock.patch.dict(os.environ, {"FIXTURE_LENS_BUILD_FAIL": "1"}):
+            _, error = self.cli("setup", "--repo", str(self.repo), "--activate", success=False)
+        self.assertIn("fixture Lens build failed", error)
+        self.assertEqual((self.state / "state.json").read_bytes(), before)
+        self.assertEqual(list((self.state / "staging").iterdir()), [])
+        active = json.loads(self.cli("--json", "status")[0])
+        self.assertEqual(active["active"], first["releaseId"])
 
 
 if __name__ == "__main__":
