@@ -110,3 +110,5 @@ The source verifier requires clean, pinned submodules. `--runtime` additionally
 checks listed generated-file presence after the documented Lens preparation;
 it does not certify dependency compatibility or the combined interactive UI.
 Unit tests use isolated fixtures and do not install or alter the live Pi setup.
+See [verification evidence](docs/verification.md) for exact local results and
+remaining validation gates.

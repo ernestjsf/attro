@@ -64,9 +64,11 @@ implicit fetch-and-execute from an unreviewed remote.
 - [ ] Commit the reproducible runtime dependency inputs and artifact provenance.
 - [ ] Test real fresh preparation on macOS and Linux before advertising support.
 - [ ] Smoke-test the combined interactive UI and provider login experience.
-- [ ] Verify interrupted preparation/activation, concurrent operations, and
-      retained-release rollback, including state compatibility.
-- [ ] Review storage/activation and release-automation permission boundaries independently.
+- [x] Verify failed preparation/interrupted pointer replacement, concurrent
+      operations, and retained-release rollback/schema refusal in isolated
+      lifecycle tests (see [evidence](verification.md); not power-loss certification).
+- [x] Review storage/activation and release-automation permission boundaries
+      independently (Fable review found no blocking safety defects).
 - [ ] Test on a second machine before replacing the maintainer's daily launcher.
 - [ ] Publish a reviewed tag and document recovery/uninstall.
 
