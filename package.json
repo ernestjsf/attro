@@ -1,0 +1,9 @@
+{
+  "name": "pi-customizations",
+  "private": true,
+  "version": "0.1.0",
+  "keywords": ["pi-package"],
+  "pi": {
+    "themes": ["./themes/quattro-amber.json"]
+  }
+}

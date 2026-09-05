@@ -1,0 +1,32 @@
+# Secrets, sessions, and local settings
+.env
+.env.*
+!.env.example
+**/secrets/
+**/sessions/
+**/session/
+**/auth/
+**/credentials/
+
+# Dependencies and generated runtime artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+grammars/
+**/grammars/
+coverage/
+**/coverage/
+.cache/
+**/.cache/
+
+# Logs, reports, and editor/OS artifacts
+__pycache__/
+**/__pycache__/
+*.pyc
+*.log
+logs/
+**/logs/
+*.tmp
+*.swp
+.DS_Store

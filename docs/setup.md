@@ -1,0 +1,94 @@
+# Setup and manual migration
+
+This repository is a reviewed, private source manifest. Preparation is separate
+from activation: setup commands below do not edit Pi settings, install/remove live
+packages, or bypass guarded settings writes.
+
+## Fresh checkout
+
+Authenticate to the private GitHub repositories, then clone the root with its
+canonical submodules:
+
+```sh
+git clone --recurse-submodules git@github.com:ernestjsf/pi-customizations.git
+cd pi-customizations
+```
+
+If an existing clone was not recursive, use `git submodule update --init --recursive`.
+The seven submodule origins are the private Quattro mirrors; the subagents origin is
+specifically `pi-subagents-quattro`, never public `ernestjsf/pi-subagents`.
+
+Submodule remotes are local clone configuration and are not versioned. To add the
+provenance remotes to a fresh clone:
+
+```sh
+git -C plugins/pi-zentui remote add upstream https://github.com/lmilojevicc/pi-zentui.git
+git -C plugins/pi-cc-extensions remote add upstream https://github.com/minuque/pi-cc-extensions.git
+git -C plugins/pi-web-access remote add upstream https://github.com/nicobailon/pi-web-access.git
+git -C plugins/pi-lens remote add upstream https://github.com/apmantza/pi-lens.git
+git -C plugins/rpiv-mono remote add upstream https://github.com/juicesharp/rpiv-mono.git
+git -C plugins/pi-ask-user remote add upstream https://github.com/edlsh/pi-ask-user.git
+git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/pi-subagents.git
+```
+
+Install each lockfile-bearing source independently, without lifecycle scripts:
+
+```sh
+for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-web-access \
+  plugins/pi-lens plugins/rpiv-mono plugins/pi-ask-user; do
+  (cd "$p" && npm ci --ignore-scripts --no-audit --no-fund)
+done
+```
+
+There is no dependency lockfile for `pi-subagents`; do not install it just for the
+root checker. The root package has no runtime dependency installation.
+
+## Lens preparation
+
+Lens is the one generated-runtime preparation step. From `plugins/pi-lens`, run
+these commands in this order:
+
+```sh
+npm run build:dist
+node scripts/download-grammars.js --core --dest grammars
+npm run check:grammars
+```
+
+`dist/` and `grammars/` are ignored generated artifacts and are legitimately absent
+from a pristine source-pin checkout. Development Lens tests additionally require
+an in-place build before tests:
+
+```sh
+npm run build
+npm test -- tests/tools/render-compact.test.ts tests/clients/widget-state.test.ts
+```
+
+Other runtimes are direct TypeScript entrypoints as declared in `sources.lock.json`.
+The rpiv runtime package is only `plugins/rpiv-mono/packages/rpiv-todo`; inspect each
+source package's own entry paths before using another package.
+
+After preparation, the optional runtime-file presence check is explicit and still
+read-only:
+
+```sh
+python3 scripts/verify.py --runtime
+```
+
+This checks only that the manifest's listed runtime files exist. It does not prove
+runtime readiness, dependency installation, or host compatibility; `npm run
+check:grammars` is the separate Lens grammar provenance check.
+
+## Manual migration (not performed here)
+
+The live installation is unchanged and pending migration. When intentionally
+migrating, replace each matching one of the seven package entries with its local
+path under this repository. Preserve every unrelated package, filter, and safety
+setting. Never keep both an old source and its replacement; never paste a fragment
+over the global settings document; and never run `pi remove`, because it would
+remove the original dirty repository registration.
+
+The root package may be added only for the theme if desired. The live old config is
+already correct. This setup does not auto-edit settings or install/remove any live
+package. Until the manual switch is made, old npm-managed live sources remain
+subject to their old update behavior. Do not implement a workaround around guarded
+settings writes.

@@ -1,0 +1,15 @@
+{
+  "mode": "compact",
+  "diffViewMode": "unified",
+  "diffIndicatorMode": "bars",
+  "editDiffCollapsedLines": 24,
+  "writeDiffCollapsedLines": 0,
+  "previewLines": 0,
+  "showStartupHeader": false,
+  "enableSessionReference": true,
+  "enableSubagentAutocomplete": false,
+  "enableContextCommand": true,
+  "enableAgentSummary": false,
+  "enableWorkingMessage": false,
+  "enableAliases": true
+}
