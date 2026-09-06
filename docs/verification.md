@@ -8,7 +8,7 @@ verified locally**, not certified for publication.
 
 ## Maintained-core verification
 
-The current tree passes **154 Python tests**, the full subagent suite on Node 26.7.0, pinned Pyright (**0 errors, 0 warnings**), installer compilation, and whitespace checks. Launcher regressions for help before initialization and `--state-root=PATH` were observed RED before correction and GREEN afterward.
+The current tree passes **154 Python tests**, the full subagent suite on Node 26, pinned Pyright (**0 errors, 0 warnings**), installer compilation, and whitespace checks. Launcher regressions for help before initialization and `--state-root=PATH` were observed RED before correction and GREEN afterward.
 
 An isolated export of core commit `36b02b695383ad89bc3a22b73633be3fa27be3c1` was augmented only with the hash-pinned v0.85.0 model snapshot. The model-data validator passed, and the dependency lock stayed unchanged through installation and build:
 
@@ -24,7 +24,15 @@ node ../../node_modules/vitest/vitest.mjs --run test/chat-viewport.test.ts test/
 
 The build and tests ran with macOS sandbox network access denied; downloading the pinned snapshot and installing locked dependencies were separate network-enabled steps. **4 stack tests and 14 viewport/theme tests passed.** The compiled CLI returned `0.85.0` and displayed help from outside the source checkout. The actual Quattro Green theme resolved `dockBg` to `#0e1713` in that build. No credentials or model prompts were used.
 
-This verifies the maintained core itself; the integrated clean-checkout Attro preparation and combined UI remain separate gates.
+### Integrated local installation and startup
+
+A clean local checkout at `1ee0a12a7948c806c48e9fc4e77a7ece263fc7a6` passed the real `./install --bin-dir <temporary-bin>` flow with a temporary HOME and ATTRO_HOME, no inherited credentials, and no global installation. The retained source core recorded Node **26.5.0** and npm **11.17.0**. Preparation and activation took about 131 seconds.
+
+The installed `attro --json doctor` reported healthy; `attro -- --version` returned `0.85.0`; source provenance matched core commit `36b02b6`. Existing `pi` and `piattro` sentinel files in the target bin directory stayed byte-identical. A real `attro try -- --version` also passed while shared settings, auth, and profile-marker bytes stayed unchanged.
+
+The installed app started in a 100-column, 30-row pseudo-terminal and rendered the configured `#0e1713` dock background. Node outbound connections were blocked and no prompt was sent. No extension-loader or subagent process-identity error was present. An earlier OS-sandbox startup probe blocked macOS `/bin/ps`, so the final startup probe used Node network blocking instead; the production process-identity guard was not weakened.
+
+Warnings about unavailable models and Cursor discovery were expected before `/login`. The auth store remained empty, and seeded `openai-codex/gpt-6-astra` and Quattro Green preferences were preserved. Authenticated turns, actual model-driven child tasks, cross-version real rollback, and fresh-machine/anonymous clone tests remain unverified.
 
 ## Attro rename verification
 
@@ -44,8 +52,8 @@ New public-seam tests in `tests/test_attro_launcher.py` cover:
 
 The latest local suite size reported for this launcher work is **131 Python tests**
 (before the later source-core and launcher regression additions). That count is historical to the launcher
-milestone; **final source-core build and combined interactive UI checks are not
-yet complete**.
+milestone; later source-core build and unauthenticated UI startup evidence is
+recorded above. Authenticated and fresh-machine checks are still pending.
 
 ## Pre-rename v0.2 local checkpoint
 
@@ -59,9 +67,9 @@ After comment cleanup:
 - A private snapshot of 107 root source files passed Gitleaks 8.30.1 with zero findings. This is not a final all-ref publication scan.
 - Independent Fable review found **no blocking defects** in shared state, installer failure handling, or child resource/core pinning. It independently reran all 119 Python tests. A pre-set `PI_SUBAGENT_COMMAND` or `PI_SUBAGENT_EXECUTABLE` remains an explicit test-hook override; production shells should leave these unset.
 
-The remaining work is a real clean v0.2 installation, source-core build on a clean
-checkout, and combined loader/TUI check, followed by final publication
-verification. No publication is part of this local checkpoint.
+At that checkpoint, clean v0.2 installation, source-core build, combined UI,
+and publication checks remained. Subsequent local evidence is recorded above;
+publication is still outside the verified checkpoint.
 
 Host reference: Python 3.14.6, Node 26.7.0, npm 11.19.0.
 
@@ -156,7 +164,7 @@ coverage was added.
 **Not verified (including v0.2 gaps):**
 
 - Source-core build and launch from a clean recursive clone
-- Combined interactive TUI and provider login on a fresh `./install`
+- Provider login and authenticated model turns in the installed interactive app
 - Shared-profile continuity across update and rollback on a real install
 - Real nested subagent loader startup (the isolated spawn seam is verified)
 - Linux execution, GitHub-hosted workflow execution, second physical machine

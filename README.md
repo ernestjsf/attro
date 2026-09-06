@@ -11,16 +11,18 @@ Pi core is built from the maintained `attro-core` fork, not edited in place.
 distribution with a one-command installer for trusted local checkouts. This
 repository is still **private**, **not yet publicly installable**, and **not
 fully verified** as a stable release. No remote stable feed, automatic release
-PRs, or public artifacts are published by the current workflows. Core source
-build and combined interactive UI verification remain **pending**. See
+PRs, or public artifacts are published by the current workflows. An isolated
+macOS install, maintained-core build, and UI startup with the configured dock
+color have passed without credentials or model prompts. Authenticated use and
+public/fresh-machine delivery remain unverified. See
 [publication gates](docs/publication.md).
 
 ## Install from a trusted checkout
 
 Requires Python 3.10+, Git, npm, and Node satisfying the pinned Pi engine
 (currently Node **22.19.0+**). macOS and Linux are the target platforms;
-real fresh-install and combined-UI validation are required before support is
-advertised. Windows is not supported by this first implementation. Source-core
+local macOS installation and UI startup have been verified; Linux and
+fresh-machine validation remain pending. Windows is not supported by this first implementation. Source-core
 preparation needs network access for locked dependency installs and the
 hash-pinned upstream model-data archive.
 
@@ -29,7 +31,7 @@ access. Review its sources before executing dependency installation or builds.
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git
-cd pi-customizations
+cd attro
 ./install
 ```
 
