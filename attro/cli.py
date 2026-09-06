@@ -18,9 +18,61 @@ from attro.prepare import prepare_release
 from attro.state import activate_release, active_release_path, load_state, prepared_manifest, register_release, rollback
 from attro.validate import ValidationError, validate_release_id
 
+MANAGEMENT_SUBCOMMANDS = frozenset(
+    {
+        "setup",
+        "update",
+        "status",
+        "doctor",
+        "activate",
+        "rollback",
+        "try",
+        "exec",
+    }
+)
+
 
 def emit(args: argparse.Namespace, data: object, message: str) -> None:
     print(json.dumps(data, indent=2, sort_keys=True) if args.json else message)
+
+
+def split_argv(argv: list[str]) -> tuple[dict[str, object], list[str]]:
+    json_flag = False
+    state_root: str | None = None
+    index = 0
+    while index < len(argv):
+        token = argv[index]
+        if token == "--json":
+            json_flag = True
+            index += 1
+            continue
+        if token.startswith("--state-root="):
+            state_root = token.partition("=")[2]
+            index += 1
+            continue
+        if token == "--state-root":
+            if index + 1 >= len(argv):
+                raise ValidationError("--state-root requires a value")
+            state_root = argv[index + 1]
+            index += 2
+            continue
+        if token == "--version":
+            print(f"attro {__version__}")
+            raise SystemExit(0)
+        break
+    return {"json": json_flag, "state_root": state_root}, argv[index:]
+
+
+def is_management_argv(argv: list[str]) -> bool:
+    _, body = split_argv(argv)
+    return bool(body) and body[0] in {*MANAGEMENT_SUBCOMMANDS, "--help", "-h"}
+
+
+def everyday_command(argv: list[str]) -> list[str]:
+    _, body = split_argv(argv)
+    if body and body[0] == "--":
+        return body[1:]
+    return body
 
 
 def cmd_setup(args: argparse.Namespace) -> int:
@@ -119,8 +171,24 @@ def cmd_exec(args: argparse.Namespace) -> int:
     return _launch(args, False)
 
 
+def _everyday_launch(opts: dict[str, object], command: list[str], root: Path) -> int:
+    args = argparse.Namespace(
+        json=opts["json"],
+        dry_run=False,
+        command=command,
+        release_id=None,
+        root=root,
+        state_root=opts["state_root"],
+    )
+    return _launch(args, False)
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="attro", description="Isolated release manager; trusted local checkouts only, not an OS sandbox.")
+    parser = argparse.ArgumentParser(
+        prog="attro",
+        description="Run attro without a subcommand to open the coding app. Management commands use trusted local checkouts; this is not an OS sandbox.",
+        epilog="Use attro -- --help for Pi options, or attro -- doctor to forward doctor to the app. Pi package-management mutations remain blocked.",
+    )
     parser.add_argument("--version", action="version", version=f"attro {__version__}")
     parser.add_argument("--json", action="store_true", help="emit JSON (launch commands require --dry-run)")
     parser.add_argument("--state-root", help="managed directory (default: ~/.attro, legacy ~/.piattro, ATTRO_HOME, or PIATTRO_HOME)")
@@ -149,18 +217,28 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    raw = list(sys.argv[1:] if argv is None else argv)
+    json_mode = False
     try:
-        args.root = validate_state_root(Path(args.state_root).expanduser() if args.state_root else home())
-        return args.func(args)
+        opts, _ = split_argv(raw)
+        json_mode = bool(opts["json"])
+        state_root_value = opts["state_root"]
+        root = validate_state_root(Path(state_root_value).expanduser() if isinstance(state_root_value, str) else home())
+        if is_management_argv(raw):
+            args = build_parser().parse_args(raw)
+            args.root = root
+            return args.func(args)
+        return _everyday_launch(opts, everyday_command(raw), root)
+    except SystemExit as exc:
+        raise exc
     except (ValidationError, OSError) as exc:
-        if args.json:
+        if json_mode:
             print(json.dumps({"error": str(exc)}))
         else:
             print(f"error: {exc}", file=sys.stderr)
         return 1
     except KeyboardInterrupt:
-        if args.json:
+        if json_mode:
             print(json.dumps({"error": "interrupted"}))
         else:
             print("error: interrupted", file=sys.stderr)

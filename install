@@ -15,7 +15,7 @@ from pathlib import Path
 
 SUPPORTED_PLATFORMS = frozenset({"darwin", "linux"})
 PYTHON_MIN = (3, 10)
-LAUNCHERS = ("pi", "attro", "piattro")
+LAUNCHERS = ("attro",)
 INSTALL_LOCK = ".attro-install.lock"
 LEGACY_INSTALL_LOCK = ".piattro-install.lock"
 
@@ -211,7 +211,7 @@ def cleanup_links(created: list[tuple[Path, Path]]) -> None:
 
 
 def print_success(bin_dir: Path) -> None:
-    print(f"Installed pi, attro, and piattro launchers to {bin_dir}")
+    print(f"Installed attro launcher to {bin_dir}")
     print()
     print("Add to PATH (once per shell, or in ~/.profile / ~/.zshrc):")
     print()
@@ -219,23 +219,23 @@ def print_success(bin_dir: Path) -> None:
     print()
     custom = os.environ.get("ATTRO_HOME") or os.environ.get("PIATTRO_HOME")
     if custom:
-        print("Custom ATTRO_HOME or PIATTRO_HOME is set; export the same value in every shell that runs pi, attro, or piattro:")
+        print("Custom ATTRO_HOME or PIATTRO_HOME is set; export the same value in every shell that runs attro:")
         print()
         root = managed_root().resolve()
         print(f"  export ATTRO_HOME={shlex.quote(str(root))}")
         print(f"  export PIATTRO_HOME={shlex.quote(str(root))}")
         print()
-    print("Launchers symlink this checkout's bin/pi, bin/attro, and bin/piattro; keep the checkout at its current path.")
-    print("Run pi, then /login for the providers you use. Updates keep this shared profile.")
+    print("The launcher symlinks this checkout's bin/attro; keep the checkout at its current path.")
+    print("Run attro, then /login for the providers you use. Updates keep this shared profile.")
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Prepare a pinned Attro release and install pi/attro/piattro launchers.",
+        description="Prepare a pinned Attro release and install the attro launcher.",
         epilog=(
             "ATTRO_HOME selects the managed state directory (default ~/.attro; legacy ~/.piattro is reused when ~/.attro is absent). "
             "PIATTRO_HOME remains a compatibility alias. Export the same value "
-            "whenever you run pi, attro, or piattro later."
+            "whenever you run attro later."
         ),
     )
     parser.add_argument("--bin-dir", type=Path, default=None, help="launcher directory (default: ~/.local/bin)")
