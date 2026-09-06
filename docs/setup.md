@@ -26,20 +26,23 @@ cd ~/projects/pi-customizations
 1. Runs `attro doctor --repo` on this checkout.
 2. Prepares a pinned release (`attro setup --repo`).
 3. Activates it.
-4. Symlinks `pi` and `attro` into `~/.local/bin` (override with `--bin-dir`).
+4. Symlinks **`attro`** into `~/.local/bin` (override with `--bin-dir`).
 
 The installer refuses conflicting existing launchers (non-matching symlinks or
 regular files) and does not modify PATH or shell startup files. Add the printed
-`export PATH=...` line yourself. Launchers resolve to this checkout's
-`bin/pi` and `bin/attro`; keep the checkout at its current path.
+`export PATH=...` line yourself. The installed launcher resolves to this
+checkout's `bin/attro`; keep the checkout at its current path. Repository
+`bin/pi` and `bin/piattro` wrappers remain for development but are **not**
+installed.
 
 If you set `ATTRO_HOME` during install, export the same value whenever you run
-`pi` or `attro` later.
+`attro` later.
 
-After install, run `pi`, then `/login` for the providers you use. Attro does
-not copy credentials or session history from `~/.pi/agent`. The shared profile at
-`~/.attro/agent` is seeded once on first activation; updates and rollback
-preserve it.
+After install, run **`attro`**, then `/login` for the providers you use. Attro
+does not copy credentials, OAuth tokens, or session history from `~/.pi/agent`.
+The shared profile at `~/.attro/agent` is seeded once on first activation from
+reviewed defaults and bundled resources; updates and rollback preserve whatever
+you establish there.
 
 Dry-run without writing state or links:
 
@@ -52,8 +55,9 @@ Manual equivalent:
 ```sh
 ./bin/attro doctor --repo "$PWD"
 ./bin/attro setup --repo "$PWD" --activate
-export PATH="$HOME/.local/bin:$PATH"   # after symlinking launchers yourself
-pi /login
+export PATH="$HOME/.local/bin:$PATH"   # after symlinking the attro launcher yourself
+attro
+/login
 ```
 
 ## Developer fresh checkout
@@ -68,13 +72,15 @@ cd ~/projects/pi-customizations
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
-The seven submodule origins are the private Quattro mirrors; the subagents origin is
-specifically `pi-subagents-quattro`, never public `ernestjsf/pi-subagents`.
+The eight submodule origins are the private Quattro mirrors (seven plugin forks
+plus `plugins/attro-core`); the subagents origin is specifically
+`pi-subagents-quattro`, never public `ernestjsf/pi-subagents`.
 
 Submodule remotes are local clone configuration and are not versioned. To add the
 provenance remotes to a fresh clone:
 
 ```sh
+git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi-mono.git
 git -C plugins/pi-zentui remote add upstream https://github.com/lmilojevicc/pi-zentui.git
 git -C plugins/pi-cc-extensions remote add upstream https://github.com/minuque/pi-cc-extensions.git
 git -C plugins/pi-web-access remote add upstream https://github.com/nicobailon/pi-web-access.git
@@ -97,9 +103,27 @@ done
 dependencies: it uses host-provided Pi APIs/peer facilities. No `npm ci` is needed
 for that submodule. The root package has no runtime dependency installation.
 
-## Lens preparation
+## attro-core and Lens preparation
 
-Lens is the one generated-runtime preparation step. From `plugins/pi-lens`, run
+Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` monorepo
+instead of installing `@earendil-works/pi-coding-agent` from npm. Preparation
+exports the pinned commit, runs `npm ci`, downloads the hash-pinned upstream
+**0.85.0** model-data archive, and runs the offline build. Network access is
+required for locked dependencies and the model-data asset. The built CLI is
+`packages/coding-agent/dist/bundle/cli.js`. Core and TUI are built together from
+the same tree. Retained releases under `releases/<id>/pi/` are larger than
+legacy npm-core installs.
+
+For local development verification of attro-core generated outputs before
+`python3 scripts/verify.py --runtime`, from `plugins/attro-core`:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+# model-data archive URL and sha256 are pinned in attro.json; preparation applies them automatically
+npm run build:offline
+```
+
+Lens is the other generated-runtime preparation step. From `plugins/pi-lens`, run
 these commands in this order:
 
 ```sh
@@ -117,9 +141,10 @@ npm run build
 npm test -- tests/tools/render-compact.test.ts tests/clients/widget-state.test.ts
 ```
 
-Other runtimes are direct TypeScript entrypoints as declared in `sources.lock.json`.
-The rpiv runtime package is only `plugins/rpiv-mono/packages/rpiv-todo`; inspect each
-source package's own entry paths before using another package.
+Other plugin runtimes are direct TypeScript entrypoints as declared in
+`sources.lock.json`. The rpiv runtime package is only
+`plugins/rpiv-mono/packages/rpiv-todo`; inspect each source package's own entry
+paths before using another package.
 
 After preparation, the optional runtime-file presence check is explicit and still
 read-only:
@@ -129,15 +154,16 @@ python3 scripts/verify.py --runtime
 ```
 
 This checks only that the manifest's listed runtime files exist. It does not prove
-runtime readiness, dependency installation, or host compatibility; `npm run
-check:grammars` is the separate Lens grammar provenance check.
+runtime readiness, attro-core build success, dependency installation, or host
+compatibility; `npm run check:grammars` is the separate Lens grammar provenance
+check.
 
 ## Active installation and migration reference
 
-The live global settings now use the seven local paths below. This table remains
-the migration reference for a fresh machine: replace only matching package entries;
-it is not a replacement full settings JSON. **Attro managed install does not
-perform this migration** and does not copy live credentials or history:
+The live global settings now use the seven local plugin paths below. This table
+remains the migration reference for a fresh machine: replace only matching package
+entries; it is not a replacement full settings JSON. **Attro managed install does
+not perform this migration** and does not copy live credentials or history:
 
 | Existing package identity | Replacement local path |
 | --- | --- |
@@ -149,13 +175,18 @@ perform this migration** and does not copy live credentials or history:
 | `pi-ask-user` | `~/projects/pi-customizations/plugins/pi-ask-user` |
 | `@williamcr01/pi-subagents` | `~/projects/pi-customizations/plugins/pi-subagents` |
 
+Pi core itself is **not** migrated through this table; Attro builds it from
+`plugins/attro-core` during release preparation.
+
 Preserve every unrelated package, filter, and safety setting. Never keep both an
 old source and its replacement; never paste a fragment over the global settings
 document; and never run `pi remove`, because it would remove the original dirty
 repository registration.
 
 The root package may be added only for themes if desired. The current machine
-loads Quattro Green from `~/.pi/agent/themes/`; its tracked copy is in `themes/`.
+loads Quattro Green from `~/.pi/agent/themes/`; its tracked copy is in `themes/`
+and includes optional `dockBg` color `#0e1713`. USER-dirty theme copies and
+source hashes in `sources.lock.json` are preserved as reviewed display inputs.
 These setup commands do not auto-edit settings or install/remove live packages.
 Old npm copies may remain on disk without being active; do not delete them as
 part of UI cleanup. Do not bypass guarded settings writes.

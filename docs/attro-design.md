@@ -1,11 +1,13 @@
 # Attro design and release gates
 
-Attro is an opinionated distribution of upstream Pi, not a fork of Pi core.
-Its release is a recipe: an exact Pi version, the seven source pins in
-`sources.lock.json`, a portable profile, and committed runtime lock inputs.
-`pi` is the coding command; `attro` manages the installation. The existing
-private workbench remains the source of the first candidate, not an
-already-public product.
+Attro is an opinionated distribution of upstream Pi, not a fork of Pi core in
+this repository. Its release is a recipe: Pi **0.85.0** built from the pinned
+`plugins/attro-core` source tree, the seven plugin source pins in
+`sources.lock.json`, a portable profile, and committed runtime lock inputs for
+descriptor npm packages. **`attro`** is the everyday launcher and release
+manager; it forwards standard Pi flags/prompts and exposes explicit management
+subcommands. The existing private workbench remains the source of the first
+candidate, not an already-public product.
 
 **Attro 0.2.0** (`shared-v1`) separates immutable release code/resources from
 one canonical user profile at `~/.attro/agent`. See [parity plan](parity-plan.md)
@@ -20,8 +22,8 @@ for the approved continuity decision.
   release intact. Keep old installations for offline rollback.
 - Keep user credentials, sessions, provider selections, and project trust out of
   source control. Never copy a live configuration directory wholesale.
-- Seed the shared profile once on first activation. Activation, update, and
-  rollback must not rewrite user preferences with new defaults.
+- Seed the shared profile once on first activation from reviewed defaults. Activation,
+  update, and rollback must not rewrite user preferences with new defaults.
 - Treat local checkouts and their dependencies as executable, trusted source.
   Disabling npm lifecycle scripts does not sandbox an extension or build.
 - A separate Pi agent directory isolates Pi configuration, not the operating
@@ -35,16 +37,26 @@ for the approved continuity decision.
 
 ## Release records
 
-`sources.lock.json` remains the canonical fork inventory. `attro.json` adds
-the distribution version (**0.2.0**), Pi pin, profile paths, and compatibility
-requirements. Installed metadata records source identity, `agentMode: shared-v1`,
-and preparation information.
+`sources.lock.json` remains the canonical fork inventory (attro-core plus seven
+plugin forks). `attro.json` adds the distribution version (**0.2.0**), core
+install method (**source**), profile paths, and compatibility requirements.
+Installed metadata records source identity, `agentMode: shared-v1`, and
+preparation information.
 
-**Runtime lock inputs:** `runtime/core` and `runtime/npm` hold committed
-`package.json` and `package-lock.json` files. Preparation runs `npm ci` against
-these inputs for core and descriptor npm packages. Plugin trees use their own
-committed locks. This improves reproducibility over v0.1's per-preparation lock
-resolution but does not by itself certify full transitive SBOM clearance.
+**Source core:** preparation exports the pinned `plugins/attro-core` commit,
+runs `npm ci` against its committed lock, applies the hash-pinned upstream
+**0.85.0** model-data archive, and runs the offline monorepo build. The
+retained CLI is `packages/coding-agent/dist/bundle/cli.js`. Core and TUI packages
+are built together. Network access is required during preparation. Retained
+`releases/<id>/pi/` trees are larger than legacy npm-core installs. Provenance
+is recorded in `pi/core.json`. There is no live catalog hydration or package
+publication step in this mode.
+
+**Runtime lock inputs:** `runtime/npm` holds committed `package.json` and
+`package-lock.json` for descriptor npm packages. Preparation runs `npm ci`
+against these inputs. Plugin trees use their own committed locks. Legacy
+`runtime/core` npm lock inputs remain in the repository for historical reference
+but are **not** used when `core.installMethod` is `source`.
 
 **Profile layout:**
 
@@ -52,6 +64,12 @@ resolution but does not by itself certify full transitive SBOM clearance.
 - `profile/agent/` — reviewed one-time seed defaults (agents, keybindings, models, plugin prefs)
 - `profile/resources/` — versioned resource package (extensions, skills, prompts, bundled themes)
 - `profile/inventory.json` — provenance record for seeded and bundled files
+
+On first activation Attro seeds `~/.attro/agent` once from those defaults plus
+prepared release config and bundled resources. Pi may additionally load personal
+config/skills and trusted-project `AGENTS.md` / `.pi` resources at runtime.
+Live login, OAuth tokens, and session history from `~/.pi/agent` are never
+copied.
 
 Legacy v0.1 releases used per-release `agent/` directories. They remain on disk
 if prepared earlier but are not migrated; prepare a new shared-v1 release to adopt
@@ -63,10 +81,12 @@ license or GitHub visibility.
 
 ## Managed launch and subagent continuity
 
-Exec and try prepend managed resource argv from prepared `config/settings.json`
-and set `PI_CODING_AGENT_DIR`, `RPIV_CONFIG_HOME`, `PI_LENS_CONFIG_PATH`, and
+Everyday `attro` (no args) and explicit `attro exec`/`try` prepend managed
+resource argv from prepared `config/settings.json` and set
+`PI_CODING_AGENT_DIR`, `RPIV_CONFIG_HOME`, `PI_LENS_CONFIG_PATH`, and
 `ATTRO_RESOURCE_DIR`. The manager exports a validated JSON envelope in
-`ATTRO_MANAGED_RESOURCE_ARGV`.
+`ATTRO_MANAGED_RESOURCE_ARGV`. Reserved management words such as `doctor` route
+to Pi when escaped with `--` (`attro -- doctor`).
 
 **Pending verification gate:** subagent child processes must inherit pinned
 parent-release managed resource argv at spawn time so grandchildren do not lose
@@ -74,6 +94,9 @@ managed plugins or custom tools when the active pointer changes. The intended
 design validates only known resource flags and absolute paths contained in the
 parent release root. Implementation and regression tests at the spawn seam are
 **in progress**; do not treat subagent resource parity as verified yet.
+
+**Pending verification gate:** source-core build success and combined interactive
+TUI behavior on a fresh `./install` are not yet certified.
 
 ## Update lanes
 
@@ -96,20 +119,21 @@ implicit fetch-and-execute from an unreviewed remote.
       (MIT, explicitly selected by the owner; see `LICENSE`).
 - [ ] Audit third-party licenses, notices, assets, and redistribution rights
       (bb-cli MIT and Herdr Apache-2.0 bundled in `profile/resources`; host
-      `bb`/`herdr` binaries not bundled).
+      `bb`/`herdr` binaries not bundled; attro-core monorepo upstream notices).
 - [ ] Audit public candidate files AND all history intended for publication.
 - [ ] Resolve private source URLs without exposing private history by accident.
 - [ ] Prove every pinned source is retrievable without maintainer credentials.
 - [ ] Include or explicitly exclude standalone extensions and npm plugins from
-      the personal setup; the seven forks alone are not an exact reproduction.
-- [x] Commit reproducible runtime dependency inputs (`runtime/core`, `runtime/npm`)
-      for v0.2.0 preparation.
+      the personal setup; the eight submodule forks alone are not an exact reproduction.
+- [x] Commit reproducible runtime dependency inputs (`runtime/npm`) for v0.2.0
+      descriptor npm preparation.
 - [ ] Test real fresh `./install` on macOS and Linux before advertising support.
 - [ ] Smoke-test the combined interactive UI and provider login experience.
+- [ ] Verify source-core build and retained-release launch on a clean checkout.
 - [x] Verify failed preparation/interrupted pointer replacement, concurrent
       operations, and retained-release rollback/schema refusal in isolated
       lifecycle tests (see [evidence](verification.md); v0.1-era evidence;
-      shared-v1 and installer gates partially pending).
+      shared-v1, installer, and launcher gates partially pending).
 - [x] Review storage/activation and release-automation permission boundaries
       independently (Fable review found no blocking safety defects in v0.1 scope).
 - [ ] Verify subagent managed-resource inheritance at the spawn seam.

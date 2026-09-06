@@ -1,15 +1,18 @@
 # Attro
 
-An opinionated distribution of Pi: a pinned Pi runtime, customized plugins,
-Quattro themes, and an isolated release manager. Use `pi` to work and `attro`
-to manage prepared releases. Pi core remains upstream; customizations live in
-plugins and the distribution profile.
+An opinionated distribution of Pi: a source-built Pi core, customized plugins,
+Quattro themes, and an isolated release manager. Use **`attro`** as the everyday
+launcher; it forwards standard Pi flags and prompts to the active release. Use
+`attro` management subcommands to prepare, activate, update, and roll back
+pinned releases. Customizations live in plugins and the distribution profile;
+Pi core is built from the maintained `attro-core` fork, not edited in place.
 
 **Development status:** Attro **0.2.0** implements a shared-profile portable
 distribution with a one-command installer for trusted local checkouts. This
 repository is still **private**, **not yet publicly installable**, and **not
 fully verified** as a stable release. No remote stable feed, automatic release
-PRs, or public artifacts are published by the current workflows. See
+PRs, or public artifacts are published by the current workflows. Core source
+build and combined interactive UI verification remain **pending**. See
 [publication gates](docs/publication.md).
 
 ## Install from a trusted checkout
@@ -17,7 +20,9 @@ PRs, or public artifacts are published by the current workflows. See
 Requires Python 3.10+, Git, npm, and Node satisfying the pinned Pi engine
 (currently Node **22.19.0+**). macOS and Linux are the target platforms;
 real fresh-install and combined-UI validation are required before support is
-advertised. Windows is not supported by this first implementation.
+advertised. Windows is not supported by this first implementation. Source-core
+preparation needs network access for locked dependency installs and the
+hash-pinned upstream model-data archive.
 
 Start with a trusted, clean, **recursive** clone whose pinned forks you can
 access. Review its sources before executing dependency installation or builds.
@@ -29,15 +34,25 @@ cd pi-customizations
 ```
 
 `./install` runs `attro doctor`, prepares a pinned release from this checkout,
-activates it, and symlinks `pi` and `attro` into `~/.local/bin` (or
-`--bin-dir`). The installer **refuses existing foreign launchers** in the target
-bin directory and **does not edit PATH or shell startup files**. It prints the
-`export PATH=...` line to add yourself. Launchers point at this checkout's
-`bin/pi` and `bin/attro`; **keep the checkout at its current path**.
+activates it, and symlinks **`attro`** into `~/.local/bin` (or `--bin-dir`).
+The installer **refuses existing foreign launchers** in the target bin directory
+and **does not edit PATH or shell startup files**. It prints the
+`export PATH=...` line to add yourself. The installed launcher points at this
+checkout's `bin/attro`; **keep the checkout at its current path**. Repository
+`bin/pi` and `bin/piattro` compatibility wrappers remain for development but
+are **not installed** by `./install`.
+
+Run **`attro`** with no arguments to launch the active Pi app. Standard Pi
+flags and prompts are forwarded (`attro -p hello`, `attro --model …`, etc.).
+Management commands are explicit subcommands: `doctor`, `update`, `setup`,
+`activate`, `rollback`, `try`, `exec`, and `status`. Use `attro -- doctor` to
+pass `doctor` to Pi chat instead of the manager.
 
 Provider authentication is **not copied** from `~/.pi/agent`. After install,
-run `pi`, then `/login` for the providers you use. Updates and rollback keep
-the same shared profile (preferences, login, and session history). See
+run `attro`, then `/login` for the providers you use. Attro seeds the shared
+profile once on first activation and **never copies live login, session history,
+OAuth tokens, or trust state** from `~/.pi/agent`. Later activations, updates,
+and rollbacks preserve whatever you establish under the shared profile. See
 [managed state](profile/MANAGED.md).
 
 If you prefer manual steps or are developing the manager itself, see
@@ -46,9 +61,14 @@ If you prefer manual steps or are developing the manager itself, see
 ## Shared profile and releases
 
 Attro **0.2.0** uses one canonical user profile at `~/.attro/agent`
-(override with `ATTRO_HOME`). It is seeded **once** on first activation from
-reviewed defaults in the release; later activations, updates, and rollbacks
-**preserve** your preferences, provider login, and ordinary session history.
+(override with `ATTRO_HOME`; legacy `~/.piattro` is reused when `~/.attro` is
+absent). It is seeded **once** on first activation from reviewed defaults in
+`profile/settings.json`, `profile/agent/`, and the bundled
+`profile/resources/` package, plus pinned npm/plugin resources prepared into
+the release. Later activations, updates, and rollbacks **preserve** your
+preferences and ordinary session history in that directory. Pi still loads
+personal config/skills and trusted-project `AGENTS.md` / `.pi` resources at
+runtime according to upstream rules.
 
 Each prepared release retains immutable code and managed resource paths
 (`releases/<id>/`). Managed plugins, skills, prompt templates, and themes are
@@ -88,13 +108,13 @@ Discovery reports are **not** an automatic consumer release feed.
 ## Structure
 
 ```text
-bin/                    attro manager and pi launcher wrappers
-install                 one-command prepare/activate/launcher install
+bin/                    attro launcher (everyday + management); pi/piattro compat wrappers (not installed)
+install                 one-command prepare/activate/attro launcher install
 attro/                preparation, validation, activation, and launch code
-attro.json            distribution recipe (v0.2.0, runtime lock inputs)
-runtime/                committed core/npm package-lock inputs for npm ci
-sources.lock.json       canonical seven-fork pins and copied config hashes
-plugins/                seven Git submodules (customized upstream plugins)
+attro.json            distribution recipe (v0.2.0; source-core install method)
+runtime/                committed npm package-lock inputs for descriptor npmPackages
+sources.lock.json       canonical eight-submodule pins and copied config hashes
+plugins/                eight Git submodules (attro-core + seven customized plugin forks)
 profile/                portable defaults, resource bundle, and managed-state guidance
 config/ + themes/       reviewed display configuration and Quattro themes
 scripts/                source verification and upstream update discovery
@@ -108,6 +128,10 @@ whole environment with the manager or `./install`, not `pi install` on that
 theme-only package. Original Attro code is [MIT](LICENSE); upstream notices
 remain authoritative ([third-party inventory](THIRD_PARTY_NOTICES.md)).
 
+Legacy upstream npm releases of `@earendil-works/pi-coding-agent` remain
+readable for comparison; Attro **0.2.0** builds core from the pinned
+`plugins/attro-core` source tree instead of installing that npm package directly.
+
 ## Developer checks
 
 ```sh
@@ -118,8 +142,8 @@ git diff --check
 ```
 
 The source verifier requires clean, pinned submodules. `--runtime` additionally
-checks listed generated-file presence after the documented Lens preparation;
-it does not certify dependency compatibility or the combined interactive UI.
-Unit tests use isolated fixtures and do not install or alter the live Pi setup.
-See [verification evidence](docs/verification.md) for exact local results and
-remaining validation gates.
+checks listed generated-file presence after the documented Lens and attro-core
+preparation; it does not certify dependency compatibility, source-core build
+success, or the combined interactive UI. Unit tests use isolated fixtures and
+do not install or alter the live Pi setup. See [verification evidence](docs/verification.md)
+for exact local results and remaining validation gates.

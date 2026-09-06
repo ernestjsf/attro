@@ -6,11 +6,12 @@ and attribution files in each source tree and installed dependency.
 
 ## Fork sources
 
-The seven current fork trees each carry an MIT license. Their exact upstream
+The eight current fork trees each carry upstream licenses. Their exact origin
 URLs and reviewed commits are recorded in `sources.lock.json`.
 
 | Source | Authoritative license |
 | --- | --- |
+| attro-core (Pi monorepo) | `plugins/attro-core/LICENSE` and per-package notices under `plugins/attro-core/packages/` |
 | Zentui | `plugins/pi-zentui/LICENSE` |
 | CC extensions | `plugins/pi-cc-extensions/LICENSE` |
 | Web access | `plugins/pi-web-access/LICENSE` |
@@ -18,6 +19,11 @@ URLs and reviewed commits are recorded in `sources.lock.json`.
 | rpiv mono / selected todo package | `plugins/rpiv-mono/LICENSE` |
 | Ask user | `plugins/pi-ask-user/LICENSE` |
 | Subagents | `plugins/pi-subagents/LICENSE` |
+
+Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` source tree
+(`ernestjsf/attro-core`, upstream `earendil-works/pi-mono` at **0.85.0**) rather
+than installing `@earendil-works/pi-coding-agent` from npm during preparation.
+Legacy upstream npm releases of that package remain readable for comparison.
 
 Additional upstream notices inside those trees remain authoritative:
 
@@ -34,6 +40,10 @@ Additional upstream notices inside those trees remain authoritative:
 - Zentui's README credits a Mohammad Alizade / Unsplash showcase image under
   the **Unsplash License**, not MIT. Do not treat that image as Attro artwork
   or imply that all repository assets use the source-code license.
+
+Source-core preparation downloads the hash-pinned upstream **0.85.0** model-data
+archive declared in `attro.json`; that asset carries its own upstream provenance
+and must be retained in audit material for prebuilt releases.
 
 ## Bundled profile resources (Attro 0.2.0)
 
@@ -52,9 +62,10 @@ those host tools separately if needed.
 
 ## Runtime and dependency notices
 
-Upstream Pi and the inspected optional npm plugins (`pi-caffeinate`, `pi-btw`,
-`pi-goal`, and `pi-cursor-sdk`) declare MIT. Installed dependency license files
-must still be retained. Notable other licenses in the selected package graph:
+The attro-core monorepo and the inspected optional npm plugins (`pi-caffeinate`,
+`pi-btw`, `pi-goal`, and `pi-cursor-sdk`) declare MIT in their respective package
+metadata. Installed dependency license files must still be retained. Notable other
+licenses in the selected package graph:
 
 | Dependency | Declared license |
 | --- | --- |

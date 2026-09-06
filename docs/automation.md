@@ -15,7 +15,9 @@ The first command reads `sources.lock.json` and `attro.json`, queries the
 upstream default-branch HEADs and npm `latest` versions, and writes a JSON
 report. It does not change pins, checkout branches, install packages, or change
 your live environment. A different npm `latest` is a candidate to review, not
-proof that an upgrade is compatible (or a version-ordering decision).
+proof that an upgrade is compatible (or a version-ordering decision). For
+attro-core, upstream tracking follows the pinned `plugins/attro-core` submodule
+origin (`earendil-works/pi-mono`), not the legacy npm core package alone.
 
 `--assess-merges` additionally clones each changed fork into a disposable
 directory, fetches the exact fork pin and current upstream revision, and
@@ -42,7 +44,7 @@ not describe a failed lookup as "up to date".
   does not need fork checkout credentials for the default upstream-only check.
 - `.github/workflows/ci.yml` runs offline lifecycle/discovery tests on macOS and
   Linux. It does not require private submodules and does not certify real plugin
-  installation, `./install`, or combined TUI readiness.
+  installation, source-core build, `./install`, or combined TUI readiness.
 
 Both workflows use pinned action commits. No privileged `pull_request_target`
 job executes contributor code. No deployment or cross-repository write token is
@@ -55,7 +57,8 @@ and stable publication. Those require the public source topology and automation
 identity to be established first. The intended next lane is:
 
 1. Prepare candidate fork merges in disposable repositories.
-2. Build/test each component and the combined distribution.
+2. Build/test each component and the combined distribution (including attro-core
+   source build and Lens generated artifacts).
 3. Open reviewable fork PRs; preserve customizations and surface conflicts.
 4. After approval, publish the fork commits, then update root gitlinks and recipe
    pins together in a root PR.

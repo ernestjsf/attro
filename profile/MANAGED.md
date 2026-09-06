@@ -5,46 +5,55 @@ immutable per-release code/resources. Prepare only from an **explicitly trusted,
 clean local checkout**:
 
 ```sh
-./install                                    # prepare, activate, install launchers
-bin/attro setup --repo /path/to/checkout   # manual prepare
+./install                                      # prepare, activate, install attro launcher
+bin/attro setup --repo /path/to/checkout       # manual prepare
 bin/attro update --repo /path/to/checkout
 bin/attro activate RELEASE_ID
 bin/attro rollback
 bin/attro status
 bin/attro doctor
 bin/attro try -- --version
-bin/pi --version
+bin/attro exec -- --version
 ```
 
-Launchers symlink this checkout's `bin/pi`, `bin/attro`, and `bin/piattro`; keep the checkout
+**Everyday launch:** run `bin/attro` with no arguments to start the active Pi
+app. Standard Pi flags and prompts are forwarded. Repository `bin/pi` and
+`bin/piattro` compatibility wrappers remain for development; `./install` symlinks
+only `attro` into the target bin directory.
+
+The installed launcher resolves to this checkout's `bin/attro`; keep the checkout
 available. Prepared Pi releases do not need their original source checkout to
 launch or roll back. `doctor --repo PATH` additionally checks source inputs;
 plain `doctor` only checks retained releases and host Node compatibility.
+Use `attro -- doctor` to pass `doctor` to Pi chat instead of the manager.
 
 Global `--state-root PATH` (or `ATTRO_HOME` / legacy `PIATTRO_HOME`) selects the managed directory,
-defaulting to `~/.attro` (reusing existing `~/.piattro` when `~/.attro` is absent). Export the same value in every shell that runs `pi`, `attro`, or `piattro`. Attro refuses
+defaulting to `~/.attro` (reusing existing `~/.piattro` when `~/.attro` is absent). Export the same value in every shell that runs `attro`. Attro refuses
 managed roots overlapping live `~/.pi`, its manager checkout, the setup source
 checkout, or a Git working tree. This is a refusal guard, not an OS security
 boundary.
 
 Global `--json` emits one JSON document for manager commands, including failures.
 For `try` and `exec`, it is available only with `--dry-run`; actual Pi output is
-passed through. Put Pi flags after `--` when using these subcommands. `bin/pi`
-inserts this separator automatically.
+passed through. Put Pi flags after `--` when using these subcommands or when
+escaping a reserved management word (for example `attro -- doctor`).
 
 ## Shared profile (`~/.attro/agent`)
 
 On first activation of a shared-profile release, Attro seeds
-`~/.attro/agent` once from reviewed defaults in `profile/agent/` and pristine
-release config. Subsequent activations, updates, and rollbacks **preserve**
-preferences, provider login, session history, and ordinary per-working-directory
-sessions in that directory.
+`~/.attro/agent` once from reviewed defaults in `profile/settings.json`,
+`profile/agent/`, pristine release config, and the bundled
+`profile/resources/` package. Subsequent activations, updates, and rollbacks
+**preserve** preferences, provider login, session history, and ordinary
+per-working-directory sessions in that directory.
 
 Attro **never copies or symlinks** live OAuth tokens, auth files, sessions,
 trust decisions, or history from `~/.pi/agent`. Authenticate separately with
 `/login` after install. OAuth must be authenticated in the shared profile:
 Pi 0.85.0's per-path OAuth locks make sharing aliased token files unsafe. Agent
-file symlinks and hardlinks are refused.
+file symlinks and hardlinks are refused. At runtime Pi may still load personal
+config/skills and trusted-project `AGENTS.md` / `.pi` resources according to
+upstream discovery rules.
 
 Environment routing for exec and try (except trial override):
 
@@ -67,7 +76,7 @@ provider requests or plugin networking.
 Each `releases/<id>/` contains:
 
 ```
-pi/          exact pinned core npm install from committed runtime lock inputs
+pi/          source-built Pi monorepo from pinned plugins/attro-core (see below)
 plugins/     committed plugin trees, with dependencies/build artifacts
 config/      allowlisted themes, plugin configs, pristine managed settings
 profile/     immutable seed defaults (profile/agent) and resource bundle (profile/resources)
@@ -76,6 +85,15 @@ npm/         descriptor npmPackages installs from committed runtime lock inputs
 
 There is **no per-release `agent/` directory** in shared-v1. User state lives
 only under `~/.attro/agent`.
+
+**Source core (`pi/`):** preparation exports the pinned `plugins/attro-core`
+commit, runs `npm ci` against its committed lock, applies the hash-pinned
+upstream **0.85.0** model-data archive, and runs the offline monorepo build.
+The retained CLI is `pi/packages/coding-agent/dist/bundle/cli.js`. Core and TUI
+packages are built together from the same monorepo tree. Preparation requires
+network access for locked dependencies and the pinned model-data download;
+retained releases are larger than npm-only core installs. Provenance is recorded
+in `pi/core.json`.
 
 Plugin paths retain their source layout, including
 `plugins/rpiv-mono/packages/rpiv-todo`. Themes from `themes/` and allowlisted
@@ -86,16 +104,15 @@ inside the release; launch prepends them as Pi CLI flags (`-e`, `--skill`,
 
 Git exports use the validated committed root and pinned submodule commits, not
 mutable working-tree contents. Ignored build artifacts are not copied. Symlinked
-source files are rejected. Dependency installs and the reviewed Lens build run
-only in staging. Failed preparation cannot replace or delete an existing
-release. The operation lock serializes cooperating manager processes.
+source files are rejected. Dependency installs and the reviewed Lens/attro-core
+builds run only in staging. Failed preparation cannot replace or delete an
+existing release. The operation lock serializes cooperating manager processes.
 Activation changes only the atomically replaced, fsynced `state.json`
 active/previous pointers; retained settings and binaries are not rewritten.
 
-Core and npm packages use **committed lock inputs** under `runtime/core` and
-`runtime/npm` (`npm ci`). Plugin `npm ci` uses each plugin's committed
-dependency lock. Host Node must satisfy the recorded minimum at preparation and
-launch.
+Descriptor npm packages use **committed lock inputs** under `runtime/npm`
+(`npm ci`). Plugin `npm ci` uses each plugin's committed dependency lock.
+Host Node must satisfy the recorded minimum at preparation and launch.
 
 Release paths are absolute and physical. Do not move retained directories.
 Code/config immutability is a management convention, not filesystem protection

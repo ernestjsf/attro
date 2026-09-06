@@ -38,9 +38,13 @@ for offline rollback. Do not delete them while sessions still reference them.
 4. Run the source package's locked checks. Use `npm ci --ignore-scripts` first
    when dependencies are absent. For Lens, run `npm run build:dist`, download core
    grammars, and run `npm run check:grammars`; development tests require `npm run
-   build` before tests.
+   build` before tests. For attro-core, run `npm ci` and `npm run build:offline`
+   after applying the pinned model-data archive; preparation does this automatically
+   during release setup.
 5. Update only the submodule gitlink and the corresponding exact `pin`, package
    version/base, lockfile, entry paths, and provenance in `sources.lock.json`.
+   When attro-core changes, also review `attro.json` core source metadata and the
+   pinned model-data archive URL/sha256 if upstream requires it.
 6. Run `python3 scripts/verify.py` (and `--runtime` after generated preparation
    for file-presence only), inspect `git diff --check`, and commit the root change with a logical
    conventional message.
@@ -60,3 +64,7 @@ filters, without retaining duplicate old/new sources and without `pi remove`.
 
 Managed Attro does not migrate live `~/.pi/agent` credentials or history into
 `~/.attro/agent`. Users authenticate once in the shared profile after install.
+
+Legacy upstream npm releases of `@earendil-works/pi-coding-agent` remain
+readable for comparison. Attro **0.2.0** uses explicit source-core preparation
+from `plugins/attro-core` instead of bumping that npm package directly.

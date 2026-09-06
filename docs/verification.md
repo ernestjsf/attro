@@ -2,14 +2,50 @@
 
 Evidence from Attro implementation work on macOS. This is **not** a public
 release certification or evidence of Linux/Windows/second-machine compatibility.
-**Attro 0.2.0** shared-profile, `./install`, and subagent resource-inheritance
-gates are **partially verified locally**, not certified for publication.
+**Attro 0.2.0** shared-profile, `./install`, everyday `attro` launcher,
+source-core build, and subagent resource-inheritance gates are **partially
+verified locally**, not certified for publication.
+
+## Maintained-core verification
+
+The current tree passes **154 Python tests**, the full subagent suite on Node 26.7.0, pinned Pyright (**0 errors, 0 warnings**), installer compilation, and whitespace checks. Launcher regressions for help before initialization and `--state-root=PATH` were observed RED before correction and GREEN afterward.
+
+An isolated export of core commit `36b02b695383ad89bc3a22b73633be3fa27be3c1` was augmented only with the hash-pinned v0.85.0 model snapshot. The model-data validator passed, and the dependency lock stayed unchanged through installation and build:
+
+```sh
+node packages/ai/scripts/check-model-data.ts
+npm ci --ignore-scripts --no-audit --no-fund
+npm run build:offline
+# From packages/tui:
+node --test test/stack-background.test.ts
+# From packages/coding-agent:
+node ../../node_modules/vitest/vitest.mjs --run test/chat-viewport.test.ts test/scrollbar-theme.test.ts
+```
+
+The build and tests ran with macOS sandbox network access denied; downloading the pinned snapshot and installing locked dependencies were separate network-enabled steps. **4 stack tests and 14 viewport/theme tests passed.** The compiled CLI returned `0.85.0` and displayed help from outside the source checkout. The actual Quattro Green theme resolved `dockBg` to `#0e1713` in that build. No credentials or model prompts were used.
+
+This verifies the maintained core itself; the integrated clean-checkout Attro preparation and combined UI remain separate gates.
 
 ## Attro rename verification
 
 After comment cleanup, the renamed tree passed all **125 Python tests**, the full Node 26 subagent suite, pinned Pyright (**0 errors, 0 warnings**), installer compilation, and whitespace checks. `bin/attro --help` and the legacy `bin/piattro --help` produce identical output. The canonical-only `ATTRO_HOME` installer export case was observed failing before correction and passes now. New child-namespace tests were also observed RED before implementation and GREEN afterward.
 
-Independent Fable review found no blocking state-compatibility or child-namespace defects. A private source snapshot passed Gitleaks 8.30.1 with zero findings. All eight GitHub repositories were renamed with stable repository IDs and private visibility; local checkout paths, upstream identities, and branch history were preserved. This does not close the fresh-install or publication gates below.
+Independent Fable review found no blocking state-compatibility or child-namespace defects. A private source snapshot passed Gitleaks 8.30.1 with zero findings. The original eight GitHub repositories were renamed with stable repository IDs and private visibility; the user's `ernestjsf/attro-core` was subsequently added as a ninth private source repository. For the rename, local checkout paths, upstream identities, and branch history were preserved. This does not close the fresh-install, source-core build, or publication gates below.
+
+## Everyday launcher verification (partial)
+
+New public-seam tests in `tests/test_attro_launcher.py` cover:
+
+- `attro` with no args launches the active Pi binary
+- standard Pi flag and prompt forwarding
+- management subcommands (`status`, `doctor`, `exec --dry-run`) still work
+- `attro -- doctor` routes to Pi chat instead of the manager
+- option values such as `-p setup` are not treated as management commands
+
+The latest local suite size reported for this launcher work is **131 Python tests**
+(before the later source-core and launcher regression additions). That count is historical to the launcher
+milestone; **final source-core build and combined interactive UI checks are not
+yet complete**.
 
 ## Pre-rename v0.2 local checkpoint
 
@@ -23,7 +59,9 @@ After comment cleanup:
 - A private snapshot of 107 root source files passed Gitleaks 8.30.1 with zero findings. This is not a final all-ref publication scan.
 - Independent Fable review found **no blocking defects** in shared state, installer failure handling, or child resource/core pinning. It independently reran all 119 Python tests. A pre-set `PI_SUBAGENT_COMMAND` or `PI_SUBAGENT_EXECUTABLE` remains an explicit test-hook override; production shells should leave these unset.
 
-The remaining work is a real clean v0.2 installation and combined loader/TUI check, followed by final publication verification. No publication is part of this local checkpoint.
+The remaining work is a real clean v0.2 installation, source-core build on a clean
+checkout, and combined loader/TUI check, followed by final publication
+verification. No publication is part of this local checkpoint.
 
 Host reference: Python 3.14.6, Node 26.7.0, npm 11.19.0.
 
@@ -59,20 +97,21 @@ providers.
 The `./install` script and `tests/test_install.py` cover:
 
 - doctor/setup/activate orchestration
-- launcher symlink creation with conflict refusal
+- **attro-only** launcher symlink creation with conflict refusal
 - partial rollback on activation failure
 - bin-directory install lock (O_NOFOLLOW, flock)
 - custom `ATTRO_HOME` handling
 
-**16 installer tests passed** in the latest local run documented in the
-continuation checkpoint. This does not prove anonymous clone, combined TUI, or
-production PATH adoption.
+**17 installer tests passed** in the latest local run documented in the
+continuation checkpoint. This does not prove anonymous clone, source-core build,
+combined TUI, or production PATH adoption.
 
 ## Real clean-checkout preparation (v0.1-era)
 
 A temporary clone of root commit `172bb3484921638b73bb8bd5f3cad7a823aeb75d`
 was populated with exact committed submodule pins. It does **not** prove public
-or anonymous source accessibility and predates shared-v1 layout and `./install`.
+or anonymous source accessibility and predates shared-v1 layout, source-core
+build, and `./install`.
 
 With `WORK` identifying that temporary directory and `RELEASE_ID` the ID printed
 by setup, these commands passed. Historical command names are preserved because
@@ -92,14 +131,14 @@ Results:
 - Source verifier passed before preparation; Lens generated artifacts were
   correctly absent from the pristine source checkout.
 - Real dependency installation completed for locked source trees, pinned npm
-  plugins, and upstream Pi **0.85.0**.
+  plugins, and upstream Pi **0.85.0** (legacy npm-core path on that commit).
 - Both launch paths printed **0.85.0**. Doctor reported healthy.
 - Retained core launched after renaming the source checkout away.
 
-Shared-v1 preparation uses committed `runtime/core` and `runtime/npm` lock
-inputs and a canonical `~/.attro/agent` profile. **Repeat fresh-install
-verification** with `./install` and shared-profile continuity before claiming
-v0.2 readiness.
+Shared-v1 preparation now builds core from pinned `plugins/attro-core` and uses
+a canonical `~/.attro/agent` profile. **Repeat fresh-install verification**
+with `./install`, source-core build, and shared-profile continuity before
+claiming v0.2 readiness.
 
 ## Ast-grep runtime warning
 
@@ -116,6 +155,7 @@ coverage was added.
 
 **Not verified (including v0.2 gaps):**
 
+- Source-core build and launch from a clean recursive clone
 - Combined interactive TUI and provider login on a fresh `./install`
 - Shared-profile continuity across update and rollback on a real install
 - Real nested subagent loader startup (the isolated spawn seam is verified)
