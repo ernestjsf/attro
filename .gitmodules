@@ -19,3 +19,7 @@
 [submodule "plugins/pi-subagents"]
 	path = plugins/pi-subagents
 	url = https://github.com/ernestjsf/attro-subagents.git
+[submodule "plugins/attro-core"]
+	path = plugins/attro-core
+	url = https://github.com/ernestjsf/attro-core.git
+	branch = quattro

@@ -34,6 +34,7 @@
     "dim": "dim",
     "text": "fg",
     "thinkingText": "dim",
+    "dockBg": "#0e1713",
     "selectedBg": "selection",
     "scrollbarTrack": "borderMuted",
     "scrollbarThumb": "dim",

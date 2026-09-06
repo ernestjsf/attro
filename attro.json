@@ -3,7 +3,6 @@
   "distribution": "attro",
   "version": "0.2.0",
   "runtimeLocks": {
-    "core": "runtime/core",
     "npm": "runtime/npm"
   },
   "profile": "profile/settings.json",
@@ -16,8 +15,16 @@
   "core": {
     "package": "@earendil-works/pi-coding-agent",
     "version": "0.85.0",
+    "installMethod": "source",
     "engines": {
       "node": ">=22.19.0"
+    },
+    "source": {
+      "path": "plugins/attro-core",
+      "modelSnapshot": {
+        "url": "https://github.com/earendil-works/pi/releases/download/v0.85.0/pi-0.85.0-source.tar.gz",
+        "sha256": "b4dd5d4db4cd2832389da6445485bbca9db9c6d83bb7504d67975af5c5fe8307"
+      }
     }
   },
   "npmPackages": [

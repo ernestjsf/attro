@@ -16,6 +16,12 @@ NPM_INSTALL = ["npm", "install", "--ignore-scripts", "--no-audit", "--no-fund"]
 LENS_BUILD = ["npm", "run", "build:dist"]
 LENS_GRAMMARS = ["node", "scripts/download-grammars.js", "--core", "--dest", "grammars"]
 LENS_CHECK_GRAMMARS = ["npm", "run", "check:grammars"]
+CORE_BUILD_OFFLINE = ["npm", "run", "build:offline"]
+CORE_CHECK_MODEL_DATA = ["node", "packages/ai/scripts/check-model-data.ts"]
+CORE_SOURCE_SUBMODULE = "plugins/attro-core"
+CORE_MODEL_DATA_REL = "packages/ai/src/providers/data"
+CORE_CLI_REL = "packages/coding-agent/dist/bundle/cli.js"
+RUNTIME_GENERATED_SUBMODULES = frozenset({"plugins/pi-lens", "plugins/attro-core"})
 
 PLUGIN_PATHS = {
     "pi-zentui": "plugins/pi-zentui",

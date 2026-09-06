@@ -10,7 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from attro.constants import LENS_BUILD, LENS_CHECK_GRAMMARS, LENS_GRAMMARS, MANIFEST_FILE, NPM_CI, NPM_INSTALL, PREPARED_MARKER
+from attro.constants import CORE_SOURCE_SUBMODULE, LENS_BUILD, LENS_CHECK_GRAMMARS, LENS_GRAMMARS, MANIFEST_FILE, NPM_CI, NPM_INSTALL, PREPARED_MARKER
+from attro.core_source import prepare_source_core
 from attro.git_export import export_tracked_tree
 from attro.npm_packages import npm_dependencies_from_entries, npm_spec
 from attro.paths import release_dir, releases_dir, safe_child, staging_dir, validate_state_root
@@ -125,7 +126,11 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
         stage.mkdir()
         (stage / "plugins").mkdir()
         dependency_locks = []
+        core_entry = None
         for entry in sources["submodules"]:
+            if entry["path"] == CORE_SOURCE_SUBMODULE:
+                core_entry = entry
+                continue
             dst = safe_child(stage, entry["path"])
             export_tracked_tree(safe_child(checkout_root, entry["path"]), dst, entry["pin"])
             lock = entry.get("dependencyLock")
@@ -152,20 +157,32 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                 raise ValidationError(f"config missing or hash mismatch in snapshot: {config['path']}")
             shutil.copyfile(src, config_dir / Path(config["path"]).name)
         runtime_locks = descriptor.get("runtimeLocks")
-        core_lock = runtime_locks["core"] if runtime_locks else None
         npm_lock = runtime_locks["npm"] if runtime_locks else None
         npm = _install_packages(stage, final, descriptor["npmPackages"], snapshot=snapshot, lock_rel=npm_lock) if descriptor["npmPackages"] else []
         if not npm:
             (stage / "npm").mkdir()
-        core = _install_packages(
-            stage,
-            final,
-            [{"package": descriptor["core"]["package"], "version": descriptor["core"]["version"]}],
-            core=True,
-            snapshot=snapshot,
-            lock_rel=core_lock,
-        )[0]
-        core["nodeMinimum"] = descriptor["core"]["engines"]["node"]
+        if descriptor["core"].get("installMethod") == "source":
+            if core_entry is None:
+                raise ValidationError(f"sources lock missing {CORE_SOURCE_SUBMODULE}")
+            core = prepare_source_core(
+                stage,
+                final,
+                checkout_root=checkout_root,
+                core_entry=core_entry,
+                descriptor=descriptor,
+                node_version=node_version,
+            )
+        else:
+            core_lock = runtime_locks["core"] if runtime_locks else None
+            core = _install_packages(
+                stage,
+                final,
+                [{"package": descriptor["core"]["package"], "version": descriptor["core"]["version"]}],
+                core=True,
+                snapshot=snapshot,
+                lock_rel=core_lock,
+            )[0]
+            core["nodeMinimum"] = descriptor["core"]["engines"]["node"]
         for key, name in (("profileResources", "resources"), ("profileSeed", "agent")):
             destination = stage / "profile" / name
             if key in descriptor:

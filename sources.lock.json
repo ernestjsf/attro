@@ -5,10 +5,36 @@
     "name": "attro",
     "version": "0.1.0",
     "manifestResources": {
-      "themes": ["themes/quattro-amber.json", "themes/quattro-green.json"]
+      "themes": [
+        "themes/quattro-amber.json",
+        "themes/quattro-green.json"
+      ]
     }
   },
   "submodules": [
+    {
+      "path": "plugins/attro-core",
+      "name": "pi-monorepo",
+      "origin": "https://github.com/ernestjsf/attro-core.git",
+      "upstream": "https://github.com/earendil-works/pi-mono.git",
+      "pin": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
+      "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
+      "baseVersion": "0.0.3",
+      "packagePath": ".",
+      "sourceEntryFiles": [
+        "package.json",
+        "package-lock.json",
+        "packages/coding-agent/package.json"
+      ],
+      "runtimeEntryFiles": [
+        "packages/coding-agent/dist/bundle/cli.js"
+      ],
+      "runtimeGenerated": true,
+      "dependencyLock": "package-lock.json",
+      "dependencyLockVersion": 3,
+      "testReport": "Maintained Quattro fork at v0.85.0; source-core build uses npm ci + build:offline with pinned model snapshot",
+      "provenance": "QUATTRO.md"
+    },
     {
       "path": "plugins/pi-zentui",
       "name": "pi-zentui",
@@ -18,8 +44,12 @@
       "baseCommit": "32f0668015f7685a3d3acb7cecb06680ae0a83fc",
       "baseVersion": "0.22.3",
       "packagePath": ".",
-      "sourceEntryFiles": ["extensions/zentui/index.ts"],
-      "runtimeEntryFiles": ["extensions/zentui/index.ts"],
+      "sourceEntryFiles": [
+        "extensions/zentui/index.ts"
+      ],
+      "runtimeEntryFiles": [
+        "extensions/zentui/index.ts"
+      ],
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
@@ -35,8 +65,12 @@
       "baseCommit": "5d7a2666f51da9f450bd019af10200c88cc1df98",
       "baseVersion": "0.8.69",
       "packagePath": ".",
-      "sourceEntryFiles": ["extensions/index.ts"],
-      "runtimeEntryFiles": ["extensions/index.ts"],
+      "sourceEntryFiles": [
+        "extensions/index.ts"
+      ],
+      "runtimeEntryFiles": [
+        "extensions/index.ts"
+      ],
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
@@ -52,8 +86,12 @@
       "baseCommit": "8f11a0a94988093b0ea5d725d18e8dcabacd2373",
       "baseVersion": "0.27.0",
       "packagePath": ".",
-      "sourceEntryFiles": ["index.ts"],
-      "runtimeEntryFiles": ["index.ts"],
+      "sourceEntryFiles": [
+        "index.ts"
+      ],
+      "runtimeEntryFiles": [
+        "index.ts"
+      ],
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
@@ -69,8 +107,14 @@
       "baseCommit": "6cebeb5dc639531fe0b24b5221f032c5169feb2e",
       "baseVersion": "4.1.0",
       "packagePath": ".",
-      "sourceEntryFiles": ["index.ts", "tools/render-compact.ts"],
-      "runtimeEntryFiles": ["dist/index.js", "grammars/tree-sitter-typescript.wasm"],
+      "sourceEntryFiles": [
+        "index.ts",
+        "tools/render-compact.ts"
+      ],
+      "runtimeEntryFiles": [
+        "dist/index.js",
+        "grammars/tree-sitter-typescript.wasm"
+      ],
       "runtimeGenerated": true,
       "runtimeBuild": "npm run build:dist && node scripts/download-grammars.js --core --dest grammars && npm run check:grammars",
       "dependencyLock": "package-lock.json",
@@ -90,8 +134,13 @@
       "packageVersion": "2.9.0",
       "publishedPackageVersion": "@juicesharp/rpiv-todo@2.9.0",
       "packagePath": "packages/rpiv-todo",
-      "sourceEntryFiles": ["packages/rpiv-todo/index.ts", "packages/rpiv-todo/todo-overlay.ts"],
-      "runtimeEntryFiles": ["packages/rpiv-todo/index.ts"],
+      "sourceEntryFiles": [
+        "packages/rpiv-todo/index.ts",
+        "packages/rpiv-todo/todo-overlay.ts"
+      ],
+      "runtimeEntryFiles": [
+        "packages/rpiv-todo/index.ts"
+      ],
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
@@ -107,8 +156,12 @@
       "baseCommit": "2de7e145227f7a527e995e323a50e7ee9bf88b0e",
       "baseVersion": "0.14.0",
       "packagePath": ".",
-      "sourceEntryFiles": ["index.ts"],
-      "runtimeEntryFiles": ["index.ts"],
+      "sourceEntryFiles": [
+        "index.ts"
+      ],
+      "runtimeEntryFiles": [
+        "index.ts"
+      ],
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
@@ -124,8 +177,12 @@
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
-      "sourceEntryFiles": ["index.ts"],
-      "runtimeEntryFiles": ["index.ts"],
+      "sourceEntryFiles": [
+        "index.ts"
+      ],
+      "runtimeEntryFiles": [
+        "index.ts"
+      ],
       "runtimeGenerated": false,
       "dependencyLock": null,
       "testReport": "full subagents.test.cjs suite passed on Node 26.7.0, including panel labels, managed resource/core pinning, and canonical ATTRO with legacy PIATTRO namespace compatibility; RED/GREEN verified; independent safety review found no blockers",
@@ -136,8 +193,8 @@
     {
       "path": "themes/quattro-green.json",
       "source": "~/.pi/agent/themes/quattro-green.json",
-      "sha256": "328326430c758fa5713ae2dfdd6a6c2dd1cf3a96eea2897bf5f27aa84014605e",
-      "provenance": "Active Quattro Green display theme with distinct user, tool, pending and error surfaces."
+      "sha256": "d1c5ab687d1c7391e04dffafa45dce12e9b4778e4ff678c05c264173c6f0c252",
+      "provenance": "Active Quattro Green display theme with distinct user, tool, pending and error surfaces plus the maintained fullscreen dock background."
     },
     {
       "path": "themes/quattro-amber.json",

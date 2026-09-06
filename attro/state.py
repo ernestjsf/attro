@@ -7,7 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from attro.constants import MANIFEST_FILE, PREPARED_MARKER
+from attro.constants import CORE_CLI_REL, CORE_SOURCE_SUBMODULE, MANIFEST_FILE, PREPARED_MARKER
+from attro.core_source import validate_installed_workspace_links, validate_source_core_layout
 from attro.paths import release_dir, safe_child, state_path
 from attro.profile import initialize_shared_agent, require_shared_release, validate_profile_tree, validate_shared_agent
 from attro.validate import ValidationError, load_json, sha256_file, validate_manifest, validate_release_id, validate_sources_lock, validate_state, write_json_atomic
@@ -68,6 +69,35 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
     for record in [provenance["core"], *provenance["npmPackages"]]:
         is_core = record is provenance["core"]
         name = "pi" if is_core else "npm"
+        if is_core and record.get("installMethod") == "source":
+            expected = {
+                "installRoot": "pi",
+                "lockFile": "pi/package-lock.json",
+                "piBinary": f"pi/{CORE_CLI_REL}",
+            }
+            for key, rel in expected.items():
+                actual = safe_child(path, rel)
+                if record[key] != str(final / rel) or not actual.exists():
+                    raise ValidationError(f"invalid or missing release {key}: {record[key]}")
+            package_json = safe_child(path, "pi/packages/coding-agent/package.json")
+            installed = load_json(package_json)
+            version = record["expectedVersion"]
+            if installed.get("name") != record["package"] or installed.get("version") != version:
+                raise ValidationError("installed package pin mismatch")
+            if sha256_file(safe_child(path, "pi/package-lock.json")) != record["lockSha256"]:
+                raise ValidationError("installed dependency lock digest mismatch")
+            install_root = safe_child(path, "pi")
+            validate_installed_workspace_links(install_root, safe_child(install_root, "package-lock.json"))
+            runtime_hashes = validate_source_core_layout(install_root, package=record["package"], version=version)
+            if record.get("runtimeHashes") != runtime_hashes:
+                raise ValidationError("source core runtime digest mismatch")
+            try:
+                executable = os.access(safe_child(path, expected["piBinary"]), os.X_OK)
+            except OSError as exc:
+                raise ValidationError("cannot inspect Pi CLI") from exc
+            if not executable:
+                raise ValidationError("Pi CLI is not executable")
+            continue
         root_rel = f"{name}/node_modules/{record['package']}"
         expected = {"installRoot": root_rel, "lockFile": f"{name}/package-lock.json"}
         if is_core:
@@ -94,6 +124,8 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
         raise ValidationError("manifest lacks source provenance")
     validate_sources_lock(sources)
     for entry in sources["submodules"]:
+        if entry["path"] == CORE_SOURCE_SUBMODULE:
+            continue
         for name in entry["runtimeEntryFiles"]:
             if not safe_child(path, entry["path"], name).is_file():
                 raise ValidationError(f"release runtime entry missing: {entry['path']}/{name}")

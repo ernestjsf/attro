@@ -205,7 +205,8 @@ install_deps()
 
     def test_descriptor_accepts_runtime_locks(self):
         data = validate_descriptor(REPO_ROOT / "attro.json")
-        self.assertEqual(data["runtimeLocks"], {"core": "runtime/core", "npm": "runtime/npm"})
+        self.assertEqual(data["core"]["installMethod"], "source")
+        self.assertEqual(data["runtimeLocks"], {"npm": "runtime/npm"})
 
     def test_shipped_runtime_locks_are_public(self):
         validate_public_npm_lock(REPO_ROOT / "runtime/core/package-lock.json")

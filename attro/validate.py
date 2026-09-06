@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from attro.constants import PROFILE_PLACEHOLDERS, SUPPORTED_PLATFORMS
+from attro.constants import CORE_SOURCE_SUBMODULE, PROFILE_PLACEHOLDERS, RUNTIME_GENERATED_SUBMODULES, SUPPORTED_PLATFORMS
 from attro.paths import safe_child
 
 RELEASE_ID_RE = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}")
@@ -86,6 +86,16 @@ def validate_release_id(release_id: Any) -> None:
         raise ValidationError(f"invalid release id: {release_id!r}")
 
 
+def validate_model_snapshot_url(value: Any) -> str:
+    url = text(value, "modelSnapshot.url")
+    if not re.fullmatch(
+        r"https://github\.com/earendil-works/pi/releases/download/v(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)/pi-\1-source\.tar\.gz",
+        url,
+    ):
+        raise ValidationError("modelSnapshot.url must be an approved public GitHub source release asset")
+    return url
+
+
 def validate_descriptor(path: Path) -> dict[str, Any]:
     from attro.npm_packages import normalize_npm_packages, validate_version
 
@@ -106,6 +116,22 @@ def validate_descriptor(path: Path) -> dict[str, Any]:
     engines = core.get("engines")
     if not isinstance(engines, dict) or not isinstance(engines.get("node"), str) or not NODE_MIN_RE.fullmatch(engines["node"]):
         raise ValidationError("core.engines.node must be an exact minimum (>=major.minor.patch)")
+    install_method = core.get("installMethod", "npm")
+    if install_method not in {"npm", "source"}:
+        raise ValidationError("core.installMethod must be npm or source")
+    core["installMethod"] = install_method
+    if install_method == "source":
+        source = core.get("source")
+        if not isinstance(source, dict):
+            raise ValidationError("core.source required for source install")
+        if relative_path(source.get("path"), "core.source.path") != CORE_SOURCE_SUBMODULE:
+            raise ValidationError(f"core.source.path must be {CORE_SOURCE_SUBMODULE}")
+        snapshot = source.get("modelSnapshot")
+        if not isinstance(snapshot, dict):
+            raise ValidationError("core.source.modelSnapshot required")
+        validate_model_snapshot_url(snapshot.get("url"))
+        if not re.fullmatch(r"[0-9a-f]{64}", text(snapshot.get("sha256"), "core.source.modelSnapshot.sha256")):
+            raise ValidationError("invalid core.source.modelSnapshot.sha256")
     supported = data.get("supportedPlatforms", sorted(SUPPORTED_PLATFORMS))
     if not isinstance(supported, list) or not supported or any(not isinstance(p, str) or p not in SUPPORTED_PLATFORMS for p in supported):
         raise ValidationError("invalid supportedPlatforms")
@@ -113,13 +139,20 @@ def validate_descriptor(path: Path) -> dict[str, Any]:
         raise ValidationError(f"unsupported platform {sys.platform}")
     data["npmPackages"] = normalize_npm_packages(data.get("npmPackages", []))
     runtime_locks = data.get("runtimeLocks")
+    if runtime_locks is not None and not isinstance(runtime_locks, dict):
+        raise ValidationError("runtimeLocks must be an object")
+    if install_method == "source" and (runtime_locks is None or runtime_locks.get("npm") is None):
+        raise ValidationError("runtimeLocks.npm required for source core")
     if runtime_locks is not None:
-        if not isinstance(runtime_locks, dict):
-            raise ValidationError("runtimeLocks must be an object")
-        data["runtimeLocks"] = {
-            "core": relative_path(runtime_locks.get("core"), "runtimeLocks.core"),
-            "npm": relative_path(runtime_locks.get("npm"), "runtimeLocks.npm"),
-        }
+        if install_method == "source":
+            if runtime_locks.get("core"):
+                raise ValidationError("runtimeLocks.core is incompatible with source core")
+            data["runtimeLocks"] = {"npm": relative_path(runtime_locks.get("npm"), "runtimeLocks.npm")}
+        else:
+            data["runtimeLocks"] = {
+                "core": relative_path(runtime_locks.get("core"), "runtimeLocks.core"),
+                "npm": relative_path(runtime_locks.get("npm"), "runtimeLocks.npm"),
+            }
     return data
 
 
@@ -158,8 +191,11 @@ def validate_manifest(data: dict[str, Any]) -> None:
     if not re.fullmatch(r"[0-9a-f]{40,64}", text(provenance.get("checkoutHead"), "checkoutHead")):
         raise ValidationError("invalid checkoutHead")
     core = provenance.get("core")
-    if not isinstance(core, dict) or core.get("package") != CORE_PACKAGE or core.get("installMethod") != "npm":
+    if not isinstance(core, dict) or core.get("package") != CORE_PACKAGE:
         raise ValidationError("invalid core provenance")
+    install_method = core.get("installMethod")
+    if install_method not in {"npm", "source"}:
+        raise ValidationError("invalid core installMethod")
     validate_version(text(core.get("expectedVersion"), "expectedVersion"))
     if core.get("installedVersion") != core["expectedVersion"]:
         raise ValidationError("core pin mismatch")
@@ -175,6 +211,31 @@ def validate_manifest(data: dict[str, Any]) -> None:
         if not re.fullmatch(r"[0-9a-f]{64}", text(record.get("lockSha256"), "lockSha256")):
             raise ValidationError("invalid lock digest")
     text(core.get("piBinary"), "piBinary")
+    if install_method == "source":
+        source = core.get("source")
+        if not isinstance(source, dict):
+            raise ValidationError("source core provenance missing source metadata")
+        relative_path(source.get("path"), "core.source.path")
+        text(source.get("origin"), "core.source.origin")
+        if not re.fullmatch(r"[0-9a-f]{40,64}", text(source.get("commit"), "core.source.commit")):
+            raise ValidationError("invalid core source commit")
+        text(core.get("buildRecipe"), "buildRecipe")
+        build_versions = core.get("buildVersions")
+        if not isinstance(build_versions, dict):
+            raise ValidationError("source core provenance missing buildVersions")
+        text(build_versions.get("node"), "buildVersions.node")
+        text(build_versions.get("npm"), "buildVersions.npm")
+        snapshot = core.get("modelSnapshot")
+        if not isinstance(snapshot, dict):
+            raise ValidationError("source core provenance missing modelSnapshot")
+        validate_model_snapshot_url(snapshot.get("url"))
+        if not re.fullmatch(r"[0-9a-f]{64}", text(snapshot.get("sha256"), "modelSnapshot.sha256")):
+            raise ValidationError("invalid modelSnapshot.sha256")
+        if not re.fullmatch(r"[0-9a-f]{64}", text(snapshot.get("manifestSha256"), "modelSnapshot.manifestSha256")):
+            raise ValidationError("invalid modelSnapshot.manifestSha256")
+        runtime_hashes = core.get("runtimeHashes")
+        if not isinstance(runtime_hashes, dict) or not runtime_hashes:
+            raise ValidationError("source core provenance missing runtimeHashes")
 
 
 def sha256_file(path: Path) -> str:
@@ -212,9 +273,10 @@ def validate_runtime_lock_package(package: dict[str, Any], entries: list[dict[st
         raise ValidationError(f"{label} package.json dependencies do not match descriptor pins")
 
 
-def run_command(cmd: list[str], cwd: Path, timeout: int = 900) -> subprocess.CompletedProcess:
+def run_command(cmd: list[str], cwd: Path, timeout: int = 900, *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess:
+    command_env = os.environ if env is None else env
     try:
-        process = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+        process = subprocess.Popen(cmd, cwd=cwd, env=command_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
     except OSError as exc:
         raise ValidationError(f"command unavailable: {' '.join(cmd)}: {exc}") from exc
     try:
@@ -272,7 +334,7 @@ def validate_sources_lock(manifest: dict[str, Any]) -> None:
             relative_path(entry["packagePath"], "packagePath")
         if type(entry.get("runtimeGenerated")) is not bool:
             raise ValidationError("runtimeGenerated must be a boolean")
-        if entry["runtimeGenerated"] and rel != "plugins/pi-lens":
+        if entry["runtimeGenerated"] and rel not in RUNTIME_GENERATED_SUBMODULES:
             raise ValidationError(f"no reviewed build for {rel}")
         for key in ("sourceEntryFiles", "runtimeEntryFiles"):
             if not isinstance(entry.get(key), list) or not entry[key]:
