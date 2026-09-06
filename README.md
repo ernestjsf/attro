@@ -69,8 +69,7 @@ personal Pi setup:
 - **Pi core** built from the pinned `plugins/attro-core` source tree
 - **Seven customized plugin forks** (Zentui, CC extensions, web access, Lens,
   rpiv todo, ask-user, subagents)
-- **Four descriptor npm packages** (`pi-caffeinate`, `pi-btw`, `pi-goal`,
-  `pi-cursor-sdk`)
+- **Three descriptor npm packages** (`pi-caffeinate`, `pi-btw`, `pi-cursor-sdk`)
 - **Shared display defaults** in `config/` (Zentui, CC style, rpiv todo)
 
 **Not bundled:** Quattro custom themes, personal instructions, agent definitions, model/provider and

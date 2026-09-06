@@ -40,7 +40,7 @@ Attro ships the maintained core recipe, not a maintainer's personal Pi setup:
 | --- | --- |
 | Source-built Pi core from `plugins/attro-core` | Personal instructions and agent definitions |
 | Seven customized plugin forks | Model/provider routing and reasoning preferences |
-| Four descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk`) | Personal skills, prompts, and standalone user extensions |
+| Three descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-cursor-sdk`) | Personal skills, prompts, and standalone user extensions |
 | Shared display defaults in `config/` | Quattro custom themes, personal plugin preferences, and policy extensions |
 | UI/package defaults in `profile/settings.json` | OAuth tokens, sessions, trust state, or live `~/.pi/agent` copies |
 
@@ -64,7 +64,7 @@ selected for a public profile:
 
 | Live resource | Distribution treatment |
 | --- | --- |
-| `pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. |
+| `pi-caffeinate`, `pi-btw`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. |
 | Standalone personal extensions (for example turn-status, auto-session-name, safety-guard, pi-automode) | Not bundled; users install or copy into their own agent directory. |
 | Optional host tools (`bb`, `herdr`) and externally installed skills | Not bundled; users install separately and retain their own notices. |
 | Agent definitions, personal `AGENTS.md`, custom skills/prompts | User-owned under `~/.attro/agent` or trusted-project paths; not seeded from the repository recipe. |

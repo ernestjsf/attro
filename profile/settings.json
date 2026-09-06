@@ -17,7 +17,6 @@
     "{{PLUGIN_PI_ASK_USER}}",
     "{{PLUGIN_PI_LENS}}",
     "{{PLUGIN_PI_WEB_ACCESS}}",
-    "{{NPM:@narumitw/pi-goal}}",
     "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",

@@ -55,7 +55,7 @@ retaining the applicable licenses and notices in their own environment.
 ## Runtime and dependency notices
 
 The attro-core monorepo and the inspected optional npm plugins (`pi-caffeinate`,
-`pi-btw`, `pi-goal`, and `pi-cursor-sdk`) declare MIT in their respective package
+`pi-btw`, and `pi-cursor-sdk`) declare MIT in their respective package
 metadata. Installed dependency license files must still be retained. Notable other
 licenses in the selected package graph:
 
