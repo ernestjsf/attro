@@ -210,8 +210,8 @@ def _with_legacy_env_aliases(env: dict[str, str]) -> dict[str, str]:
     return merged
 
 
-def release_env(release_path: Path, *, agent_dir: Path | None = None) -> dict[str, str]:
-    manifest = prepared_manifest(release_path)
+def release_env(release_path: Path, *, agent_dir: Path | None = None, manifest: dict[str, Any] | None = None) -> dict[str, str]:
+    manifest = manifest or prepared_manifest(release_path)
     require_shared_release(manifest)
     agent = agent_dir or validate_shared_agent(release_path.resolve().parents[1])
     return _with_legacy_env_aliases({

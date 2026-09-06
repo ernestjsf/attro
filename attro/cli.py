@@ -15,7 +15,7 @@ from attro.launch import build_exec_env, build_try_env, exec_pi, managed_resourc
 from attro.lock import operation_lock
 from attro.paths import home, release_dir, validate_state_root
 from attro.prepare import prepare_release
-from attro.state import activate_release, active_release_path, load_state, prepared_manifest, register_release, rollback
+from attro.state import activate_release, load_state, prepared_manifest, register_release, rollback
 from attro.validate import ValidationError, validate_release_id
 
 MANAGEMENT_SUBCOMMANDS = frozenset(
@@ -128,20 +128,22 @@ def cmd_rollback(args: argparse.Namespace) -> int:
 def _launch(args: argparse.Namespace, trial: bool) -> int:
     if args.json and not args.dry_run:
         raise ValidationError("--json is supported for launch commands only with --dry-run")
+    state = load_state(args.root)
     if trial and args.release_id:
         validate_release_id(args.release_id)
-        if args.release_id not in load_state(args.root)["releases"]:
+        if args.release_id not in state["releases"]:
             raise ValidationError(f"unknown release: {args.release_id}")
-        release = release_dir(args.release_id, args.root)
-        prepared_manifest(release, args.release_id)
+        release_id = args.release_id
     else:
-        release = active_release_path(args.root)
-    if release is None:
-        raise ValidationError("no active release; run setup --repo PATH --activate first")
+        if state["active"] is None:
+            raise ValidationError("no active release; run setup --repo PATH --activate first")
+        release_id = state["active"]
+    release = release_dir(release_id, args.root)
+    manifest = prepared_manifest(release, release_id)
     command = normalize_pi_command(list(args.command))
     refuse_managed_mutation(command)
-    pi_bin = resolve_pi_binary(release)
-    command = [*managed_resource_args(release), *command]
+    pi_bin = resolve_pi_binary(release, manifest=manifest)
+    command = [*managed_resource_args(release, manifest=manifest), *command]
 
     def run(env: dict[str, str]) -> int:
         if args.dry_run:
@@ -154,13 +156,13 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
         return 0
 
     if not trial:
-        return run(build_exec_env(release))
+        return run(build_exec_env(release, manifest=manifest))
     if args.dry_run:
-        return run(build_try_env(release, Path(tempfile.gettempdir()) / "attro-try-<temporary>" / "agent"))
+        return run(build_try_env(release, Path(tempfile.gettempdir()) / "attro-try-<temporary>" / "agent", manifest=manifest))
     with tempfile.TemporaryDirectory(prefix="attro-try-") as tmp:
         agent = Path(tmp) / "agent"
-        populate_try_agent(release, agent)
-        return run(build_try_env(release, agent))
+        populate_try_agent(release, agent, manifest=manifest)
+        return run(build_try_env(release, agent, manifest=manifest))
 
 
 def cmd_try(args: argparse.Namespace) -> int:

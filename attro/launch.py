@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 from attro.guard import MANAGED_REFUSAL, blocked_pi_command
 from attro.paths import safe_child
@@ -28,8 +29,8 @@ def refuse_managed_mutation(command: list[str]) -> None:
         raise ValidationError(f"refusing managed pi command {' '.join(blocked)}: {MANAGED_REFUSAL}")
 
 
-def resolve_pi_binary(release_path: Path) -> str:
-    manifest = prepared_manifest(release_path)
+def resolve_pi_binary(release_path: Path, *, manifest: dict[str, Any] | None = None) -> str:
+    manifest = manifest or prepared_manifest(release_path)
     core = manifest["provenance"]["core"]
     check_node(core["nodeMinimum"])
     return core["piBinary"]
@@ -60,15 +61,15 @@ def validate_managed_resource_argv(argv: list[str], release_root: Path) -> list[
     return validated
 
 
-def managed_resource_argv_envelope(release_path: Path) -> str:
-    argv = managed_resource_args(release_path)
+def managed_resource_argv_envelope(release_path: Path, *, manifest: dict[str, Any] | None = None) -> str:
+    argv = managed_resource_args(release_path, manifest=manifest)
     return json.dumps(validate_managed_resource_argv(argv, release_path.resolve()))
 
 
-def build_exec_env(release_path: Path, *, agent_dir: Path | None = None) -> dict[str, str]:
+def build_exec_env(release_path: Path, *, agent_dir: Path | None = None, manifest: dict[str, Any] | None = None) -> dict[str, str]:
     env = os.environ.copy()
-    env.update(release_env(release_path, agent_dir=agent_dir))
-    env[MANAGED_RESOURCE_ARGV_ENV] = managed_resource_argv_envelope(release_path)
+    env.update(release_env(release_path, agent_dir=agent_dir, manifest=manifest))
+    env[MANAGED_RESOURCE_ARGV_ENV] = managed_resource_argv_envelope(release_path, manifest=manifest)
     env = _with_legacy_env_aliases(env)
     env["PI_SKIP_VERSION_CHECK"] = "1"
     for key in (
@@ -85,21 +86,21 @@ def build_exec_env(release_path: Path, *, agent_dir: Path | None = None) -> dict
     return env
 
 
-def build_try_env(release_path: Path, isolated_agent: Path) -> dict[str, str]:
-    env = build_exec_env(release_path, agent_dir=isolated_agent.resolve())
+def build_try_env(release_path: Path, isolated_agent: Path, *, manifest: dict[str, Any] | None = None) -> dict[str, str]:
+    env = build_exec_env(release_path, agent_dir=isolated_agent.resolve(), manifest=manifest)
     env["ATTRO_TRY"] = "1"
     return _with_legacy_env_aliases(env)
 
 
-def populate_try_agent(release_path: Path, isolated_agent: Path) -> None:
-    require_shared_release(prepared_manifest(release_path))
+def populate_try_agent(release_path: Path, isolated_agent: Path, *, manifest: dict[str, Any] | None = None) -> None:
+    require_shared_release(manifest or prepared_manifest(release_path))
     if isolated_agent.exists() or isolated_agent.is_symlink():
         raise ValidationError("try agent target already exists")
     seed_agent(release_path, isolated_agent)
 
 
-def managed_resource_args(release_path: Path) -> list[str]:
-    require_shared_release(prepared_manifest(release_path))
+def managed_resource_args(release_path: Path, *, manifest: dict[str, Any] | None = None) -> list[str]:
+    require_shared_release(manifest or prepared_manifest(release_path))
     settings = load_json(safe_child(release_path, "config/settings.json"))
     return [arg for key, flag in RESOURCE_FLAGS.items() for value in settings.get(key, []) for arg in (flag, value)]
 
