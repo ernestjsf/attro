@@ -8,12 +8,13 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from piattro.constants import AGENT_SEED_CONFIGS
-from piattro.paths import safe_child, validate_state_root
-from piattro.validate import ValidationError, assert_copy_allowed, fsync_dir, load_json, relative_path, write_json_atomic
+from attro.constants import AGENT_SEED_CONFIGS
+from attro.paths import safe_child, validate_state_root
+from attro.validate import ValidationError, assert_copy_allowed, fsync_dir, load_json, relative_path, write_json_atomic
 
 RESOURCE_FLAGS = {"packages": "-e", "extensions": "-e", "skills": "--skill", "prompts": "--prompt-template", "themes": "--theme"}
-PROFILE_MARKER = ".piattro-profile.json"
+PROFILE_MARKER = ".attro-profile.json"
+LEGACY_PROFILE_MARKER = ".piattro-profile.json"
 SEED_FILES = frozenset({
     "AGENTS.md", "CLAUDE.md", "SYSTEM.md", "APPEND_SYSTEM.md", "models.json", "keybindings.json",
     "subagents.json", "rpiv-todo.json", "claude-plugins.json", "cursor-sdk.json", "cursor-sdk-context-windows.json",
@@ -67,6 +68,18 @@ def shared_agent_dir(state_root: Path) -> Path:
     return safe_child(validate_state_root(state_root), "agent")
 
 
+def _profile_marker_payload(agent: Path) -> dict[str, Any]:
+    return {"schemaVersion": 1, "agentMode": "shared-v1", "agentDir": str(agent)}
+
+
+def _read_profile_marker(agent: Path) -> dict[str, Any] | None:
+    for name in (PROFILE_MARKER, LEGACY_PROFILE_MARKER):
+        marker = safe_child(agent, name)
+        if marker.is_file():
+            return load_json(marker)
+    return None
+
+
 def validate_shared_agent(state_root: Path, *, required: bool = True) -> Path:
     agent = shared_agent_dir(state_root)
     if not agent.exists():
@@ -75,11 +88,11 @@ def validate_shared_agent(state_root: Path, *, required: bool = True) -> Path:
         return agent
     if not agent.is_dir():
         raise ValidationError(f"shared agent path is not a directory: {agent}")
-    for name in (PROFILE_MARKER, "auth.json", "settings.json", "trust.json", "models.json", "keybindings.json", "sessions"):
+    for name in (PROFILE_MARKER, LEGACY_PROFILE_MARKER, "auth.json", "settings.json", "trust.json", "models.json", "keybindings.json", "sessions"):
         path = safe_child(agent, name)
         if path.is_file() and path.stat().st_nlink != 1:
             raise ValidationError(f"shared agent sensitive file must not be hardlinked: {path}")
-        if path.exists() and name != "sessions" and not path.is_file():
+        if path.exists() and name not in {PROFILE_MARKER, LEGACY_PROFILE_MARKER, "sessions"} and not path.is_file():
             raise ValidationError(f"shared agent sensitive path must be a file: {path}")
     sessions = safe_child(agent, "sessions")
     if sessions.exists() and not sessions.is_dir():
@@ -87,8 +100,8 @@ def validate_shared_agent(state_root: Path, *, required: bool = True) -> Path:
     for path in sessions.rglob("*"):
         if path.is_symlink() or (path.is_file() and path.stat().st_nlink != 1):
             raise ValidationError(f"shared sessions must not alias external state: {path}")
-    marker = safe_child(agent, PROFILE_MARKER)
-    if not marker.is_file() or load_json(marker) != {"schemaVersion": 1, "agentMode": "shared-v1", "agentDir": str(agent)}:
+    marker = _read_profile_marker(agent)
+    if marker != _profile_marker_payload(agent):
         raise ValidationError(f"refusing existing unmanaged shared agent directory: {agent}; preserve it and choose an empty managed root")
     return agent
 
@@ -110,7 +123,10 @@ def seed_agent(release_path: Path, target: Path, *, agent_path: Path | None = No
         for src in validate_profile_tree(source, seed=True):
             dst = target / src.relative_to(source)
             dst.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-            text = src.read_text().replace("{{PIATTRO_AGENT_DIR}}", str(agent_path or target.resolve()))
+            text = src.read_text()
+            resolved = str(agent_path or target.resolve())
+            for token in ("{{ATTRO_AGENT_DIR}}", "{{PIATTRO_AGENT_DIR}}"):
+                text = text.replace(token, resolved)
             dst.write_text(text)
     for path in target.rglob("*"):
         path.chmod(0o700 if path.is_dir() else 0o600)
@@ -129,7 +145,7 @@ def initialize_shared_agent(state_root: Path, release_path: Path) -> Path:
     with tempfile.TemporaryDirectory(prefix=".agent-init-", dir=state_root) as tmp:
         stage = Path(tmp) / "agent"
         seed_agent(release_path, stage, agent_path=agent)
-        write_json_atomic(stage / PROFILE_MARKER, {"schemaVersion": 1, "agentMode": "shared-v1", "agentDir": str(agent)})
+        write_json_atomic(stage / PROFILE_MARKER, _profile_marker_payload(agent))
         if agent.exists() or agent.is_symlink():
             raise ValidationError(f"shared agent target already exists: {agent}")
         stage.rename(agent)

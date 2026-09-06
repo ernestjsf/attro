@@ -5,9 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from piattro.paths import home, platform_supported, release_dir, state_path
-from piattro.state import load_state, prepared_manifest
-from piattro.validate import ValidationError, check_node, validate_checkout, validate_descriptor
+from attro.paths import home, platform_supported, release_dir, state_path
+from attro.state import load_state, prepared_manifest
+from attro.validate import ValidationError, check_node, validate_checkout, validate_descriptor
 
 
 def run_doctor(*, repo: Path | None = None, state_root: Path | None = None) -> dict[str, Any]:
@@ -17,7 +17,7 @@ def run_doctor(*, repo: Path | None = None, state_root: Path | None = None) -> d
         report["issues"].append("unsupported platform")
     if repo is not None:
         try:
-            descriptor = validate_descriptor(repo / "piattro.json")
+            descriptor = validate_descriptor(repo / "attro.json")
             validate_checkout(repo, descriptor)
             check_node(descriptor["core"]["engines"]["node"])
             report["descriptorValid"] = True

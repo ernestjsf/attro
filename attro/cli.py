@@ -1,4 +1,4 @@
-"""Piattro commands for explicitly trusted local checkouts."""
+"""Attro commands for explicitly trusted local checkouts."""
 
 from __future__ import annotations
 
@@ -9,14 +9,14 @@ import sys
 import tempfile
 from pathlib import Path
 
-from piattro import __version__
-from piattro.doctor import run_doctor
-from piattro.launch import build_exec_env, build_try_env, exec_pi, managed_resource_args, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
-from piattro.lock import operation_lock
-from piattro.paths import home, release_dir, validate_state_root
-from piattro.prepare import prepare_release
-from piattro.state import activate_release, active_release_path, load_state, prepared_manifest, register_release, rollback
-from piattro.validate import ValidationError, validate_release_id
+from attro import __version__
+from attro.doctor import run_doctor
+from attro.launch import build_exec_env, build_try_env, exec_pi, managed_resource_args, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
+from attro.lock import operation_lock
+from attro.paths import home, release_dir, validate_state_root
+from attro.prepare import prepare_release
+from attro.state import activate_release, active_release_path, load_state, prepared_manifest, register_release, rollback
+from attro.validate import ValidationError, validate_release_id
 
 
 def emit(args: argparse.Namespace, data: object, message: str) -> None:
@@ -49,7 +49,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 def cmd_doctor(args: argparse.Namespace) -> int:
     repo = Path(args.repo).expanduser().resolve() if args.repo else None
     report = run_doctor(repo=repo, state_root=args.root)
-    message = "Piattro doctor: " + ("OK" if report["healthy"] else "issues found")
+    message = "Attro doctor: " + ("OK" if report["healthy"] else "issues found")
     for issue in report["issues"]:
         message += f"\n  issue: {issue}"
     for warning in report["warnings"]:
@@ -93,8 +93,8 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
 
     def run(env: dict[str, str]) -> int:
         if args.dry_run:
-            data = {"argv": [pi_bin, *command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["PIATTRO_RELEASE_ROOT"], "resourceDir": env["PIATTRO_RESOURCE_DIR"]}
-            emit(args, data, f"would run: {' '.join(data['argv'])}\nPI_CODING_AGENT_DIR={data['agentDir']}\nPIATTRO_RELEASE_ROOT={data['releaseRoot']}\nPIATTRO_RESOURCE_DIR={data['resourceDir']}")
+            data = {"argv": [pi_bin, *command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["ATTRO_RELEASE_ROOT"], "resourceDir": env["ATTRO_RESOURCE_DIR"]}
+            emit(args, data, f"would run: {' '.join(data['argv'])}\nPI_CODING_AGENT_DIR={data['agentDir']}\nATTRO_RELEASE_ROOT={data['releaseRoot']}\nATTRO_RESOURCE_DIR={data['resourceDir']}")
             return 0
         if trial:
             return subprocess.run([pi_bin, *command], env=env, check=False).returncode
@@ -104,8 +104,8 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
     if not trial:
         return run(build_exec_env(release))
     if args.dry_run:
-        return run(build_try_env(release, Path(tempfile.gettempdir()) / "piattro-try-<temporary>" / "agent"))
-    with tempfile.TemporaryDirectory(prefix="piattro-try-") as tmp:
+        return run(build_try_env(release, Path(tempfile.gettempdir()) / "attro-try-<temporary>" / "agent"))
+    with tempfile.TemporaryDirectory(prefix="attro-try-") as tmp:
         agent = Path(tmp) / "agent"
         populate_try_agent(release, agent)
         return run(build_try_env(release, agent))
@@ -120,14 +120,14 @@ def cmd_exec(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="piattro", description="Isolated release manager; trusted local checkouts only, not an OS sandbox.")
-    parser.add_argument("--version", action="version", version=f"piattro {__version__}")
+    parser = argparse.ArgumentParser(prog="attro", description="Isolated release manager; trusted local checkouts only, not an OS sandbox.")
+    parser.add_argument("--version", action="version", version=f"attro {__version__}")
     parser.add_argument("--json", action="store_true", help="emit JSON (launch commands require --dry-run)")
-    parser.add_argument("--state-root", help="managed directory (default: ~/.piattro or PIATTRO_HOME)")
+    parser.add_argument("--state-root", help="managed directory (default: ~/.attro, legacy ~/.piattro, ATTRO_HOME, or PIATTRO_HOME)")
     sub = parser.add_subparsers(dest="subcommand", required=True)
     for name in ("setup", "update"):
         command = sub.add_parser(name, help="prepare a release from a trusted, clean local checkout")
-        command.add_argument("--repo", required=True, help="explicit trusted pi-customizations checkout")
+        command.add_argument("--repo", required=True, help="explicit trusted attro checkout")
         command.add_argument("--activate", action="store_true")
         command.set_defaults(func=cmd_setup)
     sub.add_parser("status", help="show activation state").set_defaults(func=cmd_status)

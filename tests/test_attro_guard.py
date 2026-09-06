@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from piattro.guard import blocked_pi_command  # noqa: E402
+from attro.guard import blocked_pi_command  # noqa: E402
 
 
 class BlockedPiCommandTests(unittest.TestCase):

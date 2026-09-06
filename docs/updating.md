@@ -2,7 +2,7 @@
 
 This page is the manual maintainer workflow for source pins. For automated
 candidate discovery see [automation](automation.md); for preparing and switching
-managed Piattro releases see the [README](../README.md). A consumer update does
+managed Attro releases see the [README](../README.md). A consumer update does
 not merge upstream branches into these workbench sources.
 
 The root branch is `quattro`. Submodule gitlinks and `sources.lock.json` are the
@@ -13,14 +13,14 @@ divergence.
 
 ## Consumer update (shared profile)
 
-After `./install` or an equivalent manual setup, updating Piattro prepares a new
+After `./install` or an equivalent manual setup, updating Attro prepares a new
 release from an explicit trusted checkout and switches the active pointer. The
-shared profile at `~/.piattro/agent` **persists** across update and rollback:
+shared profile at `~/.attro/agent` **persists** across update and rollback:
 
 ```sh
-piattro update --repo /path/to/reviewed-clean-checkout
-piattro activate <new-release-id>
-piattro rollback   # returns to previous release binaries; shared profile unchanged
+attro update --repo /path/to/reviewed-clean-checkout
+attro activate <new-release-id>
+attro rollback   # returns to previous release binaries; shared profile unchanged
 ```
 
 `update` does not fetch the latest upstream plugin versions automatically; it
@@ -58,5 +58,5 @@ activate packages or alter settings as part of an update. Manual migration must
 replace matching entries with local paths while preserving unrelated packages and
 filters, without retaining duplicate old/new sources and without `pi remove`.
 
-Managed Piattro does not migrate live `~/.pi/agent` credentials or history into
-`~/.piattro/agent`. Users authenticate once in the shared profile after install.
+Managed Attro does not migrate live `~/.pi/agent` credentials or history into
+`~/.attro/agent`. Users authenticate once in the shared profile after install.

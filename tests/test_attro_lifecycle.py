@@ -14,9 +14,9 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from piattro.cli import main
-from piattro.validate import ValidationError, run_command, sha256_file
-from piattro.launch import build_exec_env, populate_try_agent
+from attro.cli import main
+from attro.validate import ValidationError, run_command, sha256_file
+from attro.launch import build_exec_env, populate_try_agent
 
 REAL_NODE = shutil.which("node")
 
@@ -49,7 +49,7 @@ class LifecycleTests(unittest.TestCase):
         self.git("commit", "-m", "plugin", cwd=plugin)
         pin = self.git("rev-parse", "HEAD", cwd=plugin)
         self.descriptor = {
-            "schemaVersion": 1, "distribution": "piattro", "version": "0.1.0",
+            "schemaVersion": 1, "distribution": "attro", "version": "0.1.0",
             "stateSchemaVersion": 1, "manifestSchemaVersion": 1,
             "profile": "profile/settings.json", "sourcesLock": "sources.lock.json",
             "core": {"package": "@earendil-works/pi-coding-agent", "version": "0.85.0", "engines": {"node": ">=22.19.0"}},
@@ -142,7 +142,7 @@ install_deps()
         return subprocess.run(["git", *args], cwd=cwd or self.repo, check=True, capture_output=True, text=True).stdout.strip()
 
     def commit_inputs(self):
-        (self.repo / "piattro.json").write_text(json.dumps(self.descriptor))
+        (self.repo / "attro.json").write_text(json.dumps(self.descriptor))
         (self.repo / "sources.lock.json").write_text(json.dumps(self.lock))
         self.git("add", ".")
         self.git("commit", "-m", "inputs")
@@ -312,7 +312,7 @@ install_deps()
         self.assertEqual(launch_a["agentDir"], launch_b["agentDir"])
         self.assertNotEqual(launch_a["resourceDir"], launch_b["resourceDir"])
         self.assertEqual(env_a, build_exec_env(release_a))
-        from piattro.launch import managed_resource_args
+        from attro.launch import managed_resource_args
         self.assertEqual(launch_a["argv"][1:-3], managed_resource_args(release_a))
         self.cli("rollback")
         self.assertEqual(launch_a, json.loads(self.cli("--json", "exec", "--dry-run", "--", "--model", "explicit", "-c")[0]))
@@ -324,7 +324,7 @@ install_deps()
         a = json.loads(self.cli("--json", "setup", "--repo", str(self.repo))[0])
         self.assertFalse((self.state / "agent").exists())
         before = {p.relative_to(self.state): p.read_bytes() for p in self.state.rglob("*") if p.is_file()}
-        with mock.patch("piattro.cli.tempfile.TemporaryDirectory", side_effect=AssertionError("dry-run must not allocate user state")):
+        with mock.patch("attro.cli.tempfile.TemporaryDirectory", side_effect=AssertionError("dry-run must not allocate user state")):
             trial = json.loads(self.cli("--json", "try", "--release-id", a["releaseId"], "--dry-run")[0])
         self.assertNotEqual(trial["agentDir"], str(self.state / "agent"))
         self.assertEqual(before, {p.relative_to(self.state): p.read_bytes() for p in self.state.rglob("*") if p.is_file()})
@@ -339,7 +339,7 @@ install_deps()
             self.assertFalse((isolated / "trust.json").exists())
             self.assertFalse((isolated / "sessions").exists())
             return subprocess.CompletedProcess(argv, 0)
-        with mock.patch("piattro.cli.subprocess.run", side_effect=run):
+        with mock.patch("attro.cli.subprocess.run", side_effect=run):
             self.cli("try", "--release-id", a["releaseId"], "--", "--model", "explicit")
         self.assertEqual(captured["settings"]["defaultModel"], "fixture-model")
         self.assertEqual(captured["settings"]["defaultThinkingLevel"], "high")
@@ -352,7 +352,7 @@ install_deps()
         self.configure_profile_bundle()
         a = json.loads(self.cli("--json", "setup", "--repo", str(self.repo))[0])
         before = (self.state / "state.json").read_bytes()
-        with mock.patch("piattro.profile.Path.write_text", side_effect=OSError("seed failed")):
+        with mock.patch("attro.profile.Path.write_text", side_effect=OSError("seed failed")):
             self.cli("activate", a["releaseId"], success=False)
         self.assertFalse((self.state / "agent").exists())
         self.assertEqual(before, (self.state / "state.json").read_bytes())
@@ -360,7 +360,7 @@ install_deps()
         self.cli("activate", a["releaseId"])
         settings = self.state / "agent/settings.json"
         settings.write_text('{"theme":"mine"}')
-        with mock.patch("piattro.profile.seed_agent", side_effect=AssertionError("must not reseed")):
+        with mock.patch("attro.profile.seed_agent", side_effect=AssertionError("must not reseed")):
             self.cli("activate", a["releaseId"])
         self.assertEqual(settings.read_text(), '{"theme":"mine"}')
 
@@ -392,8 +392,8 @@ install_deps()
                     path.write_bytes(original)
 
     def test_legacy_release_refs_preserved_but_not_implicitly_migrated(self):
-        from test_piattro_activation import _write_release
-        from piattro.state import register_release, save_state
+        from test_attro_activation import _write_release
+        from attro.state import register_release, save_state
         legacy = _write_release(self.state, "piattro-0.1.0-legacy", marker="legacy", legacy=True)
         (legacy / "agent/auth.json").write_text('{"synthetic":"preserve"}')
         register_release(self.state, legacy.name, legacy)
@@ -494,7 +494,7 @@ process.stdin.destroy();
         self.assertEqual(list((self.state / "staging").iterdir()), [])
 
     def test_root_dirty_refused(self):
-        (self.repo / "piattro.json").write_text(json.dumps({**self.descriptor, "version": "0.9.0"}))
+        (self.repo / "attro.json").write_text(json.dumps({**self.descriptor, "version": "0.9.0"}))
         self.cli("setup", "--repo", str(self.repo), success=False)
 
     def test_npm_pin_mismatch_refused(self):
@@ -565,7 +565,7 @@ process.stdin.destroy();
         self.commit_inputs()
         b = json.loads(self.cli("--json", "update", "--repo", str(self.repo))[0])
         before = (self.state / "state.json").read_bytes()
-        with mock.patch("piattro.validate.os.replace", side_effect=OSError("interrupted replacement")):
+        with mock.patch("attro.validate.os.replace", side_effect=OSError("interrupted replacement")):
             self.cli("activate", b["releaseId"], success=False)
         self.assertEqual((self.state / "state.json").read_bytes(), before)
         self.assertEqual(json.loads(before)["active"], a["releaseId"])
@@ -573,7 +573,7 @@ process.stdin.destroy();
         self.cli("rollback")
 
     def test_real_process_lock_contention_and_recovery(self):
-        code = "from pathlib import Path; import sys,time; from piattro.lock import operation_lock\nwith operation_lock(Path(sys.argv[1])):\n print('locked', flush=True)\n time.sleep(30)\n"
+        code = "from pathlib import Path; import sys,time; from attro.lock import operation_lock\nwith operation_lock(Path(sys.argv[1])):\n print('locked', flush=True)\n time.sleep(30)\n"
         process = subprocess.Popen([sys.executable, "-c", code, str(self.state)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
             assert process.stdout is not None

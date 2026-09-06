@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 MANAGED_REFUSAL = (
-    "piattro-managed releases pin packages and core via piattro setup/update; "
+    "attro-managed releases pin packages and core via attro setup/update; "
     "native pi package/core mutations are refused. "
-    "Use `bin/piattro update` to stage a new release and `bin/piattro activate` to switch. "
+    "Use `bin/attro update` to stage a new release and `bin/attro activate` to switch. "
     "See profile/MANAGED.md."
 )
 
-# Pi subcommands that mutate installed packages or the core CLI outside Piattro.
+# Pi subcommands that mutate installed packages or the core CLI outside Attro.
 BLOCKED_PI_COMMANDS: frozenset[tuple[str, ...]] = frozenset(
     {
         ("update",),

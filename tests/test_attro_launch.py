@@ -12,8 +12,8 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from piattro.constants import PREPARED_MARKER  # noqa: E402
-from piattro.launch import (  # noqa: E402
+from attro.constants import PREPARED_MARKER  # noqa: E402
+from attro.launch import (  # noqa: E402
     MANAGED_RESOURCE_ARGV_ENV,
     build_exec_env,
     build_try_env,
@@ -24,8 +24,8 @@ from piattro.launch import (  # noqa: E402
     refuse_managed_mutation,
     validate_managed_resource_argv,
 )
-from piattro.validate import ValidationError  # noqa: E402
-from test_piattro_activation import _write_release
+from attro.validate import ValidationError  # noqa: E402
+from test_attro_activation import _write_release
 
 
 def _fake_release(tmp: Path, release_id: str) -> Path:
@@ -48,7 +48,7 @@ class LaunchHelperTests(unittest.TestCase):
 
     def test_populate_try_agent_copies_allowlist_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_path = _fake_release(Path(tmp), "piattro-0.1.0-test")
+            release_path = _fake_release(Path(tmp), "attro-0.1.0-test")
             isolated = Path(tmp) / "sandbox" / "agent"
             populate_try_agent(release_path, isolated)
             self.assertTrue((isolated / "settings.json").is_file())
@@ -58,7 +58,7 @@ class LaunchHelperTests(unittest.TestCase):
 
     def test_build_try_env_clears_session_overrides_from_os_environ(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_path = _fake_release(Path(tmp), "piattro-0.1.0-test")
+            release_path = _fake_release(Path(tmp), "attro-0.1.0-test")
             isolated = Path(tmp) / "sandbox" / "agent"
             populate_try_agent(release_path, isolated)
             with mock.patch.dict(
@@ -81,7 +81,7 @@ class LaunchHelperTests(unittest.TestCase):
 
     def test_build_exec_env_exports_managed_resource_argv_envelope(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_path = _fake_release(Path(tmp), "piattro-0.1.0-test")
+            release_path = _fake_release(Path(tmp), "attro-0.1.0-test")
             agent = Path(tmp) / "agent"
             agent.mkdir()
             envelope = json.loads(managed_resource_argv_envelope(release_path))
@@ -92,7 +92,7 @@ class LaunchHelperTests(unittest.TestCase):
 
     def test_build_try_env_exports_managed_resource_argv_envelope(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_path = _fake_release(Path(tmp), "piattro-0.1.0-test")
+            release_path = _fake_release(Path(tmp), "attro-0.1.0-test")
             isolated = Path(tmp) / "sandbox" / "agent"
             populate_try_agent(release_path, isolated)
             env = build_try_env(release_path, isolated)
@@ -100,7 +100,7 @@ class LaunchHelperTests(unittest.TestCase):
 
     def test_validate_managed_resource_argv_rejects_malformed_and_escaping_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_path = _fake_release(Path(tmp), "piattro-0.1.0-test")
+            release_path = _fake_release(Path(tmp), "attro-0.1.0-test")
             root = release_path.resolve()
             inside = root / "plugins/pi-lens"
             inside.mkdir(parents=True, exist_ok=True)
@@ -119,7 +119,7 @@ class LaunchHelperTests(unittest.TestCase):
 
     def test_managed_resource_paths_preserve_trailing_whitespace(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_path = _fake_release(Path(tmp), "piattro-0.1.0-test")
+            release_path = _fake_release(Path(tmp), "attro-0.1.0-test")
             root = release_path.resolve()
             nested = root / "plugins/pi-lens"
             nested.mkdir(parents=True, exist_ok=True)

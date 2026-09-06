@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Launch the active Attro release, resolving symlinked wrappers."""
 
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from attro.cli import main
 
 if __name__ == "__main__":
-    raise SystemExit(main(["exec", "--", *sys.argv[1:]]))
+    raise SystemExit(main())

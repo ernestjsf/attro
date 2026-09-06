@@ -6,9 +6,23 @@ import os
 import sys
 from pathlib import Path
 
+LEGACY_HOME_ENV = "PIATTRO_HOME"
+CANONICAL_HOME_ENV = "ATTRO_HOME"
+DEFAULT_HOME_NAME = ".attro"
+LEGACY_HOME_NAME = ".piattro"
+
 
 def home() -> Path:
-    return Path(os.environ.get("PIATTRO_HOME") or Path.home() / ".piattro").expanduser()
+    explicit = os.environ.get(CANONICAL_HOME_ENV) or os.environ.get(LEGACY_HOME_ENV)
+    if explicit:
+        return Path(explicit).expanduser()
+    attro_default = Path.home() / DEFAULT_HOME_NAME
+    legacy_default = Path.home() / LEGACY_HOME_NAME
+    if attro_default.exists():
+        return attro_default
+    if legacy_default.exists():
+        return legacy_default
+    return attro_default
 
 
 def repo_root() -> Path:
@@ -16,7 +30,7 @@ def repo_root() -> Path:
 
 
 def validate_state_root(root: Path, checkout: Path | None = None) -> Path:
-    from piattro.validate import ValidationError
+    from attro.validate import ValidationError
 
     root = root.expanduser().absolute()
     if root.is_symlink():
@@ -39,7 +53,7 @@ def validate_state_root(root: Path, checkout: Path | None = None) -> Path:
 
 
 def safe_child(base: Path, *parts: str) -> Path:
-    from piattro.validate import ValidationError
+    from attro.validate import ValidationError
 
     if base.is_symlink():
         raise ValidationError(f"refusing symlink: {base}")
@@ -77,7 +91,7 @@ def lock_path(state_root: Path | None = None) -> Path:
 
 
 def release_dir(release_id: str, state_root: Path | None = None) -> Path:
-    from piattro.validate import validate_release_id
+    from attro.validate import validate_release_id
 
     validate_release_id(release_id)
     return safe_child(releases_dir(state_root), release_id)

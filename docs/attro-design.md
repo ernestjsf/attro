@@ -1,14 +1,14 @@
-# Piattro design and release gates
+# Attro design and release gates
 
-Piattro is an opinionated distribution of upstream Pi, not a fork of Pi core.
+Attro is an opinionated distribution of upstream Pi, not a fork of Pi core.
 Its release is a recipe: an exact Pi version, the seven source pins in
 `sources.lock.json`, a portable profile, and committed runtime lock inputs.
-`pi` is the coding command; `piattro` manages the installation. The existing
+`pi` is the coding command; `attro` manages the installation. The existing
 private workbench remains the source of the first candidate, not an
 already-public product.
 
-**Piattro 0.2.0** (`shared-v1`) separates immutable release code/resources from
-one canonical user profile at `~/.piattro/agent`. See [parity plan](parity-plan.md)
+**Attro 0.2.0** (`shared-v1`) separates immutable release code/resources from
+one canonical user profile at `~/.attro/agent`. See [parity plan](parity-plan.md)
 for the approved continuity decision.
 
 ## Boundaries
@@ -35,7 +35,7 @@ for the approved continuity decision.
 
 ## Release records
 
-`sources.lock.json` remains the canonical fork inventory. `piattro.json` adds
+`sources.lock.json` remains the canonical fork inventory. `attro.json` adds
 the distribution version (**0.2.0**), Pi pin, profile paths, and compatibility
 requirements. Installed metadata records source identity, `agentMode: shared-v1`,
 and preparation information.
@@ -65,8 +65,8 @@ license or GitHub visibility.
 
 Exec and try prepend managed resource argv from prepared `config/settings.json`
 and set `PI_CODING_AGENT_DIR`, `RPIV_CONFIG_HOME`, `PI_LENS_CONFIG_PATH`, and
-`PIATTRO_RESOURCE_DIR`. The manager exports a validated JSON envelope in
-`PIATTRO_MANAGED_RESOURCE_ARGV`.
+`ATTRO_RESOURCE_DIR`. The manager exports a validated JSON envelope in
+`ATTRO_MANAGED_RESOURCE_ARGV`.
 
 **Pending verification gate:** subagent child processes must inherit pinned
 parent-release managed resource argv at spawn time so grandchildren do not lose
@@ -77,7 +77,7 @@ parent release root. Implementation and regression tests at the spawn seam are
 
 ## Update lanes
 
-Consumer updates adopt a reviewed Piattro release. They do not merge upstream
+Consumer updates adopt a reviewed Attro release. They do not merge upstream
 plugins on the consumer's computer.
 
 Maintainer automation discovers new upstream revisions and versions. The next
@@ -92,7 +92,7 @@ implicit fetch-and-execute from an unreviewed remote.
 
 ## Public release checklist
 
-- [x] Choose and apply a license for original Piattro code with the owner's approval
+- [x] Choose and apply a license for original Attro code with the owner's approval
       (MIT, explicitly selected by the owner; see `LICENSE`).
 - [ ] Audit third-party licenses, notices, assets, and redistribution rights
       (bb-cli MIT and Herdr Apache-2.0 bundled in `profile/resources`; host

@@ -8,10 +8,10 @@ history, caches, and machine binaries are not distributed through Git.
 
 ## Approved continuity decision
 
-The owner selected a **separate canonical `~/.piattro/agent` profile**, initialized
+The owner selected a **separate canonical `~/.attro/agent` profile**, initialized
 once, rather than reusing or copying the live `~/.pi/agent` authentication store.
 
-- Authenticate once when adopting Piattro; all subsequent managed releases use
+- Authenticate once when adopting Attro; all subsequent managed releases use
   the same canonical user-profile path.
 - Preserve user preferences, login state, and ordinary per-working-directory
   sessions across updates and rollback.

@@ -1,17 +1,17 @@
 # Update automation
 
-Piattro separates maintainer update discovery from consumer release activation.
+Attro separates maintainer update discovery from consumer release activation.
 Updating a source pin is not the same as publishing a new stable distribution.
 A weekly discovery report is **not** an automatic consumer release feed.
 
 ## Implemented discovery
 
 ```sh
-python3 scripts/check_updates.py --report /tmp/piattro-updates.json
-python3 scripts/check_updates.py --assess-merges --report /tmp/piattro-merges.json
+python3 scripts/check_updates.py --report /tmp/attro-updates.json
+python3 scripts/check_updates.py --assess-merges --report /tmp/attro-merges.json
 ```
 
-The first command reads `sources.lock.json` and `piattro.json`, queries the
+The first command reads `sources.lock.json` and `attro.json`, queries the
 upstream default-branch HEADs and npm `latest` versions, and writes a JSON
 report. It does not change pins, checkout branches, install packages, or change
 your live environment. A different npm `latest` is a candidate to review, not
@@ -60,13 +60,13 @@ identity to be established first. The intended next lane is:
 4. After approval, publish the fork commits, then update root gitlinks and recipe
    pins together in a root PR.
 5. Run fresh `./install` and rollback checks for the candidate release.
-6. Approve and publish a Piattro tag; only then advertise it to consumers.
+6. Approve and publish a Attro tag; only then advertise it to consumers.
 
 Grant any future GitHub App only the specific repositories and permissions it
 needs. Keep release credentials out of untrusted PR jobs. Do not auto-promote
 an update merely because it merges cleanly or its unit tests pass.
 
-Until a public stable feed exists, `piattro update --repo /trusted/checkout`
+Until a public stable feed exists, `attro update --repo /trusted/checkout`
 prepares that explicit local recipe; it does not fetch the newest upstream
-versions. Shared-profile state at `~/.piattro/agent` persists across consumer
-updates. See [publication gates](publication.md) and [design](piattro-design.md).
+versions. Shared-profile state at `~/.attro/agent` persists across consumer
+updates. See [publication gates](publication.md) and [design](attro-design.md).

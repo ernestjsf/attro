@@ -9,8 +9,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-from piattro.paths import lock_path
-from piattro.validate import ValidationError
+from attro.paths import lock_path
+from attro.validate import ValidationError
 
 
 @contextmanager
@@ -27,7 +27,7 @@ def operation_lock(state_root: Path, *, fault_after_acquire: bool = False) -> It
 
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise ValidationError("another Piattro operation is already running") from exc
+            raise ValidationError("another Attro operation is already running") from exc
         payload = {
             "pid": os.getpid(),
             "startedAt": time.time(),

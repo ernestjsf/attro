@@ -1,10 +1,10 @@
 # Public release preparation
 
-Piattro's original code is MIT, as selected by its owner. See `LICENSE` and
+Attro's original code is MIT, as selected by its owner. See `LICENSE` and
 `THIRD_PARTY_NOTICES.md`. That does not make the existing private workbench or
 fork histories automatically safe to publish.
 
-**Current status:** the root repository `ernestjsf/pi-customizations` remains
+**Current status:** the root repository `ernestjsf/attro` remains
 **private**. No visibility change, public tag, or consumer release feed has been
 published. Audits of the final committed candidate and full intended histories
 are **pending**.
@@ -12,7 +12,7 @@ are **pending**.
 ## Current source topology
 
 The root checkout is `pi-customizations`, with a `quattro` branch and GitHub
-remote `https://github.com/ernestjsf/pi-customizations.git`. Its seven submodule
+remote `https://github.com/ernestjsf/attro.git`. Its seven submodule
 URLs point to the maintainer's fork mirrors. Setup documentation currently
 requires private GitHub authentication. This implementation does not rename
 repositories, change visibility, push branches, or certify anonymous retrieval.
@@ -32,7 +32,7 @@ The audit also found:
 
 | Live resource | Distribution treatment |
 | --- | --- |
-| `pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk` | Exact npm pins in `piattro.json`; never rely on an existing global install. |
+| `pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. |
 | `auto-session-name.ts`, `turn-status.ts` | Standalone personal extensions; not automatically copied. Audit and package separately if selected for the public profile. |
 | `safety-guard.ts`, `pi-automode` | Personal behavior/policy extensions; seed config may ship without implementation; do not silently transplant policy into public defaults. |
 | Herdr extensions and externally installed skills | Herdr **skill and pi integration assets** are bundled in `profile/resources` under Apache-2.0 with notices; the **Herdr binary** is a host tool and is **not** bundled. |
@@ -47,7 +47,7 @@ maintainer's personal behavior. Opinionated model routes (including Sol high for
 the reviewer agent) are user-config metadata in the seed profile; availability
 depends on the installer's own provider accounts.
 
-Piattro **0.2.0** uses a separate canonical `~/.piattro/agent` profile. Publication
+Attro **0.2.0** uses a separate canonical `~/.attro/agent` profile. Publication
 docs must not imply credential migration from live `~/.pi/agent`.
 
 ## Required evidence before publication
@@ -75,3 +75,18 @@ docs must not imply credential migration from live `~/.pi/agent`.
 Keep the stable consumer update feed disabled until these gates are satisfied.
 Scheduled update **discovery** (see [automation](automation.md)) is not an
 automatic consumer release feed.
+
+
+## Fork URL identities (Attro mirrors)
+
+These GitHub repository names are Attro mirror identities; plugin directory names in this checkout are unchanged:
+
+| Legacy fork URL | Attro fork URL |
+|---|---|
+| `ernestjsf/pi-zentui` | `ernestjsf/attro-zentui` |
+| `ernestjsf/pi-cc-extensions` | `ernestjsf/attro-cc-extensions` |
+| `ernestjsf/pi-web-access` | `ernestjsf/attro-web-access` |
+| `ernestjsf/pi-lens` | `ernestjsf/attro-lens` |
+| `ernestjsf/rpiv-mono` | `ernestjsf/attro-rpiv` |
+| `ernestjsf/pi-ask-user` | `ernestjsf/attro-ask-user` |
+| `ernestjsf/pi-subagents-quattro` | `ernestjsf/attro-subagents` |

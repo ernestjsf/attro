@@ -14,8 +14,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from piattro.cli import main
-from piattro.validate import ValidationError, sha256_file, validate_descriptor, validate_public_npm_lock
+from attro.cli import main
+from attro.validate import ValidationError, sha256_file, validate_descriptor, validate_public_npm_lock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,7 +47,7 @@ class RuntimeLockTests(unittest.TestCase):
         pin = self.git("rev-parse", "HEAD", cwd=plugin)
         self.descriptor = {
             "schemaVersion": 1,
-            "distribution": "piattro",
+            "distribution": "attro",
             "version": "0.2.0",
             "stateSchemaVersion": 1,
             "manifestSchemaVersion": 1,
@@ -160,10 +160,10 @@ install_deps()
         core_dir.mkdir(parents=True, exist_ok=True)
         npm_dir.mkdir(parents=True, exist_ok=True)
         (core_dir / "package.json").write_text(
-            json.dumps({"name": "piattro-release-pi", "private": True, "dependencies": core_deps}, sort_keys=True) + "\n"
+            json.dumps({"name": "attro-release-pi", "private": True, "dependencies": core_deps}, sort_keys=True) + "\n"
         )
         (npm_dir / "package.json").write_text(
-            json.dumps({"name": "piattro-release-npm", "private": True, "dependencies": npm_deps}, sort_keys=True) + "\n"
+            json.dumps({"name": "attro-release-npm", "private": True, "dependencies": npm_deps}, sort_keys=True) + "\n"
         )
         lock_body = json.dumps({"lockfileVersion": 3, "packages": {}}) + "\n"
         core_sha = npm_sha = None
@@ -182,7 +182,7 @@ install_deps()
         return core_sha, npm_sha
 
     def commit_inputs(self):
-        (self.repo / "piattro.json").write_text(json.dumps(self.descriptor, sort_keys=True) + "\n")
+        (self.repo / "attro.json").write_text(json.dumps(self.descriptor, sort_keys=True) + "\n")
         (self.repo / "sources.lock.json").write_text(json.dumps(self.lock, sort_keys=True) + "\n")
         self.git("add", "-A")
         if subprocess.run(["git", "status", "--porcelain"], cwd=self.repo, capture_output=True, text=True).stdout.strip():
@@ -204,7 +204,7 @@ install_deps()
         return stdout.getvalue(), stderr.getvalue()
 
     def test_descriptor_accepts_runtime_locks(self):
-        data = validate_descriptor(REPO_ROOT / "piattro.json")
+        data = validate_descriptor(REPO_ROOT / "attro.json")
         self.assertEqual(data["runtimeLocks"], {"core": "runtime/core", "npm": "runtime/npm"})
 
     def test_shipped_runtime_locks_are_public(self):

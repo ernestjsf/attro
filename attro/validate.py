@@ -13,8 +13,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from piattro.constants import PROFILE_PLACEHOLDERS, SUPPORTED_PLATFORMS
-from piattro.paths import safe_child
+from attro.constants import PROFILE_PLACEHOLDERS, SUPPORTED_PLATFORMS
+from attro.paths import safe_child
 
 RELEASE_ID_RE = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}")
 CORE_PACKAGE = "@earendil-works/pi-coding-agent"
@@ -87,7 +87,7 @@ def validate_release_id(release_id: Any) -> None:
 
 
 def validate_descriptor(path: Path) -> dict[str, Any]:
-    from piattro.npm_packages import normalize_npm_packages, validate_version
+    from attro.npm_packages import normalize_npm_packages, validate_version
 
     data = load_json(path)
     for key in ("schemaVersion", "stateSchemaVersion", "manifestSchemaVersion"):
@@ -144,7 +144,7 @@ def validate_state(data: dict[str, Any]) -> None:
 
 
 def validate_manifest(data: dict[str, Any]) -> None:
-    from piattro.npm_packages import normalize_npm_packages, validate_version
+    from attro.npm_packages import normalize_npm_packages, validate_version
 
     schema(data)
     validate_release_id(text(data.get("releaseId"), "releaseId"))
@@ -204,7 +204,7 @@ def validate_public_npm_lock(path: Path) -> None:
 
 
 def validate_runtime_lock_package(package: dict[str, Any], entries: list[dict[str, str]], *, label: str) -> None:
-    from piattro.npm_packages import npm_dependencies_from_entries
+    from attro.npm_packages import npm_dependencies_from_entries
 
     expected = npm_dependencies_from_entries(entries)
     deps = package.get("dependencies")
@@ -339,7 +339,7 @@ def compute_release_id(descriptor: dict[str, Any], sources_lock: dict[str, Any],
 
 
 def render_profile(profile_text: str, release_root: Path, checkout_root: Path, descriptor: dict[str, Any] | None = None) -> str:
-    from piattro.npm_packages import npm_package_install_dir
+    from attro.npm_packages import npm_package_install_dir
 
     try:
         payload = json.loads(profile_text)

@@ -1,11 +1,17 @@
 # Local milestone verification
 
-Evidence from Piattro implementation work on macOS. This is **not** a public
+Evidence from Attro implementation work on macOS. This is **not** a public
 release certification or evidence of Linux/Windows/second-machine compatibility.
-**Piattro 0.2.0** shared-profile, `./install`, and subagent resource-inheritance
+**Attro 0.2.0** shared-profile, `./install`, and subagent resource-inheritance
 gates are **partially verified locally**, not certified for publication.
 
-## Current v0.2 local checkpoint
+## Attro rename verification
+
+After comment cleanup, the renamed tree passed all **125 Python tests**, the full Node 26 subagent suite, pinned Pyright (**0 errors, 0 warnings**), installer compilation, and whitespace checks. `bin/attro --help` and the legacy `bin/piattro --help` produce identical output. The canonical-only `ATTRO_HOME` installer export case was observed failing before correction and passes now. New child-namespace tests were also observed RED before implementation and GREEN afterward.
+
+Independent Fable review found no blocking state-compatibility or child-namespace defects. A private source snapshot passed Gitleaks 8.30.1 with zero findings. All eight GitHub repositories were renamed with stable repository IDs and private visibility; local checkout paths, upstream identities, and branch history were preserved. This does not close the fresh-install or publication gates below.
+
+## Pre-rename v0.2 local checkpoint
 
 After comment cleanup:
 
@@ -36,7 +42,7 @@ Historical results (2026-09-05, pre–shared-profile milestone):
 - Fresh Pyright: **0 errors, 0 warnings** on the then-current tree.
 - Whitespace checks passed.
 
-The current 119-test suite includes installer, profile inventory, runtime-lock
+That 119-test suite included installer, profile inventory, runtime-lock
 validation, and shared-profile lifecycle coverage. The compact-JSON lock
 regression was observed failing before correction and passes now.
 
@@ -56,7 +62,7 @@ The `./install` script and `tests/test_install.py` cover:
 - launcher symlink creation with conflict refusal
 - partial rollback on activation failure
 - bin-directory install lock (O_NOFOLLOW, flock)
-- custom `PIATTRO_HOME` handling
+- custom `ATTRO_HOME` handling
 
 **16 installer tests passed** in the latest local run documented in the
 continuation checkpoint. This does not prove anonymous clone, combined TUI, or
@@ -69,7 +75,8 @@ was populated with exact committed submodule pins. It does **not** prove public
 or anonymous source accessibility and predates shared-v1 layout and `./install`.
 
 With `WORK` identifying that temporary directory and `RELEASE_ID` the ID printed
-by setup, these commands passed:
+by setup, these commands passed. Historical command names are preserved because
+that immutable commit predates the Attro rename:
 
 ```sh
 (cd "$WORK/source" && python3 scripts/verify.py)
@@ -90,7 +97,7 @@ Results:
 - Retained core launched after renaming the source checkout away.
 
 Shared-v1 preparation uses committed `runtime/core` and `runtime/npm` lock
-inputs and a canonical `~/.piattro/agent` profile. **Repeat fresh-install
+inputs and a canonical `~/.attro/agent` profile. **Repeat fresh-install
 verification** with `./install` and shared-profile continuity before claiming
 v0.2 readiness.
 
@@ -119,7 +126,7 @@ coverage was added.
 
 RPIV environment isolation received independent confirmation in a controlled
 ambient-root test run (263 files, 5185 tests pass; sentinel files unchanged).
-That validates RPIV config routing, not full Piattro publication readiness.
+That validates RPIV config routing, not full Attro publication readiness.
 
 No public repositories, tags, or artifacts were pushed. No live Pi registration,
 PATH, global package, or `~/.pi/agent` migration was performed as part of these

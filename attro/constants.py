@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-PIATTRO_STATE_SCHEMA = 1
-PIATTRO_DESCRIPTOR_SCHEMA = 1
-PIATTRO_MANIFEST_SCHEMA = 1
+ATTRO_STATE_SCHEMA = 1
+ATTRO_DESCRIPTOR_SCHEMA = 1
+ATTRO_MANIFEST_SCHEMA = 1
 SUPPORTED_PLATFORMS = frozenset({"darwin", "linux"})
 PREPARED_MARKER = ".prepared"
 OPERATIONS_LOCK = ".operations.lock"
 STATE_FILE = "state.json"
 MANIFEST_FILE = "manifest.json"
+DESCRIPTOR_FILE = "attro.json"
 
 # Hardcoded reviewed shell commands only — never execute manifest shell strings.
 NPM_CI = ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"]

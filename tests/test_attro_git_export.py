@@ -11,8 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from piattro.git_export import export_tracked_tree  # noqa: E402
-from piattro.validate import ValidationError  # noqa: E402
+from attro.git_export import export_tracked_tree  # noqa: E402
+from attro.validate import ValidationError  # noqa: E402
 
 
 class GitExportTests(unittest.TestCase):

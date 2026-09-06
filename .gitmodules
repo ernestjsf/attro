@@ -1,21 +1,21 @@
 [submodule "plugins/pi-zentui"]
 	path = plugins/pi-zentui
-	url = https://github.com/ernestjsf/pi-zentui.git
+	url = https://github.com/ernestjsf/attro-zentui.git
 [submodule "plugins/pi-cc-extensions"]
 	path = plugins/pi-cc-extensions
-	url = https://github.com/ernestjsf/pi-cc-extensions.git
+	url = https://github.com/ernestjsf/attro-cc-extensions.git
 [submodule "plugins/pi-web-access"]
 	path = plugins/pi-web-access
-	url = https://github.com/ernestjsf/pi-web-access.git
+	url = https://github.com/ernestjsf/attro-web-access.git
 [submodule "plugins/pi-lens"]
 	path = plugins/pi-lens
-	url = https://github.com/ernestjsf/pi-lens.git
+	url = https://github.com/ernestjsf/attro-lens.git
 [submodule "plugins/rpiv-mono"]
 	path = plugins/rpiv-mono
-	url = https://github.com/ernestjsf/rpiv-mono.git
+	url = https://github.com/ernestjsf/attro-rpiv.git
 [submodule "plugins/pi-ask-user"]
 	path = plugins/pi-ask-user
-	url = https://github.com/ernestjsf/pi-ask-user.git
+	url = https://github.com/ernestjsf/attro-ask-user.git
 [submodule "plugins/pi-subagents"]
 	path = plugins/pi-subagents
-	url = https://github.com/ernestjsf/pi-subagents-quattro.git
+	url = https://github.com/ernestjsf/attro-subagents.git

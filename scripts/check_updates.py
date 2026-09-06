@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Discover upstream updates for Piattro-maintained fork pins.
+"""Discover upstream updates for Attro-maintained fork pins.
 
 Read-only discovery: does not mutate sources.lock.json, submodules, or live
 checkouts. Emits a deterministic JSON report. Errors are recorded explicitly;
@@ -28,7 +28,7 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LOCK = ROOT / "sources.lock.json"
-DEFAULT_DESCRIPTOR = ROOT / "piattro.json"
+DEFAULT_DESCRIPTOR = ROOT / "attro.json"
 DEFAULT_PI_PACKAGE = "@earendil-works/pi-coding-agent"
 NPM_REGISTRY = "https://registry.npmjs.org"
 
@@ -167,7 +167,7 @@ def git_ls_remote_head(url: str, git: GitRunner = default_git_runner) -> GitRemo
 
 
 def default_http_fetch(url: str) -> dict[str, Any]:
-    request = Request(url, headers={"Accept": "application/json", "User-Agent": "pi-customizations-check-updates/1"})
+    request = Request(url, headers={"Accept": "application/json", "User-Agent": "attro-check-updates/1"})
     with urlopen(request, timeout=HTTP_TIMEOUT) as response:
         payload = response.read().decode("utf-8")
     value = json.loads(payload)
@@ -377,7 +377,7 @@ def assess_fork_merge(
         return {"status": "clean", "clean": True, "error": None}
 
     safe = git_safe_env()
-    with tempfile.TemporaryDirectory(prefix="piattro-merge-check-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="attro-merge-check-") as tmp:
         repo = Path(tmp) / "fork"
         try:
             clone = git("clone", "--no-checkout", origin_url, str(repo))
@@ -643,7 +643,7 @@ def main(argv: list[str] | None = None) -> int:
         "--descriptor",
         type=Path,
         default=DEFAULT_DESCRIPTOR,
-        help="piattro release descriptor (required)",
+        help="attro release descriptor (required)",
     )
     parser.add_argument(
         "--report",

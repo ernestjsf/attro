@@ -8,8 +8,8 @@ import subprocess
 import tarfile
 from pathlib import Path
 
-from piattro.paths import safe_child
-from piattro.validate import ValidationError, assert_copy_allowed, git
+from attro.paths import safe_child
+from attro.validate import ValidationError, assert_copy_allowed, git
 
 
 def export_tracked_tree(repo_root: Path, dst_root: Path, revision: str = "HEAD") -> None:

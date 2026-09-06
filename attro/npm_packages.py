@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from piattro.validate import ValidationError
+from attro.validate import ValidationError
 
 PACKAGE_NAME_RE = re.compile(
     r"(?:(@[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*)|([a-z0-9][a-z0-9._-]*))"
@@ -54,7 +54,7 @@ def npm_package_install_dir(release_root: Path, package_name: str) -> Path:
 
 def normalize_npm_packages(raw: Any) -> list[dict[str, str]]:
     if not isinstance(raw, list):
-        raise ValidationError("piattro.json npmPackages must be an array")
+        raise ValidationError("attro.json npmPackages must be an array")
     normalized: list[dict[str, str]] = []
     seen_packages: set[str] = set()
     for index, entry in enumerate(raw):

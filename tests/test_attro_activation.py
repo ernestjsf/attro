@@ -11,12 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from piattro.constants import MANIFEST_FILE, PREPARED_MARKER  # noqa: E402
-from piattro.state import activate_release, register_release, release_env  # noqa: E402
-from piattro.validate import sha256_file
+from attro.constants import MANIFEST_FILE, PREPARED_MARKER  # noqa: E402
+from attro.state import activate_release, register_release, release_env  # noqa: E402
+from attro.validate import sha256_file
 
 
-def _write_release(root: Path, release_id: str, *, marker: str, legacy: bool = False) -> Path:
+def _write_release(root: Path, release_id: str, *, marker: str, legacy: bool = False, distribution: str = "attro") -> Path:
     release_path = root.resolve() / "releases" / release_id
     agent_dir = release_path / "agent"
     agent_dir.mkdir(parents=True)
@@ -45,7 +45,7 @@ def _write_release(root: Path, release_id: str, *, marker: str, legacy: bool = F
         "releaseId": release_id,
         "preparedAt": "2026-01-01T00:00:00+00:00",
         "checkoutRoot": "/tmp/checkout",
-        "distribution": "piattro",
+        "distribution": "piattro" if legacy else distribution,
         "descriptorVersion": "0.1.0",
         "layout": {name: str(release_path / name) for name in ("pi", "plugins", "config", "agent", "npm")},
         "provenance": {

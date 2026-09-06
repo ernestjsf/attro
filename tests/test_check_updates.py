@@ -22,7 +22,7 @@ SHA_C = "c" * 40
 
 VALID_DESCRIPTOR = {
     "schemaVersion": 1,
-    "distribution": "piattro",
+    "distribution": "attro",
     "version": "0.1.0",
     "core": {
         "package": "@earendil-works/pi-coding-agent",
@@ -93,7 +93,7 @@ class DiscoverDescriptorTests(unittest.TestCase):
             lock_path.write_text(json.dumps({"schemaVersion": 1, "submodules": []}), encoding="utf-8")
             report = check_updates.build_report(
                 lock_path,
-                Path(tmp) / "piattro.json",
+                Path(tmp) / "attro.json",
                 assess_merges=False,
                 git=lambda *a, **k: ls_remote_result(SHA_A),
                 fetch_json=lambda url: {"version": "0.85.0"},
@@ -103,12 +103,12 @@ class DiscoverDescriptorTests(unittest.TestCase):
 
     def test_release_version_is_not_used_as_core_pin(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             descriptor_path.write_text(
                 json.dumps(
                     {
                         "schemaVersion": 1,
-                        "distribution": "piattro",
+                        "distribution": "attro",
                         "version": "0.99.0",
                     }
                 ),
@@ -123,7 +123,7 @@ class DiscoverDescriptorTests(unittest.TestCase):
 
     def test_core_package_must_be_supported(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             bad = dict(VALID_DESCRIPTOR)
             bad["core"] = {"package": "other-package", "version": "1.0.0"}
             descriptor_path.write_text(json.dumps(bad), encoding="utf-8")
@@ -141,7 +141,7 @@ class DiscoverDescriptorTests(unittest.TestCase):
             return {"version": "0.86.0"}
 
         with tempfile.TemporaryDirectory() as tmp:
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             descriptor_path.write_text(json.dumps(VALID_DESCRIPTOR), encoding="utf-8")
             descriptor, errors = check_updates.discover_descriptor(descriptor_path, fetch_json=fetch)
 
@@ -165,7 +165,7 @@ class DiscoverDescriptorTests(unittest.TestCase):
         }
 
         with tempfile.TemporaryDirectory() as tmp:
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             descriptor_path.write_text(json.dumps(descriptor), encoding="utf-8")
             result, errors = check_updates.discover_descriptor(
                 descriptor_path,
@@ -182,7 +182,7 @@ class DiscoverDescriptorTests(unittest.TestCase):
         descriptor = dict(VALID_DESCRIPTOR)
         descriptor["npmPackages"] = [{"spec": "pi-btw@0.4.1", "placeholder": "{{X}}"}]
         with tempfile.TemporaryDirectory() as tmp:
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             descriptor_path.write_text(json.dumps(descriptor), encoding="utf-8")
             _, errors = check_updates.discover_descriptor(
                 descriptor_path,
@@ -314,7 +314,7 @@ class GitRunnerTests(unittest.TestCase):
 class BuildReportTests(unittest.TestCase):
     def test_missing_lock_is_error_status(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             descriptor_path.write_text(json.dumps(VALID_DESCRIPTOR), encoding="utf-8")
             report = check_updates.build_report(
                 Path(tmp) / "missing.lock.json",
@@ -345,7 +345,7 @@ class BuildReportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             lock_path = Path(tmp) / "sources.lock.json"
             lock_path.write_text(json.dumps(lock), encoding="utf-8")
-            descriptor_path = Path(tmp) / "piattro.json"
+            descriptor_path = Path(tmp) / "attro.json"
             descriptor = dict(VALID_DESCRIPTOR)
             descriptor["core"]["version"] = "0.80.0"
             descriptor_path.write_text(json.dumps(descriptor), encoding="utf-8")
@@ -373,7 +373,7 @@ class MainIntegrationTests(unittest.TestCase):
                     "--lock",
                     str(lock_path),
                     "--descriptor",
-                    str(Path(tmp) / "piattro.json"),
+                    str(Path(tmp) / "attro.json"),
                     "--report",
                     str(report_path),
                 ]

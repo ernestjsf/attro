@@ -11,27 +11,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from piattro.validate import ValidationError, render_profile, validate_descriptor  # noqa: E402
+from attro.validate import ValidationError, render_profile, validate_descriptor  # noqa: E402
 
 
 class DescriptorValidationTests(unittest.TestCase):
     def test_accepts_repo_descriptor(self) -> None:
-        data = validate_descriptor(ROOT / "piattro.json")
-        self.assertEqual(data["distribution"], "piattro")
+        data = validate_descriptor(ROOT / "attro.json")
+        self.assertEqual(data["distribution"], "attro")
         self.assertEqual(data["core"]["version"], "0.85.0")
         self.assertEqual(data["core"]["engines"]["node"], ">=22.19.0")
 
     def test_rejects_missing_core_version(self) -> None:
         payload = {
             "schemaVersion": 1,
-            "distribution": "piattro",
+            "distribution": "attro",
             "version": "0.1.0",
             "profile": "profile/settings.json",
             "sourcesLock": "sources.lock.json",
             "core": {"package": "@earendil-works/pi-coding-agent"},
         }
         with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "piattro.json"
+            path = Path(tmp) / "attro.json"
             path.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaises(ValidationError):
                 validate_descriptor(path)
@@ -40,7 +40,7 @@ class DescriptorValidationTests(unittest.TestCase):
 class RenderProfileTests(unittest.TestCase):
     def test_uses_final_release_root_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            release_root = Path(tmp) / "releases" / "piattro-0.1.0-deadbeef"
+            release_root = Path(tmp) / "releases" / "attro-0.1.0-deadbeef"
             release_root.mkdir(parents=True)
             (release_root / "plugins").mkdir()
             (release_root / "config").mkdir()

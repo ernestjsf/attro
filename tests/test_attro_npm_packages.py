@@ -10,14 +10,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from piattro.npm_packages import (  # noqa: E402
+from attro.npm_packages import (  # noqa: E402
     normalize_npm_packages,
     npm_package_install_dir,
     parse_npm_spec,
     validate_package_name,
     validate_version,
 )
-from piattro.validate import ValidationError, render_profile, validate_descriptor  # noqa: E402
+from attro.validate import ValidationError, render_profile, validate_descriptor  # noqa: E402
 
 
 class ParseNpmSpecTests(unittest.TestCase):
@@ -74,7 +74,7 @@ class RenderProfileNpmTests(unittest.TestCase):
 
 class DescriptorNpmTests(unittest.TestCase):
     def test_repo_descriptor_includes_four_live_packages(self) -> None:
-        data = validate_descriptor(ROOT / "piattro.json")
+        data = validate_descriptor(ROOT / "attro.json")
         packages = [(entry["package"], entry["version"]) for entry in data["npmPackages"]]
         self.assertEqual(
             packages,

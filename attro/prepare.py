@@ -10,12 +10,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from piattro.constants import LENS_BUILD, LENS_CHECK_GRAMMARS, LENS_GRAMMARS, MANIFEST_FILE, NPM_CI, NPM_INSTALL, PREPARED_MARKER
-from piattro.git_export import export_tracked_tree
-from piattro.npm_packages import npm_dependencies_from_entries, npm_spec
-from piattro.paths import release_dir, releases_dir, safe_child, staging_dir, validate_state_root
-from piattro.profile import validate_profile_tree, validate_resource_package
-from piattro.validate import ValidationError, check_node, compute_release_id, fsync_dir, git, load_json, render_profile, run_command, sha256_file, validate_checkout, validate_descriptor, validate_public_npm_lock, validate_runtime_lock_package, write_json_atomic
+from attro.constants import LENS_BUILD, LENS_CHECK_GRAMMARS, LENS_GRAMMARS, MANIFEST_FILE, NPM_CI, NPM_INSTALL, PREPARED_MARKER
+from attro.git_export import export_tracked_tree
+from attro.npm_packages import npm_dependencies_from_entries, npm_spec
+from attro.paths import release_dir, releases_dir, safe_child, staging_dir, validate_state_root
+from attro.profile import validate_profile_tree, validate_resource_package
+from attro.validate import ValidationError, check_node, compute_release_id, fsync_dir, git, load_json, render_profile, run_command, sha256_file, validate_checkout, validate_descriptor, validate_public_npm_lock, validate_runtime_lock_package, write_json_atomic
 
 
 def _install_packages(
@@ -49,7 +49,7 @@ def _install_packages(
             raise ValidationError(f"dependency lock changed during npm ci: {name}")
         lock_source = lock_rel
     else:
-        write_json_atomic(install_root / "package.json", {"name": f"piattro-release-{name}", "private": True, "dependencies": npm_dependencies_from_entries(entries)})
+        write_json_atomic(install_root / "package.json", {"name": f"attro-release-{name}", "private": True, "dependencies": npm_dependencies_from_entries(entries)})
         run_command(NPM_INSTALL, install_root)
         lock = safe_child(install_root, "package-lock.json")
         if not lock.is_file():
@@ -95,7 +95,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
     checkout_root = checkout_root.expanduser().resolve()
     state_root = validate_state_root(state_root, checkout_root)
     head = git("rev-parse", "HEAD", cwd=checkout_root)
-    descriptor = validate_descriptor(safe_child(checkout_root, "piattro.json"))
+    descriptor = validate_descriptor(safe_child(checkout_root, "attro.json"))
     sources = validate_checkout(checkout_root, descriptor)
     if git("rev-parse", "HEAD", cwd=checkout_root) != head:
         raise ValidationError("checkout changed during validation; retry from a clean checkout")
@@ -107,7 +107,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
         workspace = Path(work)
         snapshot = workspace / "source"
         export_tracked_tree(checkout_root, snapshot, head)
-        committed_descriptor = validate_descriptor(safe_child(snapshot, "piattro.json"))
+        committed_descriptor = validate_descriptor(safe_child(snapshot, "attro.json"))
         committed_sources = load_json(safe_child(snapshot, committed_descriptor["sourcesLock"]))
         if committed_descriptor != descriptor or committed_sources != sources:
             raise ValidationError("descriptor or sources lock differs from committed snapshot")
@@ -115,7 +115,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
         rid = compute_release_id(descriptor, sources, checkout_root, head=head)
         final = release_dir(rid, state_root)
         if final.exists():
-            from piattro.state import prepared_manifest
+            from attro.state import prepared_manifest
 
             existing = prepared_manifest(final, rid)
             if existing["provenance"]["checkoutHead"] != head:
@@ -215,7 +215,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
             marker.flush()
             os.fsync(marker.fileno())
         fsync_dir(stage)
-        from piattro.state import prepared_manifest
+        from attro.state import prepared_manifest
 
         prepared_manifest(stage, rid, final_root=final)
         if final.exists() or final.is_symlink():

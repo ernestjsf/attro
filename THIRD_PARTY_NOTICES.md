@@ -1,6 +1,6 @@
 # Third-party notices
 
-The root MIT license applies to original Piattro code and documentation. It does
+The root MIT license applies to original Attro code and documentation. It does
 not replace third-party licenses. Preserve the license files, copyright headers,
 and attribution files in each source tree and installed dependency.
 
@@ -32,12 +32,12 @@ Additional upstream notices inside those trees remain authoritative:
 - Lens coderabbit rules:
   `plugins/pi-lens/rules/ast-grep-rules/coderabbit/LICENSE` (Apache-2.0).
 - Zentui's README credits a Mohammad Alizade / Unsplash showcase image under
-  the **Unsplash License**, not MIT. Do not treat that image as Piattro artwork
+  the **Unsplash License**, not MIT. Do not treat that image as Attro artwork
   or imply that all repository assets use the source-code license.
 
-## Bundled profile resources (Piattro 0.2.0)
+## Bundled profile resources (Attro 0.2.0)
 
-Piattro ships selected redistributable skills and extensions in
+Attro ships selected redistributable skills and extensions in
 `profile/resources/`. Provenance is recorded in `profile/inventory.json`.
 
 | Component | License | Notice / license file |

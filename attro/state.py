@@ -7,10 +7,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from piattro.constants import MANIFEST_FILE, PREPARED_MARKER
-from piattro.paths import release_dir, safe_child, state_path
-from piattro.profile import initialize_shared_agent, require_shared_release, validate_profile_tree, validate_shared_agent
-from piattro.validate import ValidationError, load_json, sha256_file, validate_manifest, validate_release_id, validate_sources_lock, validate_state, write_json_atomic
+from attro.constants import MANIFEST_FILE, PREPARED_MARKER
+from attro.paths import release_dir, safe_child, state_path
+from attro.profile import initialize_shared_agent, require_shared_release, validate_profile_tree, validate_shared_agent
+from attro.validate import ValidationError, load_json, sha256_file, validate_manifest, validate_release_id, validate_sources_lock, validate_state, write_json_atomic
 
 
 def empty_state() -> dict[str, Any]:
@@ -161,17 +161,34 @@ def active_release_path(state_root: Path) -> Path | None:
     return path
 
 
+def _with_legacy_env_aliases(env: dict[str, str]) -> dict[str, str]:
+    aliases = {
+        "ATTRO_RESOURCE_DIR": "PIATTRO_RESOURCE_DIR",
+        "ATTRO_RELEASE_ID": "PIATTRO_RELEASE_ID",
+        "ATTRO_RELEASE_ROOT": "PIATTRO_RELEASE_ROOT",
+        "ATTRO_PI_BIN": "PIATTRO_PI_BIN",
+        "ATTRO_MANAGED": "PIATTRO_MANAGED",
+        "ATTRO_MANAGED_RESOURCE_ARGV": "PIATTRO_MANAGED_RESOURCE_ARGV",
+        "ATTRO_TRY": "PIATTRO_TRY",
+    }
+    merged = dict(env)
+    for canonical, legacy in aliases.items():
+        if canonical in merged:
+            merged[legacy] = merged[canonical]
+    return merged
+
+
 def release_env(release_path: Path, *, agent_dir: Path | None = None) -> dict[str, str]:
     manifest = prepared_manifest(release_path)
     require_shared_release(manifest)
     agent = agent_dir or validate_shared_agent(release_path.resolve().parents[1])
-    return {
+    return _with_legacy_env_aliases({
         "PI_CODING_AGENT_DIR": str(agent),
         "RPIV_CONFIG_HOME": str(agent / "rpiv-config"),
         "PI_LENS_CONFIG_PATH": str(agent / "lens-config.json"),
-        "PIATTRO_RESOURCE_DIR": str(release_path.resolve() / "profile/resources"),
-        "PIATTRO_RELEASE_ID": manifest["releaseId"],
-        "PIATTRO_RELEASE_ROOT": str(release_path.resolve()),
-        "PIATTRO_PI_BIN": manifest["provenance"]["core"]["piBinary"],
-        "PIATTRO_MANAGED": "1", "PI_OFFLINE": "1", "PI_SKIP_VERSION_CHECK": "1",
-    }
+        "ATTRO_RESOURCE_DIR": str(release_path.resolve() / "profile/resources"),
+        "ATTRO_RELEASE_ID": manifest["releaseId"],
+        "ATTRO_RELEASE_ROOT": str(release_path.resolve()),
+        "ATTRO_PI_BIN": manifest["provenance"]["core"]["piBinary"],
+        "ATTRO_MANAGED": "1", "PI_OFFLINE": "1", "PI_SKIP_VERSION_CHECK": "1",
+    })

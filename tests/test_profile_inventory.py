@@ -13,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "profile"
 sys.path.insert(0, str(ROOT))
 
-from piattro.profile import validate_profile_tree, validate_resource_package  # noqa: E402
-from piattro.validate import load_json  # noqa: E402
+from attro.profile import validate_profile_tree, validate_resource_package  # noqa: E402
+from attro.validate import load_json  # noqa: E402
 
 USERNAME_RE = re.compile(r"/Users/[^/\s\"']+|ernestjusuf")
 AGENT_FRONTMATTER_RE = re.compile(r"^---\n(?P<body>.*?)\n---", re.DOTALL)
@@ -153,7 +153,7 @@ class ProfileInventoryTests(unittest.TestCase):
 
     def test_gitops_references_resource_commit_skill(self) -> None:
         text = (PROFILE / "agent/agents/gitops.md").read_text()
-        self.assertIn("${PIATTRO_RESOURCE_DIR}/skills/commit/SKILL.md", text)
+        self.assertIn("${ATTRO_RESOURCE_DIR}/skills/commit/SKILL.md", text)
 
     def test_writing_great_skills_license_resolves(self) -> None:
         skill = (PROFILE / "resources/skills/writing-great-skills/SKILL.md").read_text()

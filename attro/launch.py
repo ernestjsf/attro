@@ -6,13 +6,13 @@ import json
 import os
 from pathlib import Path
 
-from piattro.guard import MANAGED_REFUSAL, blocked_pi_command
-from piattro.paths import safe_child
-from piattro.profile import RESOURCE_FLAGS, require_shared_release, seed_agent
-from piattro.state import prepared_manifest, release_env
-from piattro.validate import ValidationError, check_node, load_json
+from attro.guard import MANAGED_REFUSAL, blocked_pi_command
+from attro.paths import safe_child
+from attro.profile import RESOURCE_FLAGS, require_shared_release, seed_agent
+from attro.state import _with_legacy_env_aliases, prepared_manifest, release_env
+from attro.validate import ValidationError, check_node, load_json
 
-MANAGED_RESOURCE_ARGV_ENV = "PIATTRO_MANAGED_RESOURCE_ARGV"
+MANAGED_RESOURCE_ARGV_ENV = "ATTRO_MANAGED_RESOURCE_ARGV"
 KNOWN_RESOURCE_FLAGS = frozenset(RESOURCE_FLAGS.values())
 
 
@@ -69,6 +69,7 @@ def build_exec_env(release_path: Path, *, agent_dir: Path | None = None) -> dict
     env = os.environ.copy()
     env.update(release_env(release_path, agent_dir=agent_dir))
     env[MANAGED_RESOURCE_ARGV_ENV] = managed_resource_argv_envelope(release_path)
+    env = _with_legacy_env_aliases(env)
     env["PI_SKIP_VERSION_CHECK"] = "1"
     for key in (
         "PI_CODING_AGENT_SESSION_DIR",
@@ -77,6 +78,7 @@ def build_exec_env(release_path: Path, *, agent_dir: Path | None = None) -> dict
         "PI_PACKAGE_DIR",
         "PI_SERVER_DIR",
         "PI_SERVER_ID",
+        "ATTRO_TRY",
         "PIATTRO_TRY",
     ):
         env.pop(key, None)
@@ -85,8 +87,8 @@ def build_exec_env(release_path: Path, *, agent_dir: Path | None = None) -> dict
 
 def build_try_env(release_path: Path, isolated_agent: Path) -> dict[str, str]:
     env = build_exec_env(release_path, agent_dir=isolated_agent.resolve())
-    env["PIATTRO_TRY"] = "1"
-    return env
+    env["ATTRO_TRY"] = "1"
+    return _with_legacy_env_aliases(env)
 
 
 def populate_try_agent(release_path: Path, isolated_agent: Path) -> None:
