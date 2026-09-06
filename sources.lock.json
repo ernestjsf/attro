@@ -206,7 +206,7 @@
       "path": "config/zentui.json",
       "source": "~/.pi/agent/zentui.json",
       "sha256": "7ef5d08bda4d072a0a912c45b9c8966e7c31b7a9e8df8c646019af01f866f1a7",
-      "provenance": "Live display configuration: CC owns thinking, Zentui owns live progress, turn-status owns completion. Safety footer-label placement remains unchanged."
+      "provenance": "Shared display defaults: CC owns thinking and Zentui owns live progress. Standalone personal status integrations are not bundled."
     },
     {
       "path": "config/claude-code-style.json",

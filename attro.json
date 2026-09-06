@@ -6,8 +6,6 @@
     "npm": "runtime/npm"
   },
   "profile": "profile/settings.json",
-  "profileResources": "profile/resources",
-  "profileSeed": "profile/agent",
   "sourcesLock": "sources.lock.json",
   "stateSchemaVersion": 1,
   "manifestSchemaVersion": 1,

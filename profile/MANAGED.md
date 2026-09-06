@@ -40,20 +40,21 @@ escaping a reserved management word (for example `attro -- doctor`).
 
 ## Shared profile (`~/.attro/agent`)
 
-On first activation of a shared-profile release, Attro seeds
-`~/.attro/agent` once from reviewed defaults in `profile/settings.json`,
-`profile/agent/`, pristine release config, and the bundled
-`profile/resources/` package. Subsequent activations, updates, and rollbacks
-**preserve** preferences, provider login, session history, and ordinary
-per-working-directory sessions in that directory.
+On first activation of a shared-profile release, Attro initializes
+`~/.attro/agent` once from reviewed **UI, package, and theme defaults** in
+`profile/settings.json` and the prepared release config (themes, plugin wiring,
+and the shared UI files copied from `config/`). Subsequent activations, updates,
+and rollbacks **preserve** preferences, provider login, session history, and
+ordinary per-working-directory sessions in that directory.
 
 Attro **never copies or symlinks** live OAuth tokens, auth files, sessions,
-trust decisions, or history from `~/.pi/agent`. Authenticate separately with
-`/login` after install. OAuth must be authenticated in the shared profile:
-Pi 0.85.0's per-path OAuth locks make sharing aliased token files unsafe. Agent
-file symlinks and hardlinks are refused. At runtime Pi may still load personal
-config/skills and trusted-project `AGENTS.md` / `.pi` resources according to
-upstream discovery rules.
+trust decisions, agent definitions, model routing, skills, prompts, or history
+from `~/.pi/agent`. Authenticate separately with `/login` after install. OAuth
+must be authenticated in the shared profile: Pi 0.85.0's per-path OAuth locks
+make sharing aliased token files unsafe. Agent file symlinks and hardlinks are
+refused. At runtime Pi may still load personal config/skills and trusted-project
+`AGENTS.md` / `.pi` resources according to upstream discovery rules. Attro does
+not edit `~/.attro/agent` when the repository recipe changes.
 
 Environment routing for exec and try (except trial override):
 
@@ -62,7 +63,7 @@ Environment routing for exec and try (except trial override):
 | `PI_CODING_AGENT_DIR` | Shared writable agent directory |
 | `RPIV_CONFIG_HOME` | `<agent>/rpiv-config` |
 | `PI_LENS_CONFIG_PATH` | `<agent>/lens-config.json` |
-| `ATTRO_RESOURCE_DIR` (alias: `PIATTRO_RESOURCE_DIR`) | `<release>/profile/resources` |
+| `ATTRO_RESOURCE_DIR` (alias: `PIATTRO_RESOURCE_DIR`) | Legacy release path; see below |
 
 Provider API keys and other ambient provider configuration from the environment
 are intentionally inherited. Attro does not override `HOME` or change
@@ -70,6 +71,15 @@ billing/provider routing. It clears inherited Pi session-directory/session
 markers and package/server path overrides. Pi startup network checks are disabled
 with `PI_OFFLINE=1` and `PI_SKIP_VERSION_CHECK=1`; this does not disable
 provider requests or plugin networking.
+
+### Legacy `ATTRO_RESOURCE_DIR`
+
+Older releases prepared with personal resource bundles set
+`ATTRO_RESOURCE_DIR` to `<release>/profile/resources`. Current recipe releases
+do not ship personal skills, prompts, or extensions in that tree. If your own
+configuration or extensions still reference the bundled path, move those assets
+into `~/.attro/agent` (or another Pi discovery location you control) and update
+the references yourself. Attro does not rewrite personal files for you.
 
 ## Retained release layout (shared-v1)
 
@@ -79,7 +89,7 @@ Each `releases/<id>/` contains:
 pi/          source-built Pi monorepo from pinned plugins/attro-core (see below)
 plugins/     committed plugin trees, with dependencies/build artifacts
 config/      allowlisted themes, plugin configs, pristine managed settings
-profile/     immutable seed defaults (profile/agent) and resource bundle (profile/resources)
+profile/     empty placeholder directories for legacy layout compatibility
 npm/         descriptor npmPackages installs from committed runtime lock inputs
 ```
 
@@ -99,8 +109,7 @@ Plugin paths retain their source layout, including
 `plugins/rpiv-mono/packages/rpiv-todo`. Themes from `themes/` and allowlisted
 plugin configs from `config/` are flattened by basename into release `config/`.
 Managed resource paths in prepared `config/settings.json` are absolute paths
-inside the release; launch prepends them as Pi CLI flags (`-e`, `--skill`,
-`--prompt-template`, `--theme`).
+inside the release; launch prepends them as Pi CLI flags (`-e`, `--theme`).
 
 Git exports use the validated committed root and pinned submodule commits, not
 mutable working-tree contents. Ignored build artifacts are not copied. Symlinked
@@ -142,24 +151,25 @@ reports that legacy credentials and history are **preserved, not migrated**.
 Prepare a new release from a current source revision before switching to
 shared-v1.
 
+Releases prepared before the personal-bundle boundary may still retain a
+populated `profile/resources/` tree. Those directories are immutable with their
+release. Preparing a new release from the current recipe does not delete or
+re-seed your shared profile.
+
 ## Try versus exec
 
 `attro try` uses a temporary agent directory seeded only from the release's
-pristine config and `profile/agent` defaults. It does not copy the shared
-profile's OAuth credentials, settings edits, trust decisions, or history.
-Session/provider/model/trust defaults are removed from trial settings. It runs
-Pi as a child process and removes the temporary agent directory on normal exit;
-trial logins/history are disposable. `exec` replaces the wrapper process with the
-physical release-local Pi executable and uses the shared profile.
+pristine config. It does not copy the shared profile's OAuth credentials,
+settings edits, trust decisions, or history. Session/provider/model/trust
+defaults are removed from trial settings. It runs Pi as a child process and
+removes the temporary agent directory on normal exit; trial logins/history are
+disposable. `exec` replaces the wrapper process with the physical release-local
+Pi executable and uses the shared profile.
 
 Neither mode is a sandbox. Project-local resources may load when Pi project trust
 allows them. Plugins and tools run with your normal user permissions and may
 read or write arbitrary home-directory files. Explicit Pi flags can also
 redirect sessions or load additional extensions.
-
-Bundled **bb-cli** and **Herdr** skills document optional host tools; the `bb`
-and `herdr` binaries themselves are **not** bundled and must be installed
-separately if you use those integrations.
 
 ## Native mutation guard
 

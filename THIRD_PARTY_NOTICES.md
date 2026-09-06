@@ -45,20 +45,12 @@ Source-core preparation downloads the hash-pinned upstream **0.85.0** model-data
 archive declared in `attro.json`; that asset carries its own upstream provenance
 and must be retained in audit material for prebuilt releases.
 
-## Bundled profile resources (Attro 0.2.0)
-
-Attro ships selected redistributable skills and extensions in
-`profile/resources/`. Provenance is recorded in `profile/inventory.json`.
-
-| Component | License | Notice / license file |
-| --- | --- | --- |
-| bb-cli skill | MIT ([get-bb/bb](https://github.com/get-bb/bb)) | `profile/resources/skills/bb-cli/NOTICE.md`, `profile/resources/licenses/get-bb-bb-MIT` |
-| Herdr skill | Apache-2.0 ([herdrdev/herdr](https://github.com/herdrdev/herdr)) | `profile/resources/skills/herdr/NOTICE.md`, `profile/resources/licenses/herdrdev-herdr-Apache-2.0` |
-| Herdr pi integration extensions | Apache-2.0 (upstream `@ 5eab32da`) | `profile/resources/extensions/herdr-agent-state.NOTICE.md` |
-
-The bundled **bb-cli** and **Herdr** skills document optional host integrations.
-The **`bb` CLI/server** and **`herdr` binary** are **not** bundled; users install
-those host tools separately if needed.
+Individual plugins may ship their own skills, examples, and documentation under
+their source trees. Those notices remain in the plugin repositories. Attro does
+**not** redistribute personal skills, prompts, or standalone user extensions from
+the distribution recipe. Users who install optional host tools (for example `bb`
+or `herdr`) or third-party skills in `~/.attro/agent` are responsible for
+retaining the applicable licenses and notices in their own environment.
 
 ## Runtime and dependency notices
 
@@ -87,3 +79,9 @@ safe to expose. Audit the intended public files and history, verify anonymous
 access to every pinned source, and obtain approval before changing visibility
 or pushing a public release. No repository visibility is changed by this file.
 The root repository remains **private** as of the latest documentation refresh.
+
+**History gate:** files removed from the current tree may still exist in earlier
+local Git commits and in releases prepared before the personal-bundle boundary.
+Do not treat the current checkout as proof that older branches or retained
+releases are safe to publish without a separate sanitized-history decision.
+See [publication gates](docs/publication.md).

@@ -293,6 +293,10 @@ install_deps()
         (agent / "auth.json").write_text('{"fixture":{"type":"oauth","access":"synthetic","refresh":"synthetic","expires":1}}')
         (agent / "sessions/project").mkdir(parents=True)
         (agent / "sessions/project/history.jsonl").write_text('{"synthetic":"history"}\n')
+        for relative in ("skills/commit/SKILL.md", "prompts/review.md", "agents/reviewer.md"):
+            personal = agent / relative
+            personal.parent.mkdir(parents=True, exist_ok=True)
+            personal.write_text("Personal content must survive a distribution update.\n")
         before = {p.relative_to(agent): p.read_bytes() for p in agent.rglob("*") if p.is_file()}
         launch_a = json.loads(self.cli("--json", "exec", "--dry-run", "--", "--model", "explicit", "-c")[0])
         self.assertEqual(launch_a["agentDir"], str(agent))
@@ -306,9 +310,15 @@ install_deps()
         env_a = build_exec_env(release_a)
         self.assertEqual(env_a["RPIV_CONFIG_HOME"], str(agent / "rpiv-config"))
         self.descriptor["version"] = "0.2.0"
+        self.descriptor.pop("profileSeed")
+        self.descriptor.pop("profileResources")
         self.commit_inputs()
         b = self.setup_release()
         launch_b = json.loads(self.cli("--json", "exec", "--dry-run")[0])
+        self.assertNotIn(launch_b["resourceDir"], launch_b["argv"])
+        release_b = self.state / "releases" / b["releaseId"]
+        self.assertEqual(list((release_b / "profile/agent").rglob("*")), [])
+        self.assertEqual(list((release_b / "profile/resources").rglob("*")), [])
         self.assertEqual(launch_a["agentDir"], launch_b["agentDir"])
         self.assertNotEqual(launch_a["resourceDir"], launch_b["resourceDir"])
         self.assertEqual(env_a, build_exec_env(release_a))
@@ -661,8 +671,8 @@ process.stdin.destroy();
         expected = {"quietStartup": True, "hideThinkingBlock": False, "editorPaddingX": 0, "outputPad": 1, "tuiMode": "fullscreen", "fullscreenScrollbar": "auto", "fullscreenExitOutput": "resume-hint", "collapseChangelog": True, "markdown": {"mermaid": "final"}}
         for key, value in expected.items():
             self.assertEqual(profile[key], value)
-        for key in ("defaultProvider", "defaultModel"):
-            self.assertIsInstance(profile[key], str)
+        for key in ("defaultProvider", "defaultModel", "enabledModels", "defaultThinkingLevel", "modelThinkingLevels"):
+            self.assertNotIn(key, profile)
         self.assertNotIn("defaultProjectTrust", profile)
 
     def test_committed_plugin_dependency_lock_preserved(self):

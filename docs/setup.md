@@ -39,10 +39,12 @@ If you set `ATTRO_HOME` during install, export the same value whenever you run
 `attro` later.
 
 After install, run **`attro`**, then `/login` for the providers you use. Attro
-does not copy credentials, OAuth tokens, or session history from `~/.pi/agent`.
-The shared profile at `~/.attro/agent` is seeded once on first activation from
-reviewed defaults and bundled resources; updates and rollback preserve whatever
-you establish there.
+does not copy credentials, OAuth tokens, session history, agent definitions,
+model routing, skills, or prompts from `~/.pi/agent`. The shared profile at
+`~/.attro/agent` is initialized once on first activation from reviewed UI,
+package, and theme defaults plus the prepared release config; updates and
+rollback preserve whatever you establish there. Personal configuration remains
+your responsibility under `~/.attro/agent` or other Pi discovery paths.
 
 Dry-run without writing state or links:
 
@@ -158,12 +160,13 @@ runtime readiness, attro-core build success, dependency installation, or host
 compatibility; `npm run check:grammars` is the separate Lens grammar provenance
 check.
 
-## Active installation and migration reference
+## Optional manual Pi migration (non-managed)
 
-The live global settings now use the seven local plugin paths below. This table
-remains the migration reference for a fresh machine: replace only matching package
-entries; it is not a replacement full settings JSON. **Attro managed install does
-not perform this migration** and does not copy live credentials or history:
+Attro managed install does **not** perform manual Pi settings migration and does
+not copy live credentials or history. If you maintain a separate global Pi
+installation and want to point matching package entries at this checkout's plugin
+paths, replace only the matching package identities below. This table is not a
+replacement full settings JSON:
 
 | Existing package identity | Replacement local path |
 | --- | --- |
@@ -183,13 +186,12 @@ old source and its replacement; never paste a fragment over the global settings
 document; and never run `pi remove`, because it would remove the original dirty
 repository registration.
 
-The root package may be added only for themes if desired. The current machine
-loads Quattro Green from `~/.pi/agent/themes/`; its tracked copy is in `themes/`
-and includes optional `dockBg` color `#0e1713`. USER-dirty theme copies and
-source hashes in `sources.lock.json` are preserved as reviewed display inputs.
-These setup commands do not auto-edit settings or install/remove live packages.
-Old npm copies may remain on disk without being active; do not delete them as
-part of UI cleanup. Do not bypass guarded settings writes.
+The root package may be added only for themes if desired. Shipped Quattro themes
+live in `themes/` (Green includes optional `dockBg` color `#0e1713`). Source
+hashes in `sources.lock.json` record the reviewed display inputs. These setup
+commands do not auto-edit settings or install/remove live packages. Old npm
+copies may remain on disk without being active; do not delete them as part of UI
+cleanup. Do not bypass guarded settings writes.
 
 See [transcript UI](transcript-ui.md) for the active display ownership and reload
 instructions. Changes inside a registered local source tree require `/reload`

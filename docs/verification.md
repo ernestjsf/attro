@@ -32,7 +32,7 @@ The installed `attro --json doctor` reported healthy; `attro -- --version` retur
 
 The installed app started in a 100-column, 30-row pseudo-terminal and rendered the configured `#0e1713` dock background. Node outbound connections were blocked and no prompt was sent. No extension-loader or subagent process-identity error was present. An earlier OS-sandbox startup probe blocked macOS `/bin/ps`, so the final startup probe used Node network blocking instead; the production process-identity guard was not weakened.
 
-Warnings about unavailable models and Cursor discovery were expected before `/login`. The auth store remained empty, and seeded `openai-codex/gpt-6-astra` and Quattro Green preferences were preserved. Authenticated turns, actual model-driven child tasks, cross-version real rollback, and fresh-machine/anonymous clone tests remain unverified.
+Warnings about unavailable models and Cursor discovery were expected before `/login`. The auth store remained empty, and Quattro Green UI preferences from the prepared release config were preserved. That run predated the personal-bundle boundary; it is not evidence that personal model routing is shipped or seeded today. Authenticated turns, actual model-driven child tasks, cross-version real rollback, and fresh-machine/anonymous clone tests remain unverified.
 
 ## Attro rename verification
 
@@ -88,7 +88,7 @@ Historical results (2026-09-05, pre–shared-profile milestone):
 - Fresh Pyright: **0 errors, 0 warnings** on the then-current tree.
 - Whitespace checks passed.
 
-That 119-test suite included installer, profile inventory, runtime-lock
+That 119-test suite included installer, profile-boundary checks, runtime-lock
 validation, and shared-profile lifecycle coverage. The compact-JSON lock
 regression was observed failing before correction and passes now.
 
@@ -184,5 +184,7 @@ checks.
 
 Preliminary secret scans and fixture classification exist from earlier audit
 work; the **final committed publication candidate and full branch/tag histories
-have not yet been scanned and approved**. Do not mark publication gates complete
-from this document alone. See [publication](publication.md).
+have not yet been scanned and approved**. Earlier commits may still contain
+personal bundles removed from the current tree. Do not mark publication gates
+complete or claim old branches are safe to publish from this document alone.
+See [publication](publication.md).

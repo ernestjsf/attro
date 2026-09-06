@@ -3,15 +3,17 @@
 Attro is an opinionated distribution of upstream Pi, not a fork of Pi core in
 this repository. Its release is a recipe: Pi **0.85.0** built from the pinned
 `plugins/attro-core` source tree, the seven plugin source pins in
-`sources.lock.json`, a portable profile, and committed runtime lock inputs for
-descriptor npm packages. **`attro`** is the everyday launcher and release
+`sources.lock.json`, UI/package/theme defaults, and committed runtime lock inputs
+for descriptor npm packages. **`attro`** is the everyday launcher and release
 manager; it forwards standard Pi flags/prompts and exposes explicit management
 subcommands. The existing private workbench remains the source of the first
 candidate, not an already-public product.
 
 **Attro 0.2.0** (`shared-v1`) separates immutable release code/resources from
-one canonical user profile at `~/.attro/agent`. See [parity plan](parity-plan.md)
-for the approved continuity decision.
+one canonical user profile at `~/.attro/agent`. First activation seeds UI,
+package, and theme defaults only. Personal agent definitions, model routing,
+skills, prompts, and extensions remain user-owned. Updates and rollbacks preserve
+the shared profile; they do not rewrite it with new repository defaults.
 
 ## Boundaries
 
@@ -22,8 +24,9 @@ for the approved continuity decision.
   release intact. Keep old installations for offline rollback.
 - Keep user credentials, sessions, provider selections, and project trust out of
   source control. Never copy a live configuration directory wholesale.
-- Seed the shared profile once on first activation from reviewed defaults. Activation,
-  update, and rollback must not rewrite user preferences with new defaults.
+- Seed the shared profile once on first activation from reviewed UI and package
+  defaults. Activation, update, and rollback must not rewrite user preferences
+  with new defaults.
 - Treat local checkouts and their dependencies as executable, trusted source.
   Disabling npm lifecycle scripts does not sandbox an extension or build.
 - A separate Pi agent directory isolates Pi configuration, not the operating
@@ -39,7 +42,7 @@ for the approved continuity decision.
 
 `sources.lock.json` remains the canonical fork inventory (attro-core plus seven
 plugin forks). `attro.json` adds the distribution version (**0.2.0**), core
-install method (**source**), profile paths, and compatibility requirements.
+install method (**source**), profile path, and compatibility requirements.
 Installed metadata records source identity, `agentMode: shared-v1`, and
 preparation information.
 
@@ -60,20 +63,21 @@ but are **not** used when `core.installMethod` is `source`.
 
 **Profile layout:**
 
-- `profile/settings.json` — initial settings and ordered managed resource references
-- `profile/agent/` — reviewed one-time seed defaults (agents, keybindings, models, plugin prefs)
-- `profile/resources/` — versioned resource package (extensions, skills, prompts, bundled themes)
-- `profile/inventory.json` — provenance record for seeded and bundled files
+- `profile/settings.json` — initial UI, package, and theme defaults (no personal model routing)
+- `config/` — shared display defaults copied into each prepared release (`zentui.json`, `claude-code-style.json`, `rpiv-todo.json`)
+- `themes/` — Quattro theme files referenced by the profile
 
-On first activation Attro seeds `~/.attro/agent` once from those defaults plus
-prepared release config and bundled resources. Pi may additionally load personal
+On first activation Attro initializes `~/.attro/agent` once from those defaults
+plus the prepared release config. Pi may additionally load personal
 config/skills and trusted-project `AGENTS.md` / `.pi` resources at runtime.
 Live login, OAuth tokens, and session history from `~/.pi/agent` are never
-copied.
+copied. Attro does not edit `~/.attro/agent` when the repository recipe changes.
 
 Legacy v0.1 releases used per-release `agent/` directories. They remain on disk
 if prepared earlier but are not migrated; prepare a new shared-v1 release to adopt
-the portable model.
+the portable model. Releases prepared before the personal-bundle boundary may
+still retain populated `profile/resources/` trees until replaced by a newly
+prepared release.
 
 The legacy npm package remains private and theme-only. That flag prevents
 accidental npm publication; it is not a statement about the future project's
@@ -83,10 +87,10 @@ license or GitHub visibility.
 
 Everyday `attro` (no args) and explicit `attro exec`/`try` prepend managed
 resource argv from prepared `config/settings.json` and set
-`PI_CODING_AGENT_DIR`, `RPIV_CONFIG_HOME`, `PI_LENS_CONFIG_PATH`, and
-`ATTRO_RESOURCE_DIR`. The manager exports a validated JSON envelope in
-`ATTRO_MANAGED_RESOURCE_ARGV`. Reserved management words such as `doctor` route
-to Pi when escaped with `--` (`attro -- doctor`).
+`PI_CODING_AGENT_DIR`, `RPIV_CONFIG_HOME`, and `PI_LENS_CONFIG_PATH`. Legacy
+releases may also export `ATTRO_RESOURCE_DIR`. The manager exports a validated
+JSON envelope in `ATTRO_MANAGED_RESOURCE_ARGV`. Reserved management words such
+as `doctor` route to Pi when escaped with `--` (`attro -- doctor`).
 
 **Pending verification gate:** subagent child processes must inherit pinned
 parent-release managed resource argv at spawn time so grandchildren do not lose
@@ -118,13 +122,15 @@ implicit fetch-and-execute from an unreviewed remote.
 - [x] Choose and apply a license for original Attro code with the owner's approval
       (MIT, explicitly selected by the owner; see `LICENSE`).
 - [ ] Audit third-party licenses, notices, assets, and redistribution rights
-      (bb-cli MIT and Herdr Apache-2.0 bundled in `profile/resources`; host
-      `bb`/`herdr` binaries not bundled; attro-core monorepo upstream notices).
-- [ ] Audit public candidate files AND all history intended for publication.
+      (attro-core monorepo upstream notices; plugin-shipped skills/docs in fork trees).
+- [ ] Audit public candidate files AND all history intended for publication,
+      including commits that previously contained personal bundles.
+- [ ] Record an explicit sanitized-history decision before any public push or
+      visibility change (no history rewrite authorized now).
 - [ ] Resolve private source URLs without exposing private history by accident.
 - [ ] Prove every pinned source is retrievable without maintainer credentials.
-- [ ] Include or explicitly exclude standalone extensions and npm plugins from
-      the personal setup; the eight submodule forks alone are not an exact reproduction.
+- [ ] Confirm the recipe excludes personal agent/model/skill/prompt bundles while
+      retaining maintained core, plugins, npm packages, and display defaults.
 - [x] Commit reproducible runtime dependency inputs (`runtime/npm`) for v0.2.0
       descriptor npm preparation.
 - [ ] Test real fresh `./install` on macOS and Linux before advertising support.

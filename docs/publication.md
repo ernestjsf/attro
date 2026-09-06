@@ -7,7 +7,9 @@ fork histories automatically safe to publish.
 **Current status:** the root repository `ernestjsf/attro` remains
 **private**. No visibility change, public tag, or consumer release feed has been
 published. Audits of the final committed candidate and full intended histories
-are **pending**.
+are **pending**. **No history rewrite is authorized now.** A separate decision
+is required before any push or visibility change that would expose prior commits
+containing personal configuration, bundled skills, or other removed material.
 
 ## Current source topology
 
@@ -30,31 +32,58 @@ Attro **0.2.0** builds Pi core from the private `ernestjsf/attro-core` fork
 (pinned in `sources.lock.json`) rather than relying on public npm publication of
 that core package. Legacy upstream npm releases remain readable for comparison.
 
+## What the distribution ships
+
+Attro ships the maintained core recipe, not a maintainer's personal Pi setup:
+
+| Shipped in the recipe | Not bundled in the recipe |
+| --- | --- |
+| Source-built Pi core from `plugins/attro-core` | Personal instructions and agent definitions |
+| Seven customized plugin forks | Model/provider routing and reasoning preferences |
+| Four descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk`) | Personal skills, prompts, and standalone user extensions |
+| Quattro themes and shared display defaults (`themes/`, `config/`) | Personal plugin preferences and policy extensions |
+| UI/package/theme defaults in `profile/settings.json` | OAuth tokens, sessions, trust state, or live `~/.pi/agent` copies |
+
+Model **providers remain available through the shipped plugins and npm packages**.
+Only personal routing defaults were removed from the distribution profile. Do not
+claim that upstream built-in agents, provider integrations, or plugin-shipped
+skills are gone from the maintained forks.
+
+Users keep personal copies under `~/.attro/agent` (or other Pi discovery paths).
+Pi still loads personal/global and trusted-project `.pi` resources at runtime.
+Plugin repositories may ship their own skills and docs normally. Existing
+installed releases retain whatever they were prepared with until a new release is
+prepared and activated; Attro does not automatically delete or re-seed personal
+state when the recipe changes.
+
 ## What the source manifest does not capture
 
-The eight-submodule manifest is not a full backup of the maintainer's live environment.
-The audit also found:
+The eight-submodule manifest is not a full backup of any maintainer's live
+environment. Additional live-only resources require separate review if ever
+selected for a public profile:
 
 | Live resource | Distribution treatment |
 | --- | --- |
 | `pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. |
-| `auto-session-name.ts`, `turn-status.ts` | Standalone personal extensions; not automatically copied. Audit and package separately if selected for the public profile. |
-| `safety-guard.ts`, `pi-automode` | Personal behavior/policy extensions; seed config may ship without implementation; do not silently transplant policy into public defaults. |
-| Herdr extensions and externally installed skills | Herdr **skill and pi integration assets** are bundled in `profile/resources` under Apache-2.0 with notices; the **Herdr binary** is a host tool and is **not** bundled. |
-| bb-cli skill | Bundled in `profile/resources/skills/bb-cli` under MIT with notices; the **bb** CLI/server is a host tool and is **not** bundled. |
-| Agent definitions, personal `AGENTS.md`, custom skills/prompts | Reviewed subsets seed `profile/agent/` and `profile/resources/`; Pi may also load trusted-project resources at runtime. Not an exact live clone. |
+| Standalone personal extensions (for example turn-status, auto-session-name, safety-guard, pi-automode) | Not bundled; users install or copy into their own agent directory. |
+| Optional host tools (`bb`, `herdr`) and externally installed skills | Not bundled; users install separately and retain their own notices. |
+| Agent definitions, personal `AGENTS.md`, custom skills/prompts | User-owned under `~/.attro/agent` or trusted-project paths; not seeded from the repository recipe. |
 | Models, provider login, trust and safety state | Machine/user-local. Never publish credentials or granted trust. |
 | Sessions, histories, caches, backups | Excluded from distribution source. |
 
-Inspect `profile/inventory.json` and the actual descriptor/profile for the current
-inclusion list. The portable profile is intentionally not an exact clone of the
-maintainer's personal behavior. Opinionated model routes (including Sol high for
-the reviewer agent) are user-config metadata in the seed profile; availability
-depends on the installer's own provider accounts.
+Inspect `attro.json`, `profile/settings.json`, and the actual prepared release
+for the current inclusion list. The portable profile is intentionally not an
+exact clone of any maintainer's personal behavior.
 
 Attro **0.2.0** uses a separate canonical `~/.attro/agent` profile. Publication
 docs must not imply credential migration from live `~/.pi/agent`. Login and
-session history are never copied from live `~/.pi/agent` during seeding.
+session history are never copied from live `~/.pi/agent` during initialization.
+
+Releases prepared before the personal-bundle boundary may still contain
+`profile/resources/` trees on disk. Those retained releases are immutable. New
+recipe releases do not reproduce that content. Users with configs referencing
+`ATTRO_RESOURCE_DIR` or bundled resource paths must update their personal files
+themselves; Attro does not edit `~/.attro/agent` during recipe cleanup.
 
 ## Required evidence before publication
 
@@ -62,8 +91,9 @@ session history are never copied from live `~/.pi/agent` during seeding.
    review findings without printing credentials into CI logs or issue reports.
    Preliminary scans found fixture-like patterns requiring explicit
    content/context review; **no final committed-candidate scan is complete**.
-2. Inspect fork-specific changes, copied assets, attribution, bundled
-   `profile/resources` (bb, Herdr, and other vendored files), attro-core monorepo
+   Treat earlier commits that contained personal bundles as **still present in
+   Git history** until a sanitized publication path is explicitly approved.
+2. Inspect fork-specific changes, copied assets, attribution, attro-core monorepo
    notices, and any generated artifacts. The initial source license audit is not a
    complete dependency SBOM.
 3. In a credential-free environment, clone the candidate recursively and verify
@@ -82,7 +112,6 @@ session history are never copied from live `~/.pi/agent` during seeding.
 Keep the stable consumer update feed disabled until these gates are satisfied.
 Scheduled update **discovery** (see [automation](automation.md)) is not an
 automatic consumer release feed.
-
 
 ## Fork URL identities (Attro mirrors)
 

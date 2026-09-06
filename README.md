@@ -52,32 +52,61 @@ pass `doctor` to Pi chat instead of the manager.
 
 Provider authentication is **not copied** from `~/.pi/agent`. After install,
 run `attro`, then `/login` for the providers you use. Attro seeds the shared
-profile once on first activation and **never copies live login, session history,
-OAuth tokens, or trust state** from `~/.pi/agent`. Later activations, updates,
-and rollbacks preserve whatever you establish under the shared profile. See
-[managed state](profile/MANAGED.md).
+profile once on first activation with **UI, package, and theme defaults only**
+from `profile/settings.json` and the prepared release config. It **never copies
+live login, session history, OAuth tokens, trust state, agent definitions,
+model routing, skills, prompts, or other personal configuration** from
+`~/.pi/agent`. Later activations, updates, and rollbacks preserve whatever you
+establish under the shared profile. See [managed state](profile/MANAGED.md).
 
 If you prefer manual steps or are developing the manager itself, see
 [setup](docs/setup.md).
+
+## What Attro ships
+
+Attro **0.2.0** ships the maintained distribution recipe, not a maintainer's
+personal Pi setup:
+
+- **Pi core** built from the pinned `plugins/attro-core` source tree
+- **Seven customized plugin forks** (Zentui, CC extensions, web access, Lens,
+  rpiv todo, ask-user, subagents)
+- **Four descriptor npm packages** (`pi-caffeinate`, `pi-btw`, `pi-goal`,
+  `pi-cursor-sdk`)
+- **Quattro themes** and **shared display defaults** in `themes/` and `config/`
+
+**Not bundled:** personal instructions, agent definitions, model/provider and
+reasoning preferences, skills, prompt templates, standalone user extensions,
+and personal plugin preferences. Those belong in your own `~/.attro/agent`
+directory (or other Pi discovery paths you configure). Individual plugins may
+ship their own skills and documentation under their source trees; that is
+separate from any personal copies you maintain locally.
 
 ## Shared profile and releases
 
 Attro **0.2.0** uses one canonical user profile at `~/.attro/agent`
 (override with `ATTRO_HOME`; legacy `~/.piattro` is reused when `~/.attro` is
-absent). It is seeded **once** on first activation from reviewed defaults in
-`profile/settings.json`, `profile/agent/`, and the bundled
-`profile/resources/` package, plus pinned npm/plugin resources prepared into
-the release. Later activations, updates, and rollbacks **preserve** your
-preferences and ordinary session history in that directory. Pi still loads
-personal config/skills and trusted-project `AGENTS.md` / `.pi` resources at
-runtime according to upstream rules.
+absent). It is initialized **once** on first activation from reviewed UI and
+package defaults in `profile/settings.json` plus the prepared release config
+(themes, plugin wiring, and the three shared UI config files under `config/`).
+Later activations, updates, and rollbacks **preserve** your preferences and
+ordinary session history in that directory. Pi still loads personal config/skills
+and trusted-project `AGENTS.md` / `.pi` resources at runtime according to
+upstream rules.
 
 Each prepared release retains immutable code and managed resource paths
-(`releases/<id>/`). Managed plugins, skills, prompt templates, and themes are
-passed to Pi through upstream CLI resource flags (`-e`, `--skill`, etc.) from
-the release's prepared settings. Release-specific environment routing sets
-`PI_CODING_AGENT_DIR`, `RPIV_CONFIG_HOME`, `PI_LENS_CONFIG_PATH`, and
-`ATTRO_RESOURCE_DIR`.
+(`releases/<id>/`). Managed plugins and themes are passed to Pi through upstream
+CLI resource flags (`-e`, `--theme`, etc.) from the release's prepared settings.
+Release-specific environment routing sets `PI_CODING_AGENT_DIR`,
+`RPIV_CONFIG_HOME`, and `PI_LENS_CONFIG_PATH`. Releases prepared before the
+personal-bundle boundary may still expose `ATTRO_RESOURCE_DIR` pointing at a
+retained `profile/resources/` tree; new recipe releases do not ship personal
+resource bundles. Update personal configs that still reference the old bundled
+path. Attro does not edit files under `~/.attro/agent` when the repository
+recipe changes.
+
+**Existing installed releases stay as prepared.** Preparing and activating a new
+release from an updated checkout applies the new recipe; Attro does not
+automatically delete, re-seed, or rewrite an existing shared profile.
 
 A trial uses temporary Pi state and discards it on exit; it is not a sandbox and
 can still access environment credentials, project resources, and host tools.
@@ -98,8 +127,8 @@ attro rollback
 
 `update` prepares the **explicit checkout's recipe**, not the latest upstream
 versions. Old prepared code is retained locally; rollback switches the active
-pointer and returns to the previous release's binaries while **keeping the
-shared profile**. It does not undo shared plugin data changes, external side
+pointer and returns to the previous release's binaries while **keeping the shared
+profile**. It does not undo shared plugin data changes, external side
 effects, or modifications made by an agent. Never delete old releases while
 sessions still use them.
 
@@ -117,7 +146,7 @@ attro.json            distribution recipe (v0.2.0; source-core install method)
 runtime/                committed npm package-lock inputs for descriptor npmPackages
 sources.lock.json       canonical eight-submodule pins and copied config hashes
 plugins/                eight Git submodules (attro-core + seven customized plugin forks)
-profile/                portable defaults, resource bundle, and managed-state guidance
+profile/                portable UI/package/theme defaults and managed-state guidance
 config/ + themes/       reviewed display configuration and Quattro themes
 scripts/                source verification and upstream update discovery
 tests/                  isolated runtime, installer, and discovery regression tests
