@@ -18,7 +18,9 @@ FAKE_ATTRO = '''#!/usr/bin/env python3
 import fcntl
 import json
 import os
+import signal
 import sys
+import time
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
@@ -43,6 +45,11 @@ if args[0] == "--json":
     if len(args) < 2:
         fail("missing subcommand")
     args = args[1:]
+
+if os.environ.get("FIXTURE_INTERRUPT_AT") == args[0]:
+    os.kill(os.getppid(), signal.SIGINT)
+    time.sleep(5)
+    raise SystemExit(130)
 
 if args[0] == "doctor":
     if os.environ.get("FIXTURE_DOCTOR_FAIL") == "1":
@@ -150,6 +157,37 @@ class InstallTests(unittest.TestCase):
         self.assertIn("export PATH=", result.stdout)
         self.assertIn(str(self.bin_dir), result.stdout)
         self.assertIn("Installed attro launcher", result.stdout)
+
+    def test_reports_installation_phases(self):
+        result = self.run_install()
+        phases = ("[1/3]", "[2/3]", "[3/3]")
+        positions = [result.stderr.index(phase) for phase in phases]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("minutes", result.stderr)
+
+    def test_interrupted_activation_keeps_prepared_release(self):
+        result = self.run_install(extra_env={"FIXTURE_INTERRUPT_AT": "activate"}, success=False)
+        self.assertEqual(result.returncode, 130, result.stderr)
+        self.assertIn("Installation interrupted", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        state = json.loads((self.managed / "state.json").read_text())
+        self.assertIsNone(state["active"])
+        self.assertIn("attro-0.1.0-fixture", state["releases"])
+        self.assertFalse((self.bin_dir / "attro").is_symlink())
+
+    def test_interruption_preserves_existing_launcher_and_activation(self):
+        self.run_install()
+        before = (self.bin_dir / "attro").readlink()
+        result = self.run_install(extra_env={"FIXTURE_INTERRUPT_AT": "activate"}, success=False)
+        self.assertEqual(result.returncode, 130, result.stderr)
+        self.assertEqual((self.bin_dir / "attro").readlink(), before)
+        self.assertEqual(json.loads((self.managed / "state.json").read_text())["active"], "attro-0.1.0-fixture")
+
+    def test_interrupted_preparation_creates_no_launcher(self):
+        result = self.run_install(extra_env={"FIXTURE_INTERRUPT_AT": "setup"}, success=False)
+        self.assertEqual(result.returncode, 130, result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse((self.bin_dir / "attro").is_symlink())
 
     def test_preflight_failure_writes_no_state_or_links(self):
         result = self.run_install(extra_env={"FIXTURE_DOCTOR_FAIL": "1"}, success=False)
