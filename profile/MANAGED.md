@@ -41,9 +41,10 @@ escaping a reserved management word (for example `attro -- doctor`).
 ## Shared profile (`~/.attro/agent`)
 
 On first activation of a shared-profile release, Attro initializes
-`~/.attro/agent` once from reviewed **UI, package, and theme defaults** in
-`profile/settings.json` and the prepared release config (themes, plugin wiring,
-and the shared UI files copied from `config/`). Subsequent activations, updates,
+`~/.attro/agent` once from reviewed **UI and package defaults** in
+`profile/settings.json` and the prepared release config (plugin wiring and the
+shared UI files copied from `config/`). Theme selection uses upstream Pi defaults
+on fresh profiles until you add personal theme files. Subsequent activations, updates,
 and rollbacks **preserve** preferences, provider login, session history, and
 ordinary per-working-directory sessions in that directory.
 
@@ -88,7 +89,7 @@ Each `releases/<id>/` contains:
 ```
 pi/          source-built Pi monorepo from pinned plugins/attro-core (see below)
 plugins/     committed plugin trees, with dependencies/build artifacts
-config/      allowlisted themes, plugin configs, pristine managed settings
+config/      allowlisted plugin configs and pristine managed settings
 profile/     empty placeholder directories for legacy layout compatibility
 npm/         descriptor npmPackages installs from committed runtime lock inputs
 ```
@@ -106,10 +107,12 @@ retained releases are larger than npm-only core installs. Provenance is recorded
 in `pi/core.json`.
 
 Plugin paths retain their source layout, including
-`plugins/rpiv-mono/packages/rpiv-todo`. Themes from `themes/` and allowlisted
-plugin configs from `config/` are flattened by basename into release `config/`.
-Managed resource paths in prepared `config/settings.json` are absolute paths
-inside the release; launch prepends them as Pi CLI flags (`-e`, `--theme`).
+`plugins/rpiv-mono/packages/rpiv-todo`. Allowlisted plugin configs from
+`config/` are flattened by basename into release `config/`. New Attro releases
+do not copy Quattro theme files from `themes/` or pass `--theme` flags; upstream
+Pi built-in themes and personal theme files under `~/.attro/agent` remain
+available at runtime. Managed resource paths in prepared `config/settings.json`
+are absolute paths inside the release; launch prepends them as Pi CLI flags (`-e`).
 
 Git exports use the validated committed root and pinned submodule commits, not
 mutable working-tree contents. Ignored build artifacts are not copied. Symlinked

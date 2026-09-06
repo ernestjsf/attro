@@ -3,15 +3,15 @@
 Attro is an opinionated distribution of upstream Pi, not a fork of Pi core in
 this repository. Its release is a recipe: Pi **0.85.0** built from the pinned
 `plugins/attro-core` source tree, the seven plugin source pins in
-`sources.lock.json`, UI/package/theme defaults, and committed runtime lock inputs
+`sources.lock.json`, UI/package defaults, and committed runtime lock inputs
 for descriptor npm packages. **`attro`** is the everyday launcher and release
 manager; it forwards standard Pi flags/prompts and exposes explicit management
 subcommands. The existing private workbench remains the source of the first
 candidate, not an already-public product.
 
 **Attro 0.2.0** (`shared-v1`) separates immutable release code/resources from
-one canonical user profile at `~/.attro/agent`. First activation seeds UI,
-package, and theme defaults only. Personal agent definitions, model routing,
+one canonical user profile at `~/.attro/agent`. First activation seeds UI and
+package defaults only. Personal theme selection, agent definitions, model routing,
 skills, prompts, and extensions remain user-owned. Updates and rollbacks preserve
 the shared profile; they do not rewrite it with new repository defaults.
 
@@ -63,9 +63,9 @@ but are **not** used when `core.installMethod` is `source`.
 
 **Profile layout:**
 
-- `profile/settings.json` — initial UI, package, and theme defaults (no personal model routing)
+- `profile/settings.json` — initial UI and package defaults (no personal model routing or theme selection)
 - `config/` — shared display defaults copied into each prepared release (`zentui.json`, `claude-code-style.json`, `rpiv-todo.json`)
-- `themes/` — Quattro theme files referenced by the profile
+- `themes/` — Quattro theme source files for originalPi checkout use; not copied into new Attro releases
 
 On first activation Attro initializes `~/.attro/agent` once from those defaults
 plus the prepared release config. Pi may additionally load personal

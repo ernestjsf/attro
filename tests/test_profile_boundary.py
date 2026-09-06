@@ -7,12 +7,14 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "profile"
 sys.path.insert(0, str(ROOT))
 
-from attro.profile import seed_agent  # noqa: E402
+from attro.launch import managed_resource_args  # noqa: E402
+from attro.profile import initialize_shared_agent, seed_agent  # noqa: E402
 from attro.validate import load_json, render_profile, validate_descriptor  # noqa: E402
 
 PERSONAL_SETTINGS_KEYS = frozenset({
@@ -71,12 +73,9 @@ class ProfileBoundaryTests(unittest.TestCase):
             self.assertNotIn(key, settings, msg=key)
         self.assertNotIn("defaultProjectTrust", settings)
         self.assertNotIn("sessionDir", settings)
-        self.assertEqual(settings["theme"], "quattro-green")
+        self.assertNotIn("theme", settings)
+        self.assertNotIn("themes", settings)
         self.assertEqual(settings["packages"], EXPECTED_PACKAGES)
-        self.assertEqual(
-            settings["themes"],
-            ["{{THEME_QUATTRO_GREEN}}", "{{THEME_QUATTRO_AMBER}}"],
-        )
         for key, value in EXPECTED_UI_DEFAULTS.items():
             self.assertEqual(settings[key], value)
 
@@ -120,7 +119,7 @@ class ProfileBoundaryTests(unittest.TestCase):
             settings = load_json(target / "settings.json")
             for key in PERSONAL_SETTINGS_KEYS:
                 self.assertNotIn(key, settings, msg=key)
-            self.assertEqual(settings["theme"], "quattro-green")
+            self.assertNotIn("theme", settings)
             self.assertNotIn("packages", settings)
             self.assertNotIn("themes", settings)
             self.assertFalse((target / "AGENTS.md").exists())
@@ -128,6 +127,104 @@ class ProfileBoundaryTests(unittest.TestCase):
             self.assertFalse((target / "subagents.json").exists())
             self.assertFalse((target / "agents").exists())
             self.assertTrue((target / "rpiv-config/rpiv-todo/config.json").is_file())
+
+    def test_shipped_sources_lock_omits_theme_configs(self) -> None:
+        lock = load_json(ROOT / "sources.lock.json")
+        config_paths = {entry["path"] for entry in lock["configs"]}
+        self.assertFalse(config_paths & {"themes/quattro-green.json", "themes/quattro-amber.json"})
+        self.assertEqual(
+            config_paths,
+            {"config/zentui.json", "config/claude-code-style.json", "config/rpiv-todo.json"},
+        )
+
+    def test_root_package_exports_quattro_themes_for_original_pi_only(self) -> None:
+        package = load_json(ROOT / "package.json")
+        themes = package.get("pi", {}).get("themes", [])
+        self.assertEqual(themes, ["./themes/quattro-amber.json", "./themes/quattro-green.json"])
+        for rel in themes:
+            self.assertTrue((ROOT / rel.removeprefix("./")).is_file(), rel)
+
+    def test_managed_plugin_themes_are_not_quattro_recipe(self) -> None:
+        cc = load_json(ROOT / "plugins/pi-cc-extensions/package.json")
+        cc_themes = cc.get("pi", {}).get("themes", [])
+        self.assertTrue(cc_themes)
+        self.assertTrue(all("quattro" not in path for path in cc_themes))
+        managed_packages = [
+            ROOT / "plugins/pi-zentui/package.json",
+            ROOT / "plugins/pi-web-access/package.json",
+            ROOT / "plugins/pi-lens/package.json",
+            ROOT / "plugins/pi-ask-user/package.json",
+            ROOT / "plugins/pi-subagents/package.json",
+            ROOT / "plugins/rpiv-mono/packages/rpiv-todo/package.json",
+        ]
+        for path in managed_packages:
+            if not path.is_file():
+                continue
+            pi = load_json(path).get("pi", {})
+            self.assertNotIn("themes", pi, msg=str(path))
+
+    def test_rendered_release_omits_theme_resources(self) -> None:
+        descriptor = validate_descriptor(ROOT / "attro.json")
+        rendered = json.loads(
+            render_profile(
+                (PROFILE / "settings.json").read_text(),
+                ROOT,
+                ROOT,
+                descriptor,
+            )
+        )
+        self.assertNotIn("theme", rendered)
+        self.assertNotIn("themes", rendered)
+
+    def test_managed_launch_omits_theme_flags(self) -> None:
+        descriptor = validate_descriptor(ROOT / "attro.json")
+        rendered = json.loads(
+            render_profile(
+                (PROFILE / "settings.json").read_text(),
+                ROOT / "releases" / "fixture-release",
+                ROOT,
+                descriptor,
+            )
+        )
+        with tempfile.TemporaryDirectory() as work:
+            release = Path(work) / "release"
+            config = release / "config"
+            config.mkdir(parents=True)
+            (config / "settings.json").write_text(json.dumps(rendered) + "\n")
+            with mock.patch("attro.launch.prepared_manifest", return_value={"agentMode": "shared-v1"}):
+                argv = managed_resource_args(release)
+            self.assertNotIn("--theme", argv)
+
+    def test_existing_theme_selection_retained_after_profile_init(self) -> None:
+        descriptor = validate_descriptor(ROOT / "attro.json")
+        rendered = json.loads(
+            render_profile(
+                (PROFILE / "settings.json").read_text(),
+                ROOT,
+                ROOT,
+                descriptor,
+            )
+        )
+        with tempfile.TemporaryDirectory() as work:
+            state_root = Path(work) / "managed"
+            state_root.mkdir()
+            release = state_root / "releases" / "attro-0.2.0-fixture"
+            config = release / "config"
+            config.mkdir(parents=True)
+            (config / "settings.json").write_text(json.dumps(rendered) + "\n")
+            for name in ("zentui.json", "claude-code-style.json", "rpiv-todo.json"):
+                source = ROOT / "config" / name
+                if source.is_file():
+                    (config / name).write_bytes(source.read_bytes())
+            (release / "profile" / "agent").mkdir(parents=True)
+            initialize_shared_agent(state_root, release)
+            agent = state_root / "agent"
+            settings = load_json(agent / "settings.json")
+            self.assertNotIn("theme", settings)
+            settings["theme"] = "quattro-green"
+            (agent / "settings.json").write_text(json.dumps(settings) + "\n")
+            initialize_shared_agent(state_root, release)
+            self.assertEqual(load_json(agent / "settings.json")["theme"], "quattro-green")
 
 
 if __name__ == "__main__":

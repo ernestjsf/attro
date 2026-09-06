@@ -41,8 +41,8 @@ Attro ships the maintained core recipe, not a maintainer's personal Pi setup:
 | Source-built Pi core from `plugins/attro-core` | Personal instructions and agent definitions |
 | Seven customized plugin forks | Model/provider routing and reasoning preferences |
 | Four descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-goal`, `pi-cursor-sdk`) | Personal skills, prompts, and standalone user extensions |
-| Quattro themes and shared display defaults (`themes/`, `config/`) | Personal plugin preferences and policy extensions |
-| UI/package/theme defaults in `profile/settings.json` | OAuth tokens, sessions, trust state, or live `~/.pi/agent` copies |
+| Shared display defaults in `config/` | Quattro custom themes, personal plugin preferences, and policy extensions |
+| UI/package defaults in `profile/settings.json` | OAuth tokens, sessions, trust state, or live `~/.pi/agent` copies |
 
 Model **providers remain available through the shipped plugins and npm packages**.
 Only personal routing defaults were removed from the distribution profile. Do not

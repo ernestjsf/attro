@@ -175,8 +175,21 @@ def main() -> int:
         return 1
     if type(package.get("private")) != bool or not package.get("private") or package.get("version") != "0.1.0":
         fail("root package must be private at version 0.1.0", failures)
-    if package.get("pi") != {"themes": ["./themes/quattro-amber.json", "./themes/quattro-green.json"]}:
-        fail("root pi manifest must declare themes only", failures)
+    expected_quattro_themes = ["./themes/quattro-amber.json", "./themes/quattro-green.json"]
+    pi_manifest = package.get("pi")
+    if pi_manifest != {"themes": expected_quattro_themes}:
+        fail("root pi manifest must declare Quattro themes for originalPi checkout use", failures)
+    for rel in expected_quattro_themes:
+        if not (ROOT / rel.removeprefix("./")).is_file():
+            fail(f"root pi theme source missing: {rel}", failures)
+    profile = load_json(ROOT / "profile" / "settings.json")
+    if "theme" in profile or "themes" in profile:
+        fail("profile/settings.json must not declare theme defaults for new Attro releases", failures)
+    config_paths = {entry["path"] for entry in manifest["configs"]}
+    if config_paths & {"themes/quattro-green.json", "themes/quattro-amber.json"}:
+        fail("sources.lock.json must not copy Quattro themes into new Attro releases", failures)
+    if config_paths != {"config/zentui.json", "config/claude-code-style.json", "config/rpiv-todo.json"}:
+        fail("sources.lock.json configs must match the three shared display defaults", failures)
 
     expected_gitmodules = {
         entry["path"]: entry["origin"] for entry in manifest["submodules"]

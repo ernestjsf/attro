@@ -1,8 +1,7 @@
 # Attro
 
 An opinionated distribution of Pi: a source-built Pi core, customized plugins,
-Quattro themes, and an isolated release manager. Use **`attro`** as the everyday
-launcher; it forwards standard Pi flags and prompts to the active release. Use
+and an isolated release manager. Use **`attro`** as the everyday launcher; it forwards standard Pi flags and prompts to the active release. Use
 `attro` management subcommands to prepare, activate, update, and roll back
 pinned releases. Customizations live in plugins and the distribution profile;
 Pi core is built from the maintained `attro-core` fork, not edited in place.
@@ -52,7 +51,7 @@ pass `doctor` to Pi chat instead of the manager.
 
 Provider authentication is **not copied** from `~/.pi/agent`. After install,
 run `attro`, then `/login` for the providers you use. Attro seeds the shared
-profile once on first activation with **UI, package, and theme defaults only**
+profile once on first activation with **UI and package defaults only**
 from `profile/settings.json` and the prepared release config. It **never copies
 live login, session history, OAuth tokens, trust state, agent definitions,
 model routing, skills, prompts, or other personal configuration** from
@@ -72,9 +71,9 @@ personal Pi setup:
   rpiv todo, ask-user, subagents)
 - **Four descriptor npm packages** (`pi-caffeinate`, `pi-btw`, `pi-goal`,
   `pi-cursor-sdk`)
-- **Quattro themes** and **shared display defaults** in `themes/` and `config/`
+- **Shared display defaults** in `config/` (Zentui, CC style, rpiv todo)
 
-**Not bundled:** personal instructions, agent definitions, model/provider and
+**Not bundled:** Quattro custom themes, personal instructions, agent definitions, model/provider and
 reasoning preferences, skills, prompt templates, standalone user extensions,
 and personal plugin preferences. Those belong in your own `~/.attro/agent`
 directory (or other Pi discovery paths you configure). Individual plugins may
@@ -87,15 +86,19 @@ Attro **0.2.0** uses one canonical user profile at `~/.attro/agent`
 (override with `ATTRO_HOME`; legacy `~/.piattro` is reused when `~/.attro` is
 absent). It is initialized **once** on first activation from reviewed UI and
 package defaults in `profile/settings.json` plus the prepared release config
-(themes, plugin wiring, and the three shared UI config files under `config/`).
+(plugin wiring and the three shared UI config files under `config/`). Theme
+selection uses upstream Pi defaults on fresh profiles; copy personal theme files
+into `~/.attro/agent` or choose a theme interactively. The root checkout still
+exports `themes/quattro-*.json` through `package.json` for originalPi use, but
+new Attro releases do not copy them or pass `--theme` flags.
 Later activations, updates, and rollbacks **preserve** your preferences and
 ordinary session history in that directory. Pi still loads personal config/skills
 and trusted-project `AGENTS.md` / `.pi` resources at runtime according to
 upstream rules.
 
 Each prepared release retains immutable code and managed resource paths
-(`releases/<id>/`). Managed plugins and themes are passed to Pi through upstream
-CLI resource flags (`-e`, `--theme`, etc.) from the release's prepared settings.
+(`releases/<id>/`). Managed plugins are passed to Pi through upstream
+CLI resource flags (`-e`, etc.) from the release's prepared settings.
 Release-specific environment routing sets `PI_CODING_AGENT_DIR`,
 `RPIV_CONFIG_HOME`, and `PI_LENS_CONFIG_PATH`. Releases prepared before the
 personal-bundle boundary may still expose `ATTRO_RESOURCE_DIR` pointing at a
@@ -146,8 +149,9 @@ attro.json            distribution recipe (v0.2.0; source-core install method)
 runtime/                committed npm package-lock inputs for descriptor npmPackages
 sources.lock.json       canonical eight-submodule pins and copied config hashes
 plugins/                eight Git submodules (attro-core + seven customized plugin forks)
-profile/                portable UI/package/theme defaults and managed-state guidance
-config/ + themes/       reviewed display configuration and Quattro themes
+profile/                portable UI/package defaults and managed-state guidance
+config/                 reviewed shared display defaults copied into releases
+themes/                 Quattro theme sources for originalPi; not bundled in new Attro releases
 scripts/                source verification and upstream update discovery
 tests/                  isolated runtime, installer, and discovery regression tests
 .github/workflows/      macOS/Linux tests and weekly update reports

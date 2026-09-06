@@ -2,9 +2,8 @@
 
 ## Shipped display defaults
 
-Attro ships the Quattro transcript/display stack through the maintained plugin
-forks, shared UI config files, and themes — not through personal extensions or
-skills in the distribution profile.
+Attro ships the maintained plugin forks, shared UI config files, and display
+defaults — not through personal extensions or skills in the distribution profile.
 
 | Surface | Owner |
 | --- | --- |
@@ -52,12 +51,14 @@ bar. Spawn, delivery, and execution behavior are unchanged.
 - `config/zentui.json` is the reviewed Zentui display default.
 - `config/claude-code-style.json` is the reviewed CC display default.
 - `config/rpiv-todo.json` is the reviewed rpiv todo display default.
-- `themes/quattro-green.json` and `themes/quattro-amber.json` are the shipped
-  Quattro themes; Green includes optional `dockBg` color `#0e1713`.
+- `themes/quattro-green.json` and `themes/quattro-amber.json` remain in the
+  checkout for originalPi compatibility; new Attro releases do not copy them or
+  pass `--theme` flags. Green includes optional `dockBg` color `#0e1713`.
 - `sources.lock.json` records copied display-file hashes and last committed
   source pins. Uncommitted fork edits are live working-tree changes, not new pins.
 
-The root package exports themes only. Do not copy full global settings,
+The root checkout exports Quattro themes through `package.json` for originalPi
+use only. Do not copy full global settings,
 credentials, sessions, or safety policy into this repository. Provider, model,
 permission, and unrelated plugin configurations are user-owned.
 

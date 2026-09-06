@@ -414,6 +414,8 @@ def render_profile(profile_text: str, release_root: Path, checkout_root: Path, d
     npm_paths = {entry["package"]: str(npm_package_install_dir(release_root, entry["package"])) for entry in (descriptor or {}).get("npmPackages", [])}
     replacements.update({"{{NPM:" + package + "}}": path for package, path in npm_paths.items()})
     for key in ("packages", "themes", "extensions", "skills", "prompts"):
+        if key == "themes" and key not in payload:
+            continue
         values = payload.get(key, [])
         if not isinstance(values, list) or any(not isinstance(v, str) for v in values):
             raise ValidationError(f"profile {key} must be an array of paths")

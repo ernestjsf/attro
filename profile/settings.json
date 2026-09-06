@@ -1,5 +1,4 @@
 {
-  "theme": "quattro-green",
   "quietStartup": true,
   "hideThinkingBlock": false,
   "editorPaddingX": 0,
@@ -28,9 +27,5 @@
   "collapseChangelog": true,
   "markdown": {
     "mermaid": "final"
-  },
-  "themes": [
-    "{{THEME_QUATTRO_GREEN}}",
-    "{{THEME_QUATTRO_AMBER}}"
-  ]
+  }
 }

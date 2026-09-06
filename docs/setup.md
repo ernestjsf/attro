@@ -42,7 +42,7 @@ After install, run **`attro`**, then `/login` for the providers you use. Attro
 does not copy credentials, OAuth tokens, session history, agent definitions,
 model routing, skills, or prompts from `~/.pi/agent`. The shared profile at
 `~/.attro/agent` is initialized once on first activation from reviewed UI,
-package, and theme defaults plus the prepared release config; updates and
+package, and UI defaults plus the prepared release config; updates and
 rollback preserve whatever you establish there. Personal configuration remains
 your responsibility under `~/.attro/agent` or other Pi discovery paths.
 
@@ -186,12 +186,11 @@ old source and its replacement; never paste a fragment over the global settings
 document; and never run `pi remove`, because it would remove the original dirty
 repository registration.
 
-The root package may be added only for themes if desired. Shipped Quattro themes
-live in `themes/` (Green includes optional `dockBg` color `#0e1713`). Source
-hashes in `sources.lock.json` record the reviewed display inputs. These setup
-commands do not auto-edit settings or install/remove live packages. Old npm
-copies may remain on disk without being active; do not delete them as part of UI
-cleanup. Do not bypass guarded settings writes.
+The root checkout exports Quattro themes through `package.json` for originalPi
+use. Those source files remain in `themes/` (Green includes optional `dockBg`
+color `#0e1713`), but new Attro releases do not copy them into release
+`config/` or pass `--theme` flags. Fresh Attro profiles use upstream Pi theme
+defaults until you add personal theme files under `~/.attro/agent`.
 
 See [transcript UI](transcript-ui.md) for the active display ownership and reload
 instructions. Changes inside a registered local source tree require `/reload`

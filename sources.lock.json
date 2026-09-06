@@ -191,18 +191,6 @@
   ],
   "configs": [
     {
-      "path": "themes/quattro-green.json",
-      "source": "~/.pi/agent/themes/quattro-green.json",
-      "sha256": "d1c5ab687d1c7391e04dffafa45dce12e9b4778e4ff678c05c264173c6f0c252",
-      "provenance": "Active Quattro Green display theme with distinct user, tool, pending and error surfaces plus the maintained fullscreen dock background."
-    },
-    {
-      "path": "themes/quattro-amber.json",
-      "source": "~/.pi/agent/themes/quattro-amber.json",
-      "sha256": "2ac0742180fd15a0e44783ea042960c2f48c8aee7d0f2a5d26e9a14a8af7b53e",
-      "provenance": "Allowlisted live theme read and copied unchanged; display theme only."
-    },
-    {
       "path": "config/zentui.json",
       "source": "~/.pi/agent/zentui.json",
       "sha256": "7ef5d08bda4d072a0a912c45b9c8966e7c31b7a9e8df8c646019af01f866f1a7",
