@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "fb7bd3cfd22321dd9e2dbd73975afd6049ca132d",
+      "pin": "111add463ed79c2a8f710692834d5aad41bb8bb4",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1275 files, no changes); 30 native-editor and startup input tests passed; nativeEditor Down-at-end and focus services verified for native and custom editors",
+      "testReport": "Maintained Quattro fork at v0.85.0; npm run check and build:offline passed; 115 focused loader/runtime tests passed on Node 26; independent review cleared pinned Cursor host-module loading",
       "provenance": "QUATTRO.md"
     },
     {
@@ -103,7 +103,7 @@
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
       "upstream": "https://github.com/apmantza/pi-lens.git",
-      "pin": "faed4cc7bbd29d36b0c00cafc032882a22243023",
+      "pin": "29eee9f24099a5a329c30125889742cd4343d146",
       "baseCommit": "6cebeb5dc639531fe0b24b5221f032c5169feb2e",
       "baseVersion": "4.1.0",
       "packagePath": ".",
@@ -119,7 +119,7 @@
       "runtimeBuild": "npm run build:dist && node scripts/download-grammars.js --core --dest grammars && npm run check:grammars",
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "188 focused tests; build/lint/import checks passed; independent review cleared; full suite 11 baseline failures plus 6 preexisting comment rule findings remain; user approved known limitations",
+      "testReport": "Startup/cache fix: 157 focused tests passed, 1 skipped; build/lint/build:dist passed; mutation checks and independent cache-race review cleared. Full suite not rerun; prior baseline reported 11 failures and 6 comment-rule findings.",
       "provenance": "QUATTRO.md"
     },
     {
