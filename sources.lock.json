@@ -61,7 +61,7 @@
       "name": "pi-cc-extensions",
       "origin": "https://github.com/ernestjsf/attro-cc-extensions.git",
       "upstream": "https://github.com/minuque/pi-cc-extensions.git",
-      "pin": "80aed670119b8861665af1fbd01987058055af76",
+      "pin": "670012fc673bf27dc7199a27b8369f1734a383b2",
       "baseCommit": "5d7a2666f51da9f450bd019af10200c88cc1df98",
       "baseVersion": "0.8.69",
       "packagePath": ".",
@@ -74,7 +74,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "181 passed; typecheck and lint passed on Node 26.5.0; 40/80-column installed-Pi component smoke checks passed",
+      "testReport": "192 passed; typecheck and lint passed on Node 26.5.0; 100/40-column installed-Pi component smoke checks passed",
       "provenance": "QUATTRO.md"
     },
     {
@@ -199,8 +199,8 @@
     {
       "path": "config/claude-code-style.json",
       "source": "~/.pi/agent/claude-code-style.json",
-      "sha256": "7f1f9f2b40a36d960b7b68ac8d6941e2beeffdb4015b9b8026587e44ed0ab3c3",
-      "provenance": "Allowlisted live style configuration read and copied unchanged."
+      "sha256": "8e64f2a1755c219218ae54f019056f2c0fae14d8fb3263cceedf3f3efc468d0b",
+      "provenance": "Reviewed work-first display defaults; collapsed writes show an eight-line preview. Existing shared profiles are not rewritten."
     },
     {
       "path": "config/rpiv-todo.json",

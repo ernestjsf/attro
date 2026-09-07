@@ -668,7 +668,7 @@ process.stdin.destroy();
         root = Path(__file__).resolve().parents[1]
         profile = json.loads((root / "profile/settings.json").read_text())
         self.assertEqual(profile["packages"], ["{{NPM:@narumitw/pi-caffeinate}}", "{{NPM:pi-btw}}", "{{PLUGIN_PI_ASK_USER}}", "{{PLUGIN_PI_LENS}}", "{{PLUGIN_PI_WEB_ACCESS}}", "{{NPM:pi-cursor-sdk}}", "{{PLUGIN_PI_SUBAGENTS}}", "{{PLUGIN_RPIV_TODO}}", "{{PLUGIN_PI_CC_EXTENSIONS}}", "{{PLUGIN_PI_ZENTUI}}"])
-        expected = {"quietStartup": True, "hideThinkingBlock": False, "editorPaddingX": 0, "outputPad": 1, "tuiMode": "fullscreen", "fullscreenScrollbar": "auto", "fullscreenExitOutput": "resume-hint", "collapseChangelog": True, "markdown": {"mermaid": "final"}}
+        expected = {"quietStartup": True, "hideThinkingBlock": True, "editorPaddingX": 0, "outputPad": 1, "tuiMode": "fullscreen", "fullscreenScrollbar": "auto", "fullscreenExitOutput": "resume-hint", "collapseChangelog": True, "markdown": {"mermaid": "final"}}
         for key, value in expected.items():
             self.assertEqual(profile[key], value)
         for key in ("defaultProvider", "defaultModel", "enabledModels", "defaultThinkingLevel", "modelThinkingLevels"):

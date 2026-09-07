@@ -40,7 +40,7 @@ EXPECTED_PACKAGES = [
 
 EXPECTED_UI_DEFAULTS = {
     "quietStartup": True,
-    "hideThinkingBlock": False,
+    "hideThinkingBlock": True,
     "editorPaddingX": 0,
     "outputPad": 1,
     "tuiMode": "fullscreen",

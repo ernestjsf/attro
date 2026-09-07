@@ -1,6 +1,6 @@
 {
   "quietStartup": true,
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "editorPaddingX": 0,
   "outputPad": 1,
   "tuiMode": "fullscreen",

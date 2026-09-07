@@ -8,7 +8,7 @@ defaults — not through personal extensions or skills in the distribution profi
 | Surface | Owner |
 | --- | --- |
 | User-message labeled frame, minimalist editor, selector borders | Zentui |
-| Compact tool rows, expandable details, edit/write diffs, folded thinking/activity | CC extensions |
+| Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
 | Live working line, current tool, elapsed time and token count | Zentui |
 | Diagnostic, task and subagent panels | Lens, rpiv todo, and subagent packages |
 
@@ -17,25 +17,32 @@ recipe. Users who want them install or copy standalone extensions into their own
 `~/.attro/agent` directory (or another Pi discovery path).
 
 Zentui's experimental thinking renderer is disabled in the shipped
-`config/zentui.json` to avoid overlapping CC's assistant renderer. Thinking is
-not globally hidden by default (`hideThinkingBlock: false` in
-`profile/settings.json`); CC's compact folding is a separate display behavior.
+`config/zentui.json` to avoid overlapping CC's assistant renderer. Thinking starts folded on fresh profiles (`hideThinkingBlock: true` in
+`profile/settings.json`), with a per-message disclosure; Ctrl+T reveals it. Existing
+profiles retain their visibility preference. Compact mode keeps assistant commentary in chronological order and no longer collects tools into Activity cards.
 CC's own working message and agent summary remain disabled. Zentui's turn summary and working-line thought
 preview are disabled; the working message is the literal `Working…`. These
 changes remove duplicate UI, not model reasoning or tool content.
 
 ## Visual hierarchy
 
-Quattro Green is the default theme. User text uses cream; tool titles use jade;
-success uses green; pending tools use a subtle amber surface; errors retain
-their red surface. Completed tools use a separate blue-green surface, not the
-user-message background. Labels and state glyphs provide distinctions without
-relying only on color.
+Compact mode prioritizes evidence over tool plumbing: routine reads have compact
+path/range rows; commands and searches expose bounded output previews; edits use
+rich diffs; new writes show eight preview lines in the shipped defaults. Failed
+tools expose error text even while collapsed. Restored writes without a known
+baseline use a neutral content preview, not an all-add diff. Ordinary rows are unboxed and use
+the active theme's title/status tokens, with state glyphs rather than color alone.
+Fuller input/output remains accessible through tool expansion. A tool updates in
+place as it runs and settles; tool rows are not moved into expanded Activity cards.
 
-The confirmed final-answer separator uses `borderAccent` and a bold `mdHeading`
-label when a matching completion marker is present. Old messages are not guessed
-to be final, and streaming/failed answers do not acquire that label. No
-model-facing messages or tool results are rewritten by these display changes.
+Assistant commentary remains ordinary Markdown between actions, without repeated
+Assistant labels. In compact interactive mode, a short appended prompt guideline
+asks for meaningful findings, decisions, uncertainty, and blockers—not narration
+of each tool call or raw internal reasoning. This is guidance, not a guarantee of
+model behavior. Stored messages and tool results are not rewritten.
+
+Fresh profiles use the upstream theme default; personal Quattro themes remain
+optional. Standalone final-answer/status extensions are not bundled or required.
 
 ## Related UI work in plugin forks
 
@@ -66,12 +73,13 @@ permission, and unrelated plugin configurations are user-owned.
 
 For distribution changes, prepare and activate a new release, then restart
 Attro. `/reload` alone keeps using the running process's pinned release.
+Existing profiles retain their settings: select thinking-hidden with Ctrl+T and
+set `writeDiffCollapsedLines: 8` in the shared CC config to adopt those new defaults.
 Personal extension changes can use `/reload`; personal theme files retain
 upstream's hot-reload behavior. Restarting also gives a fresh transcript
 component tree.
 
-Use Ctrl+O for tool expansion and Ctrl+T for thinking visibility (subject to CC's
-compact grouping). These are Pi's default bindings and are not remapped by the
+Use Ctrl+O for tool expansion and Ctrl+T for thinking visibility. These are Pi's default bindings and are not remapped by the
 shipped profile defaults. Fullscreen clicking/selection remains owned by Pi and
 the existing renderer interaction layer.
 
@@ -89,9 +97,9 @@ npm test
 ```
 
 Exercise collapsed/expanded, pending/error, multiline arguments, restored messages
-and narrow-width component rendering. Activity remains expandable after a turn
-finishes, so folded thinking is not lost. Compact tool rows preserve the tool
-name at narrow widths; verbose expansion hints are omitted below 60 columns.
+and narrow-width component rendering. Thinking remains attached to its original
+message and separately expandable. Compact tool rows preserve their action at
+narrow widths; overflow remains accessible through expansion.
 Validate JSON and compare tracked config/theme files against their prepared
 release copies. No new dependencies or additional UI plugin are needed.
 
@@ -106,6 +114,24 @@ Verification used real installed-Pi transcript components at 40/80 columns,
 final-heading/status components at narrow and normal widths, the CC test suite,
 and the subagent test harness. This is component/automated evidence, not a
 screenshot or manual interaction test of the entire live combined terminal.
+
+### Work-first verification (2026-09-07)
+
+- `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm test`
+  passed in the CC fork on Homebrew Node 26.5.0 (192 tests).
+- `python3 -m unittest discover -s tests -p 'test_*.py' -v` passed
+  (178 tests run, one skipped).
+- The Bash-tail, unknown-write-baseline, and duplicate-stop regressions failed
+  against an isolated pre-fix source snapshot, then passed against the fixes.
+- The installed Attro CLI with checkout CC and Zentui extensions rendered a
+  synthetic restored session in an isolated tmux terminal at 100 and 40 columns.
+  Captures confirmed actual output beyond 16 KB, neutral restored-write previews,
+  folded thinking, visible errors, and Ctrl+O/Ctrl+T toggles. No credentials or
+  model requests were used. Live provider streaming and the full plugin set were
+  not exercised; partial output is covered by component tests.
+- Source/release verification remains blocked by the uncommitted CC submodule;
+  `--runtime` also reports the checkout's missing core build artifact. No source
+  pins were fabricated, and no installed release or shared user profile was changed.
 
 Historical maintainer backups of pre-change live files may exist under
 `~/.pi/agent/ui-backups/` on development machines. Those paths are personal and

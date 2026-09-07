@@ -3,7 +3,7 @@
   "diffViewMode": "unified",
   "diffIndicatorMode": "bars",
   "editDiffCollapsedLines": 24,
-  "writeDiffCollapsedLines": 0,
+  "writeDiffCollapsedLines": 8,
   "previewLines": 0,
   "showStartupHeader": false,
   "enableSessionReference": true,
