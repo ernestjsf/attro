@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "b5c4e8dcbd0942a68cc39bc376bf1f626e03e51e",
+      "pin": "d415336b7d35c423abb5ec4cdb2dbd7d1167f3a8",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Maintained Quattro fork at v0.85.0; source-core build uses npm ci + build:offline with pinned model snapshot",
+      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1273 files, no changes); read and image-resize test files 84 tests passed; isImage marker on image reads",
       "provenance": "QUATTRO.md"
     },
     {
@@ -61,7 +61,7 @@
       "name": "pi-cc-extensions",
       "origin": "https://github.com/ernestjsf/attro-cc-extensions.git",
       "upstream": "https://github.com/minuque/pi-cc-extensions.git",
-      "pin": "670012fc673bf27dc7199a27b8369f1734a383b2",
+      "pin": "52e52c1f2ea64385b6ce0df393624b5b931e09e8",
       "baseCommit": "5d7a2666f51da9f450bd019af10200c88cc1df98",
       "baseVersion": "0.8.69",
       "packagePath": ".",
@@ -74,7 +74,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "192 passed; typecheck and lint passed on Node 26.5.0; 100/40-column installed-Pi component smoke checks passed",
+      "testReport": "211 passed; typecheck, lint, and format:check passed on Node 26.5.0; numbered read previews and image classification; 100/40-column installed-Pi component smoke checks passed",
       "provenance": "QUATTRO.md"
     },
     {

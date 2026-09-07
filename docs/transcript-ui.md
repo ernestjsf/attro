@@ -26,8 +26,14 @@ changes remove duplicate UI, not model reasoning or tool content.
 
 ## Visual hierarchy
 
-Compact mode prioritizes evidence over tool plumbing: routine reads have compact
-path/range rows; commands and searches expose bounded output previews; edits use
+Compact mode prioritizes evidence over tool plumbing: file and symbol reads show
+up to three source lines with line numbers when the returned location is known,
+beneath their path/range or symbol header. Omitted content stays expandable.
+Read-limit/truncation notices and partial-symbol notices remain visible separately
+from the preview's own omitted-line count. Image classification uses actual image
+attachments or the core read tool's `details.isImage` marker, never literal source
+phrases. This also keeps text-only image-processing failures unnumbered.
+Commands and searches expose bounded output previews; edits use
 rich diffs; new writes show eight preview lines in the shipped defaults. Failed
 tools expose error text even while collapsed. Restored writes without a known
 baseline use a neutral content preview, not an all-add diff. Ordinary rows are unboxed and use
@@ -39,7 +45,15 @@ Assistant commentary remains ordinary Markdown between actions, without repeated
 Assistant labels. In compact interactive mode, a short appended prompt guideline
 asks for meaningful findings, decisions, uncertainty, and blockers—not narration
 of each tool call or raw internal reasoning. This is guidance, not a guarantee of
-model behavior. Stored messages and tool results are not rewritten.
+model behavior. Formatting guidance uses inline code for paths, commands, and
+identifiers, and headings only where useful. Stored messages and tool results
+are not rewritten.
+
+Response colors belong to the selected theme: `mdHeading` controls headings,
+`mdCode` inline code, `mdLink` links, and `mdListBullet` list markers. Normal prose
+keeps `text`; status colors remain reserved for actual tool states. A personal
+theme can map `mdHeading` to its `accent` without changing the renderer or other
+themes. No keyword-matching colorizer or fixed response palette is installed.
 
 Fresh profiles use the upstream theme default; personal Quattro themes remain
 optional. Standalone final-answer/status extensions are not bundled or required.
@@ -132,6 +146,21 @@ screenshot or manual interaction test of the entire live combined terminal.
 - Source/release verification remains blocked by the uncommitted CC submodule;
   `--runtime` also reports the checkout's missing core build artifact. No source
   pins were fabricated, and no installed release or shared user profile was changed.
+
+### Numbered read previews and response emphasis (2026-09-07)
+
+The CC refinement passed `npm run typecheck`, `npm run lint`,
+`npm run format:check`, and `npm test` (211 tests). The root Python suite passed
+178 tests run with one skipped. Nineteen new preview/guidance assertions failed
+against the prior CC commit and passed with the refinement. An isolated installed
+CLI with Lens, checkout CC, and Zentui rendered restored file/symbol reads at
+40 and 100 columns; Ctrl+O exposed the complete results without reordering them.
+Theme-loader and rendered ANSI checks confirmed that a personal `mdHeading` →
+`accent` mapping and existing inline-code colors work at both widths. No personal
+theme was added to the distribution, and no model requests were made by these checks.
+The optional core image-result marker passed `npm run check` and both complete
+read/image test files (84 tests). Three continuation/image-classification
+regressions failed against the pre-fix renderer snapshot and passed with the fixes.
 
 Historical maintainer backups of pre-change live files may exist under
 `~/.pi/agent/ui-backups/` on development machines. Those paths are personal and
