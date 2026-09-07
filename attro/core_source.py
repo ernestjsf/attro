@@ -8,6 +8,7 @@ import io
 import json
 import os
 import re
+import stat
 import tarfile
 import tempfile
 import urllib.request
@@ -41,16 +42,31 @@ CRITICAL_WORKSPACES = {
 }
 
 
-def _digest_runtime_file(path: Path, key: str) -> str:
+def _digest_runtime_file(path: Path | str, key: str, *, dir_fd: int | None = None) -> str:
     try:
-        if not path.is_file():
-            raise ValidationError(f"source core runtime is not a regular file: {key}")
-        stat = path.stat()
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=dir_fd)
+        with os.fdopen(fd, "rb") as stream:
+            metadata = os.fstat(stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode):
+                raise ValidationError(f"source core runtime is not a regular file: {key}")
+            if metadata.st_nlink != 1:
+                raise ValidationError(f"source core runtime must not alias another file: {key}")
+            return _sha256_bytes(stream.read())
     except OSError as exc:
         raise ValidationError(f"source core runtime is not a regular file: {key}") from exc
-    if stat.st_nlink != 1:
-        raise ValidationError(f"source core runtime must not alias another file: {key}")
-    return sha256_file(path)
+
+
+def _open_runtime_directory(root_fd: int, key: str) -> int:
+    fd = os.dup(root_fd)
+    try:
+        for component in key.split("/"):
+            child_fd = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = child_fd
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
 
 
 def _hash_runtime_resource(install_root: Path, resource: Path, rel_key: str) -> dict[str, str]:
@@ -64,25 +80,33 @@ def _hash_runtime_resource(install_root: Path, resource: Path, rel_key: str) -> 
     if not resource.is_dir():
         raise ValidationError(f"source core runtime is not a regular file: {rel_key}")
     hashes: dict[str, str] = {}
-    stack = [resource]
-    keys = [rel_key]
-    while stack:
-        current = stack.pop()
-        prefix = keys.pop()
-        with os.scandir(current) as entries:
-            for entry in entries:
-                if entry.name == "node_modules" and entry.is_dir():
-                    continue
-                key = f"{prefix}/{entry.name}" if prefix else entry.name
-                path = Path(entry.path)
-                safe_child(install_root, key)
-                if entry.is_file(follow_symlinks=False):
-                    hashes[key] = _digest_runtime_file(path, key)
-                elif entry.is_dir(follow_symlinks=False):
-                    stack.append(path)
-                    keys.append(key)
-                else:
-                    raise ValidationError(f"source core runtime is not a regular file: {key}")
+    root_fd = os.open(install_root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        keys = [rel_key]
+        while keys:
+            prefix = keys.pop()
+            directory_fd = _open_runtime_directory(root_fd, prefix)
+            try:
+                with os.scandir(directory_fd) as entries:
+                    for entry in entries:
+                        if entry.name == "node_modules" and entry.is_dir():
+                            continue
+                        key = f"{prefix}/{entry.name}"
+                        if "\\" in entry.name:
+                            raise ValidationError(f"invalid relative path: {key!r}")
+                        if entry.is_file(follow_symlinks=False):
+                            hashes[key] = _digest_runtime_file(entry.name, key, dir_fd=directory_fd)
+                        elif entry.is_dir(follow_symlinks=False):
+                            keys.append(key)
+                        else:
+                            raise ValidationError(f"source core runtime is not a regular file: {key}")
+                current_directory = safe_child(install_root, prefix)
+                if not os.path.samestat(os.fstat(directory_fd), current_directory.stat()):
+                    raise ValidationError(f"source core runtime directory changed during validation: {prefix}")
+            finally:
+                os.close(directory_fd)
+    finally:
+        os.close(root_fd)
     return hashes
 
 
