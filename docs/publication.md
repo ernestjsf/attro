@@ -64,7 +64,7 @@ selected for a public profile:
 
 | Live resource | Distribution treatment |
 | --- | --- |
-| `pi-caffeinate`, `pi-btw`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. |
+| `pi-caffeinate`, `pi-btw`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. New Attro releases opt into `sdkPatches` to stage a versioned `@cursor/sdk` attribution-default patch after `npm ci`, record provenance, and validate patched bundle digests before publication. |
 | Standalone personal extensions (for example turn-status, auto-session-name, safety-guard, pi-automode) | Not bundled; users install or copy into their own agent directory. |
 | Optional host tools (`bb`, `herdr`) and externally installed skills | Not bundled; users install separately and retain their own notices. |
 | Agent definitions, personal `AGENTS.md`, custom skills/prompts | User-owned under `~/.attro/agent` or trusted-project paths; not seeded from the repository recipe. |

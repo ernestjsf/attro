@@ -161,6 +161,12 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
         npm = _install_packages(stage, final, descriptor["npmPackages"], snapshot=snapshot, lock_rel=npm_lock) if descriptor["npmPackages"] else []
         if not npm:
             (stage / "npm").mkdir()
+        sdk_patch_ids = descriptor.get("sdkPatches", [])
+        cursor_sdk_patches = []
+        if sdk_patch_ids:
+            from attro.cursor_sdk_attribution_patch import apply_cursor_sdk_attribution_patches
+
+            cursor_sdk_patches = apply_cursor_sdk_attribution_patches(safe_child(stage, "npm"), sdk_patch_ids)
         if descriptor["core"].get("installMethod") == "source":
             if core_entry is None:
                 raise ValidationError(f"sources lock missing {CORE_SOURCE_SUBMODULE}")
@@ -222,6 +228,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                     else "Plugin npm ci uses committed locks; core/npm locks are newly resolved per preparation, not globally reproducible."
                 ),
                 **({"runtimeLocks": runtime_locks} if runtime_locks else {}),
+                **({"sdkPatchIds": sdk_patch_ids, "cursorSdkPatches": cursor_sdk_patches} if sdk_patch_ids else {}),
             },
         }
         write_json_atomic(stage / "pi/core.json", core)

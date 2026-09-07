@@ -138,6 +138,20 @@ sessions still use them.
 optional disposable fork-merge assessment, and the remaining release-PR lane.
 Discovery reports are **not** an automatic consumer release feed.
 
+### Cursor attribution
+
+New releases disable Cursor SDK's default commit and PR attribution through the
+versioned `sdkPatches` entry in `attro.json`. Preparation patches only staged
+`@cursor/sdk@1.0.27` bundles, checks their original and resulting SHA-256 hashes,
+and records patch provenance that is verified when the release is used. An
+unrecognized SDK version or bundle fails preparation rather than being patched
+blindly; SDK upgrades require a reviewed patch specification.
+
+This changes attribution defaults, not explicit overrides or admin controls.
+It does not rewrite existing commits, change original Pi, or modify retained
+releases. Prepare and activate a new release to adopt it, then start a fresh
+session. Cursor Cloud attribution is not covered.
+
 ## Structure
 
 ```text

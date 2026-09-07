@@ -133,6 +133,10 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
         target = safe_child(path, "config", Path(config["path"]).name)
         if not target.is_file() or sha256_file(target) != config["sha256"]:
             raise ValidationError(f"release config digest mismatch: {config['path']}")
+    if "sdkPatchIds" in provenance or "cursorSdkPatches" in provenance:
+        from attro.cursor_sdk_attribution_patch import validate_cursor_sdk_patch_provenance
+
+        validate_cursor_sdk_patch_provenance(provenance, safe_child(path, "npm"))
     for agent_settings in (("config/settings.json",) if shared else ("config/settings.json", "agent/settings.json")):
         settings = load_json(safe_child(path, agent_settings))
         for key in ("packages", "themes", "extensions", "skills", "prompts"):

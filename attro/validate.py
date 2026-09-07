@@ -138,6 +138,9 @@ def validate_descriptor(path: Path) -> dict[str, Any]:
     if sys.platform not in supported:
         raise ValidationError(f"unsupported platform {sys.platform}")
     data["npmPackages"] = normalize_npm_packages(data.get("npmPackages", []))
+    from attro.cursor_sdk_attribution_patch import normalize_sdk_patches
+
+    data["sdkPatches"] = normalize_sdk_patches(data.get("sdkPatches"))
     runtime_locks = data.get("runtimeLocks")
     if runtime_locks is not None and not isinstance(runtime_locks, dict):
         raise ValidationError("runtimeLocks must be an object")
