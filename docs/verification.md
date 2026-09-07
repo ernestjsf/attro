@@ -6,6 +6,36 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Automatic release retention (2026-09-07)
+
+After comment review, the retention change passed these local checks:
+
+- `python3 -m unittest discover -s tests -p 'test_*.py' -v`: **197 tests run,
+  one skipped** (196 passed).
+- `npm exec --offline --yes --package pyright@1.1.408 -- pyright --project pyrightconfig.json`:
+  **0 errors, 0 warnings**.
+- `python3 scripts/verify.py` and `python3 scripts/verify.py --runtime`: passed.
+- `python3 -m py_compile install` and `git diff --check`: passed.
+
+The same isolated public activation probe failed against the pre-change manager
+because the old release remained, then passed with automatic retention. Nineteen
+focused retention tests cover idle pruning, rollback refusal, staged candidates,
+real exec/try lease inheritance and cleanup after exit, a detached env-pinned
+process, process-inspection/decoding failure, interrupted deletion/registry saves,
+directory-identity changes, symlink confinement, and shared/legacy data protection.
+A review-found decoding failure was also reproduced with an actual non-UTF-8
+process environment on macOS; the correction retains code with an inspection
+warning rather than failing a committed activation. Independent Astra review
+confirmed the correction; no other concrete destructive-deletion findings were
+reported in the scoped review.
+Fixtures use temporary managed roots and synthetic executables; no provider calls
+or live release activation are part of these checks.
+
+Linux process inspection and a real interactive PTY session were not exercised
+locally. The foreground launch still uses `execvpe`; process scanning for unleased
+sessions remains conservative best-effort protection, not a guarantee for arbitrary
+processes that hide their release identity.
+
 ## Maintained-core verification
 
 The current tree passes **154 Python tests**, the full subagent suite on Node 26, pinned Pyright (**0 errors, 0 warnings**), installer compilation, and whitespace checks. Launcher regressions for help before initialization and `--state-root=PATH` were observed RED before correction and GREEN afterward.

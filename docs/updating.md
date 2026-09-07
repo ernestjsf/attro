@@ -20,12 +20,17 @@ shared profile at `~/.attro/agent` **persists** across update and rollback:
 ```sh
 attro update --repo /path/to/reviewed-clean-checkout
 attro activate <new-release-id>
-attro rollback   # returns to previous release binaries; shared profile unchanged
+attro rollback   # only if previous code is still retained; shared profile unchanged
 ```
 
 `update` does not fetch the latest upstream plugin versions automatically; it
-builds the recipe pinned in the checkout you pass. Old release directories remain
-for offline rollback. Do not delete them while sessions still reference them.
+builds the recipe pinned in the checkout you pass. Retention keeps the active
+release and one staged candidate. Preparing a replacement candidate or activating
+a release supersedes older code, which is automatically pruned when idle. Running
+sessions keep their release; pending cleanup retries after they exit. There is no
+guaranteed offline rollback copy: prepare the desired recipe again if its code
+has already been pruned. Legacy per-release user data is preserved. See the
+[retention behavior and limitations](../README.md#update-and-rollback).
 
 ## Review and update workflow (maintainers)
 

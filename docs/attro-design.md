@@ -21,7 +21,8 @@ the shared profile; they do not rewrite it with new repository defaults.
   development or setup. PATH adoption must be explicit; `./install` does not edit
   shell startup files.
 - Prepare each release independently. Failed preparation must leave the active
-  release intact. Keep old installations for offline rollback.
+  release intact. Keep the active release and one staged candidate; superseded
+  code is pruned when idle, so offline rollback is not guaranteed.
 - Keep user credentials, sessions, provider selections, and project trust out of
   source control. Never copy a live configuration directory wholesale.
 - Seed the shared profile once on first activation from reviewed UI and package
@@ -34,7 +35,10 @@ the shared profile; they do not rewrite it with new repository defaults.
 - Do not claim code rollback reverses shared-state migrations or external side
   effects. Block incompatible managed state formats until recovery is designed.
 - Existing sessions must continue using their resolved release after activation.
-  Keep old release directories; do not prune automatically.
+  Acquire release leases under the operation lock before launching. Prune only
+  superseded, idle code; a pending-cleanup process retries after sessions exit.
+  Process inspection conservatively protects unleased sessions and descendants;
+  unknown liveness must retain code, not authorize deletion.
 - Pass managed resource paths through upstream Pi CLI flags so a running release
   A session does not reload release B's plugins after activation changes.
 

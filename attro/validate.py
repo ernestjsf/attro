@@ -170,6 +170,15 @@ def validate_state(data: dict[str, Any]) -> None:
             raise ValidationError(f"invalid release record: {rid}")
         text(entry.get("path"), "release path")
         text(entry.get("preparedAt"), "preparedAt")
+        retention = entry.get("retention")
+        if retention is not None and (not isinstance(retention, str) or retention not in {"candidate", "active", "retired"}):
+            raise ValidationError(f"invalid retention metadata: {rid}")
+        if "deleting" in entry and type(entry["deleting"]) is not bool:
+            raise ValidationError(f"invalid deleting metadata: {rid}")
+        if entry.get("deleting"):
+            identity = entry.get("deletionIdentity")
+            if retention != "retired" or not isinstance(identity, list) or len(identity) != 2 or any(type(value) is not int or value < 0 for value in identity):
+                raise ValidationError(f"deleting release must be retired with a directory identity: {rid}")
     for key in ("active", "previous"):
         if key not in data:
             raise ValidationError(f"state missing {key}")
@@ -177,6 +186,13 @@ def validate_state(data: dict[str, Any]) -> None:
             validate_release_id(data[key])
             if data[key] not in releases:
                 raise ValidationError(f"state {key} references an unknown release")
+            if releases[data[key]].get("deleting"):
+                raise ValidationError(f"state {key} references a deleting release")
+    active = data.get("active")
+    if active is not None:
+        active_entry = releases[active]
+        if active_entry.get("retention") == "retired" or active_entry.get("deleting"):
+            raise ValidationError("active release cannot be retired or deleting")
 
 
 def validate_manifest(data: dict[str, Any]) -> None:

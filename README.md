@@ -106,9 +106,9 @@ resource bundles. Update personal configs that still reference the old bundled
 path. Attro does not edit files under `~/.attro/agent` when the repository
 recipe changes.
 
-**Existing installed releases stay as prepared.** Preparing and activating a new
-release from an updated checkout applies the new recipe; Attro does not
-automatically delete, re-seed, or rewrite an existing shared profile.
+**Release contents are not rewritten in place.** Preparing and activating a new
+release applies the new recipe. Superseded release code is automatically pruned
+when idle; Attro does not delete, re-seed, or rewrite the shared user profile.
 
 A trial uses temporary Pi state and discards it on exit; it is not a sandbox and
 can still access environment credentials, project resources, and host tools.
@@ -124,15 +124,31 @@ After `./install`, put `~/.local/bin` (or your `--bin-dir`) on PATH, then:
 ```sh
 attro update --repo /path/to/reviewed-clean-checkout
 attro activate <new-release-id>
-attro rollback
+attro rollback   # only while the previous release is still retained
 ```
 
 `update` prepares the **explicit checkout's recipe**, not the latest upstream
-versions. Old prepared code is retained locally; rollback switches the active
-pointer and returns to the previous release's binaries while **keeping the shared
-profile**. It does not undo shared plugin data changes, external side
-effects, or modifications made by an agent. Never delete old releases while
-sessions still use them.
+versions. Attro keeps the active release and one staged update candidate.
+Preparing another candidate supersedes the earlier candidate; activation
+supersedes other releases. Idle superseded code is automatically deleted.
+There is **no guaranteed offline rollback copy**. If the previous release is
+still retained, rollback switches binaries while **keeping the shared profile**;
+otherwise, prepare the desired recipe again. Rollback does not undo shared plugin
+data changes, external side effects, or modifications made by an agent.
+
+Running managed sessions hold release leases. A detached cleanup process retries
+pending deletion after sessions exit, without replacing or supervising the Pi
+process. It exits when cleanup is finished. Process inspection also conservatively
+protects older unleased sessions and detached children; inspection failure retains
+code rather than assuming it is unused. This is not a guarantee for arbitrary
+processes that hide or discard their release identity. Directly launching retained
+binaries bypasses the managed launch/cleanup locking protocol.
+
+Cleanup never sweeps arbitrary directories or deletes `~/.attro/agent`. Legacy
+releases with per-release user state are preserved for manual handling. Interrupted
+cleanup is retried; a later preparation, activation, or real launch also resumes
+pending cleanup if the cleanup process was stopped. Never manually delete releases
+while sessions still use them.
 
 [Update automation](docs/automation.md) explains scheduled candidate discovery,
 optional disposable fork-merge assessment, and the remaining release-PR lane.

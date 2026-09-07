@@ -155,11 +155,19 @@ def register_release(state_root: Path, release_id: str, release_path: Path) -> N
     expected = release_dir(release_id, state_root)
     if release_path.is_symlink() or release_path.resolve() != expected:
         raise ValidationError("cannot register a release outside its managed directory")
-    manifest = prepared_manifest(expected, release_id)
     state = load_state(state_root)
+    existing = state["releases"].get(release_id)
+    if existing is not None and existing.get("deleting"):
+        raise ValidationError("release is marked deleting and cannot be registered")
+    manifest = prepared_manifest(expected, release_id)
     record = {"path": str(expected), "preparedAt": manifest["preparedAt"]}
-    if release_id in state["releases"] and state["releases"][release_id] != record:
+    if existing is not None and any(existing[key] != value for key, value in record.items()):
         raise ValidationError("release is already registered with different metadata")
+    record["retention"] = "active" if state["active"] == release_id else "candidate"
+    if record["retention"] == "candidate":
+        for other_id, other in state["releases"].items():
+            if other_id != release_id and other_id != state["active"] and other.get("retention") == "candidate":
+                other["retention"] = "retired"
     state["releases"][release_id] = record
     save_state(state_root, state)
 
@@ -169,13 +177,16 @@ def activate_release(state_root: Path, release_id: str) -> None:
     state = load_state(state_root)
     if release_id not in state["releases"]:
         raise ValidationError(f"unknown release: {release_id}")
+    if state["releases"][release_id].get("deleting"):
+        raise ValidationError(f"release is marked deleting: {release_id}")
     path = release_dir(release_id, state_root)
     require_shared_release(prepared_manifest(path, release_id))
     initialize_shared_agent(state_root, path)
-    if state["active"] == release_id:
-        return
-    state["previous"], state["active"] = state["active"], release_id
-    state["activatedAt"] = datetime.now(timezone.utc).isoformat()
+    if state["active"] != release_id:
+        state["previous"], state["active"] = state["active"], release_id
+        state["activatedAt"] = datetime.now(timezone.utc).isoformat()
+    for other_id, other in state["releases"].items():
+        other["retention"] = "active" if other_id == release_id else "retired"
     save_state(state_root, state)
 
 
@@ -183,7 +194,7 @@ def rollback(state_root: Path) -> str:
     state = load_state(state_root)
     previous = state["previous"]
     if previous is None:
-        raise ValidationError("no previous release to roll back to")
+        raise ValidationError("no previous release to roll back to; idle superseded releases are pruned, so prepare the desired recipe again")
     activate_release(state_root, previous)
     return previous
 

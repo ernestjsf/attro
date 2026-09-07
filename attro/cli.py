@@ -7,12 +7,14 @@ import json
 import subprocess
 import sys
 import tempfile
+from contextlib import ExitStack
 from pathlib import Path
 
 from attro import __version__
 from attro.doctor import run_doctor
 from attro.launch import build_exec_env, build_try_env, exec_pi, managed_resource_args, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
 from attro.lock import operation_lock
+from attro.retention import reconcile_and_maybe_reap, release_lease
 from attro.paths import home, release_dir, validate_state_root
 from attro.prepare import prepare_release
 from attro.state import activate_release, load_state, prepared_manifest, register_release, rollback
@@ -75,6 +77,15 @@ def everyday_command(argv: list[str]) -> list[str]:
     return body
 
 
+def _emit_retention_result(args: argparse.Namespace, data: object, message: str, warnings: list[str]) -> None:
+    if warnings and args.json and isinstance(data, dict):
+        data = {**data, "warnings": warnings}
+    emit(args, data, message)
+    if warnings and not args.json:
+        for warning in warnings:
+            print(f"warning: {warning}", file=sys.stderr)
+
+
 def cmd_setup(args: argparse.Namespace) -> int:
     checkout = Path(args.repo).expanduser().resolve()
     state_root = validate_state_root(args.root, checkout)
@@ -85,7 +96,8 @@ def cmd_setup(args: argparse.Namespace) -> int:
         register_release(state_root, rid, release_dir(rid, state_root))
         if args.activate:
             activate_release(state_root, rid)
-    emit(args, manifest, f"prepared release {rid}" + (" (active)" if args.activate else ""))
+        warnings = reconcile_and_maybe_reap(state_root)
+    _emit_retention_result(args, manifest, f"prepared release {rid}" + (" (active)" if args.activate else ""), warnings)
     return 0
 
 
@@ -114,55 +126,75 @@ def cmd_activate(args: argparse.Namespace) -> int:
     validate_release_id(args.release_id)
     with operation_lock(args.root):
         activate_release(args.root, args.release_id)
-    emit(args, {"active": args.release_id}, f"activated {args.release_id}")
+        warnings = reconcile_and_maybe_reap(args.root)
+    _emit_retention_result(args, {"active": args.release_id}, f"activated {args.release_id}", warnings)
     return 0
 
 
 def cmd_rollback(args: argparse.Namespace) -> int:
     with operation_lock(args.root):
         previous = rollback(args.root)
-    emit(args, {"active": previous}, f"rolled back to {previous}; live ~/.pi data is untouched")
+        warnings = reconcile_and_maybe_reap(args.root)
+    _emit_retention_result(args, {"active": previous}, f"rolled back to {previous}; live ~/.pi data is untouched", warnings)
     return 0
 
 
 def _launch(args: argparse.Namespace, trial: bool) -> int:
     if args.json and not args.dry_run:
         raise ValidationError("--json is supported for launch commands only with --dry-run")
-    state = load_state(args.root)
-    if trial and args.release_id:
-        validate_release_id(args.release_id)
-        if args.release_id not in state["releases"]:
-            raise ValidationError(f"unknown release: {args.release_id}")
-        release_id = args.release_id
-    else:
-        if state["active"] is None:
-            raise ValidationError("no active release; run setup --repo PATH --activate first")
-        release_id = state["active"]
-    release = release_dir(release_id, args.root)
-    manifest = prepared_manifest(release, release_id)
     command = normalize_pi_command(list(args.command))
     refuse_managed_mutation(command)
-    pi_bin = resolve_pi_binary(release, manifest=manifest)
-    command = [*managed_resource_args(release, manifest=manifest), *command]
 
-    def run(env: dict[str, str]) -> int:
+    def resolve(state: dict) -> tuple[str, Path]:
+        if trial and args.release_id:
+            validate_release_id(args.release_id)
+            if args.release_id not in state["releases"]:
+                raise ValidationError(f"unknown release: {args.release_id}")
+            release_id = args.release_id
+        else:
+            if state["active"] is None:
+                raise ValidationError("no active release; run setup --repo PATH --activate first")
+            release_id = state["active"]
+        if state["releases"].get(release_id, {}).get("deleting"):
+            raise ValidationError(f"release is marked deleting: {release_id}")
+        return release_id, release_dir(release_id, args.root)
+
+    def run(pi_bin: str, full_command: list[str], env: dict[str, str], lease_fd: int | None = None) -> int:
         if args.dry_run:
-            data = {"argv": [pi_bin, *command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["ATTRO_RELEASE_ROOT"], "resourceDir": env["ATTRO_RESOURCE_DIR"]}
+            data = {"argv": [pi_bin, *full_command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["ATTRO_RELEASE_ROOT"], "resourceDir": env["ATTRO_RESOURCE_DIR"]}
             emit(args, data, f"would run: {' '.join(data['argv'])}\nPI_CODING_AGENT_DIR={data['agentDir']}\nATTRO_RELEASE_ROOT={data['releaseRoot']}\nATTRO_RESOURCE_DIR={data['resourceDir']}")
             return 0
         if trial:
-            return subprocess.run([pi_bin, *command], env=env, check=False).returncode
-        exec_pi(pi_bin, command, env)
+            return subprocess.run([pi_bin, *full_command], env=env, check=False, pass_fds=() if lease_fd is None else (lease_fd,)).returncode
+        exec_pi(pi_bin, full_command, env)
         return 0
 
-    if not trial:
-        return run(build_exec_env(release, manifest=manifest))
     if args.dry_run:
-        return run(build_try_env(release, Path(tempfile.gettempdir()) / "attro-try-<temporary>" / "agent", manifest=manifest))
-    with tempfile.TemporaryDirectory(prefix="attro-try-") as tmp:
-        agent = Path(tmp) / "agent"
-        populate_try_agent(release, agent, manifest=manifest)
-        return run(build_try_env(release, agent, manifest=manifest))
+        state = load_state(args.root)
+        _, release = resolve(state)
+        manifest = prepared_manifest(release, release.name)
+        pi_bin = resolve_pi_binary(release, manifest=manifest)
+        full_command = [*managed_resource_args(release, manifest=manifest), *command]
+        env = build_try_env(release, Path(tempfile.gettempdir()) / "attro-try-<temporary>" / "agent", manifest=manifest) if trial else build_exec_env(release, manifest=manifest)
+        return run(pi_bin, full_command, env)
+
+    with ExitStack() as leases:
+        with operation_lock(args.root):
+            state = load_state(args.root)
+            release_id, release = resolve(state)
+            lease = leases.enter_context(release_lease(release, inheritable=True))
+            manifest = prepared_manifest(release, release_id)
+            pi_bin = resolve_pi_binary(release, manifest=manifest)
+            full_command = [*managed_resource_args(release, manifest=manifest), *command]
+            warnings = reconcile_and_maybe_reap(args.root)
+        for warning in warnings:
+            print(f"warning: {warning}", file=sys.stderr)
+        if not trial:
+            return run(pi_bin, full_command, build_exec_env(release, manifest=manifest), lease.fd)
+        with tempfile.TemporaryDirectory(prefix="attro-try-") as tmp:
+            agent = Path(tmp) / "agent"
+            populate_try_agent(release, agent, manifest=manifest)
+            return run(pi_bin, full_command, build_try_env(release, agent, manifest=manifest), lease.fd)
 
 
 def cmd_try(args: argparse.Namespace) -> int:

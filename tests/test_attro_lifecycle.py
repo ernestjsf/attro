@@ -15,6 +15,7 @@ from pathlib import Path
 from unittest import mock
 
 from attro.cli import main
+from attro.retention import release_lease
 from attro.validate import ValidationError, run_command, sha256_file
 from attro.launch import build_exec_env, populate_try_agent
 
@@ -137,6 +138,12 @@ install_deps()
         env = mock.patch.dict(os.environ, {"PATH": str(fakebin) + os.pathsep + os.environ["PATH"]})
         env.start()
         self.addCleanup(env.stop)
+        scan = mock.patch("attro.retention.scan_processes", return_value=(False, True))
+        reaper = mock.patch("attro.retention.start_reaper", return_value=True)
+        scan.start()
+        reaper.start()
+        self.addCleanup(scan.stop)
+        self.addCleanup(reaper.stop)
 
     def git(self, *args, cwd=None):
         return subprocess.run(["git", *args], cwd=cwd or self.repo, check=True, capture_output=True, text=True).stdout.strip()
@@ -233,15 +240,18 @@ install_deps()
         self.descriptor["version"] = "0.2.0"
         self.commit_inputs()
         b = self.setup_release()
+        self.assertFalse(release_a.exists())
         self.repo.rename(self.base / "unavailable")
-        self.cli("rollback")
+        _, error = self.cli("rollback", success=False)
+        self.assertIn("no previous release", error)
         state = json.loads(self.cli("--json", "status")[0])
-        self.assertEqual(state["active"], a["releaseId"])
-        self.assertEqual(state["previous"], b["releaseId"])
-        self.assertEqual((release_a / "config/settings.json").read_bytes(), settings_before)
+        self.assertEqual(state["active"], b["releaseId"])
+        self.assertIsNone(state["previous"])
+        release_b = self.state / "releases" / b["releaseId"]
         self.cli("doctor")
         self.cli("exec", "--dry-run", "--", "--version")
         self.cli("try", "--dry-run", "--", "--version")
+        self.assertTrue(release_b.exists())
 
     def configure_profile_bundle(self):
         config = self.repo / "config/rpiv-todo.json"
@@ -313,7 +323,8 @@ install_deps()
         self.descriptor.pop("profileSeed")
         self.descriptor.pop("profileResources")
         self.commit_inputs()
-        b = self.setup_release()
+        with release_lease(release_a):
+            b = self.setup_release()
         launch_b = json.loads(self.cli("--json", "exec", "--dry-run")[0])
         self.assertNotIn(launch_b["resourceDir"], launch_b["argv"])
         release_b = self.state / "releases" / b["releaseId"]
@@ -339,7 +350,7 @@ install_deps()
         self.assertNotEqual(trial["agentDir"], str(self.state / "agent"))
         self.assertEqual(before, {p.relative_to(self.state): p.read_bytes() for p in self.state.rglob("*") if p.is_file()})
         captured = {}
-        def run(argv, *, env, check):
+        def run(argv, *, env, check, pass_fds=()):
             isolated = Path(env["PI_CODING_AGENT_DIR"])
             captured.update({"agent": isolated, "settings": json.loads((isolated / "settings.json").read_text()), "argv": argv})
             self.assertEqual(json.loads((isolated / "subagents.json").read_text())["agentDir"], str(isolated / "agents"))
@@ -579,8 +590,10 @@ process.stdin.destroy();
             self.cli("activate", b["releaseId"], success=False)
         self.assertEqual((self.state / "state.json").read_bytes(), before)
         self.assertEqual(json.loads(before)["active"], a["releaseId"])
-        self.cli("activate", b["releaseId"])
-        self.cli("rollback")
+        release_a = self.state / "releases" / a["releaseId"]
+        with release_lease(release_a):
+            self.cli("activate", b["releaseId"])
+            self.cli("rollback")
 
     def test_real_process_lock_contention_and_recovery(self):
         code = "from pathlib import Path; import sys,time; from attro.lock import operation_lock\nwith operation_lock(Path(sys.argv[1])):\n print('locked', flush=True)\n time.sleep(30)\n"

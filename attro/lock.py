@@ -13,6 +13,10 @@ from attro.paths import lock_path
 from attro.validate import ValidationError
 
 
+class OperationBusy(ValidationError):
+    pass
+
+
 @contextmanager
 def operation_lock(state_root: Path, *, fault_after_acquire: bool = False) -> Iterator[None]:
     """Acquire an exclusive operations lock under state_root."""
@@ -27,7 +31,7 @@ def operation_lock(state_root: Path, *, fault_after_acquire: bool = False) -> It
 
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise ValidationError("another Attro operation is already running") from exc
+            raise OperationBusy("another Attro operation is already running") from exc
         payload = {
             "pid": os.getpid(),
             "startedAt": time.time(),

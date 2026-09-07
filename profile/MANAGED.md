@@ -9,7 +9,7 @@ clean local checkout**:
 bin/attro setup --repo /path/to/checkout       # manual prepare
 bin/attro update --repo /path/to/checkout
 bin/attro activate RELEASE_ID
-bin/attro rollback
+bin/attro rollback                            # only if the previous release remains
 bin/attro status
 bin/attro doctor
 bin/attro try -- --version
@@ -119,8 +119,9 @@ mutable working-tree contents. Ignored build artifacts are not copied. Symlinked
 source files are rejected. Dependency installs and the reviewed Lens/attro-core
 builds run only in staging. Failed preparation cannot replace or delete an
 existing release. The operation lock serializes cooperating manager processes.
-Activation changes only the atomically replaced, fsynced `state.json`
-active/previous pointers; retained settings and binaries are not rewritten.
+Activation atomically replaces the fsynced `state.json` pointers and marks older
+releases for cleanup. Retained settings and binaries are not rewritten in place;
+idle superseded release directories are deleted.
 
 Descriptor npm packages use **committed lock inputs** under `runtime/npm`
 (`npm ci`). Plugin `npm ci` uses each plugin's committed dependency lock.
@@ -128,8 +129,34 @@ Host Node must satisfy the recorded minimum at preparation and launch.
 
 Release paths are absolute and physical. Do not move retained directories.
 Code/config immutability is a management convention, not filesystem protection
-from your user account or extensions. No release deletion/pruning command is
-provided.
+from your user account or extensions.
+
+### Automatic retention
+
+Attro keeps the active release and one staged candidate. Registering another
+candidate supersedes the earlier candidate; activation supersedes other releases.
+There is no guaranteed rollback copy. Rollback works only while the previous
+release remains available; otherwise prepare the desired recipe again.
+
+Real managed launches acquire a shared release lease under the operation lock
+before reading executable/resource paths. Cleanup requires exclusive access plus
+successful process inspection. Running sessions, including detected unleased
+sessions and detached children, retain their code. A singleton detached cleanup
+process retries pending deletion after sessions exit, with no terminal or output
+pipe ownership. It exits once no retryable cleanup remains. A later preparation,
+activation, or real launch resumes pending cleanup if the process was stopped.
+Dry-run launches do not allocate leases or start cleanup.
+
+Process inspection fails safe: uncertainty retains releases. It is best-effort
+protection for processes without leases, not an atomic guarantee for arbitrary
+children that hide or discard their release identity. Direct execution of
+retained binaries bypasses managed launch/cleanup locking.
+
+Only registered, superseded shared-v1 code is eligible. Legacy per-release user
+state and the shared `agent/` directory are never automatically deleted. Deletion
+is recorded durably before removing code, making interrupted removal retryable;
+a release being deleted cannot be launched or reactivated. Cleanup failures do
+not undo successful activation. No arbitrary directory sweep is performed.
 
 ## Managed resources and subagents
 
