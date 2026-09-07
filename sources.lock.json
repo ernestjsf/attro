@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "28f9aa94ab61279cc005fa36c6b28e256bc1ebaa",
+      "pin": "fb7bd3cfd22321dd9e2dbd73975afd6049ca132d",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1275 files, no changes); attro-editor and interactive startup input tests passed; native editor from first frame with draft, cursor, and undo preserved through init",
+      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1275 files, no changes); 30 native-editor and startup input tests passed; nativeEditor Down-at-end and focus services verified for native and custom editors",
       "provenance": "QUATTRO.md"
     },
     {
@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "59b1a43e43f7618f84d2d31bb388e1aca860ea55",
+      "pin": "c160995edd974ac9880fe5012398635ee59660ff",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "full subagents.test.cjs suite passed on Node 26.7.0, including panel labels, managed resource/core pinning, and canonical ATTRO with legacy PIATTRO namespace compatibility; RED/GREEN verified; independent safety review found no blockers",
+      "testReport": "298 checks passed in subagents.test.cjs on Node 26.7.0, including nativeEditor Down navigation, panel return-focus, managed resource/core pinning, and canonical ATTRO with legacy PIATTRO namespace compatibility",
       "provenance": "QUATTRO.md"
     }
   ],
