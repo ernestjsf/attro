@@ -103,7 +103,7 @@
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
       "upstream": "https://github.com/apmantza/pi-lens.git",
-      "pin": "c14c31960628bdfeb5280f7c454a5a58dbd41d01",
+      "pin": "faed4cc7bbd29d36b0c00cafc032882a22243023",
       "baseCommit": "6cebeb5dc639531fe0b24b5221f032c5169feb2e",
       "baseVersion": "4.1.0",
       "packagePath": ".",
@@ -119,7 +119,7 @@
       "runtimeBuild": "npm run build:dist && node scripts/download-grammars.js --core --dest grammars && npm run check:grammars",
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "75 targeted; lint/build/imports passed; 12 core and 1 vendored grammar verified; not full Lens suite/live combined TUI",
+      "testReport": "188 focused tests; build/lint/import checks passed; independent review cleared; full suite 11 baseline failures plus 6 preexisting comment rule findings remain; user approved known limitations",
       "provenance": "QUATTRO.md"
     },
     {
