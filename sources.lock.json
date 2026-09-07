@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "d415336b7d35c423abb5ec4cdb2dbd7d1167f3a8",
+      "pin": "b5927cfdca9bad1aafd769aa7b0e9117679a733e",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1273 files, no changes); read and image-resize test files 84 tests passed; isImage marker on image reads",
+      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1273 files, no changes); interactive startup input and trust-blocking tests passed; draft during loading with submit blocked until trust resolves",
       "provenance": "QUATTRO.md"
     },
     {
