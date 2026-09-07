@@ -41,6 +41,73 @@ CRITICAL_WORKSPACES = {
 }
 
 
+def _digest_runtime_file(path: Path, key: str) -> str:
+    try:
+        if not path.is_file():
+            raise ValidationError(f"source core runtime is not a regular file: {key}")
+        stat = path.stat()
+    except OSError as exc:
+        raise ValidationError(f"source core runtime is not a regular file: {key}") from exc
+    if stat.st_nlink != 1:
+        raise ValidationError(f"source core runtime must not alias another file: {key}")
+    return sha256_file(path)
+
+
+def _hash_runtime_resource(install_root: Path, resource: Path, rel_key: str) -> dict[str, str]:
+    if not resource.exists():
+        if resource.is_symlink():
+            raise ValidationError(f"source core runtime is symlinked: {resource}")
+        return {}
+    safe_child(install_root, rel_key)
+    if resource.is_file():
+        return {rel_key: _digest_runtime_file(resource, rel_key)}
+    if not resource.is_dir():
+        raise ValidationError(f"source core runtime is not a regular file: {rel_key}")
+    hashes: dict[str, str] = {}
+    stack = [resource]
+    keys = [rel_key]
+    while stack:
+        current = stack.pop()
+        prefix = keys.pop()
+        with os.scandir(current) as entries:
+            for entry in entries:
+                if entry.name == "node_modules" and entry.is_dir():
+                    continue
+                key = f"{prefix}/{entry.name}" if prefix else entry.name
+                path = Path(entry.path)
+                safe_child(install_root, key)
+                if entry.is_file(follow_symlinks=False):
+                    hashes[key] = _digest_runtime_file(path, key)
+                elif entry.is_dir(follow_symlinks=False):
+                    stack.append(path)
+                    keys.append(key)
+                else:
+                    raise ValidationError(f"source core runtime is not a regular file: {key}")
+    return hashes
+
+
+def _validate_tree_symlinks(root: Path, pending_bins: dict[Path, Path]) -> None:
+    stack = [root]
+    while stack:
+        directory = stack.pop()
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                if entry.is_symlink():
+                    link = Path(entry.path)
+                    try:
+                        resolved = link.resolve(strict=True)
+                    except FileNotFoundError as exc:
+                        resolved = link.resolve()
+                        if pending_bins.get(link) != resolved:
+                            raise ValidationError(f"installed link is broken: {link}") from exc
+                    except (OSError, RuntimeError) as exc:
+                        raise ValidationError(f"installed link is broken: {link}") from exc
+                    if Path(os.readlink(link)).is_absolute() or not resolved.is_relative_to(root):
+                        raise ValidationError(f"installed link must be relative and contained: {link}")
+                elif entry.is_dir(follow_symlinks=False):
+                    stack.append(Path(entry.path))
+
+
 def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -179,21 +246,7 @@ def validate_installed_workspace_links(install_root: Path, lock_path: Path, *, b
                 if "/" in command:
                     raise ValidationError(f"invalid workspace bin command: {command}")
                 pending_bins[root / "node_modules/.bin" / command] = safe_child(root, rel, relative_path(target, "workspace bin target"))
-    for directory, dirs, files in os.walk(root, followlinks=False):
-        for name in [*dirs, *files]:
-            link = Path(directory) / name
-            if not link.is_symlink():
-                continue
-            try:
-                resolved = link.resolve(strict=True)
-            except FileNotFoundError as exc:
-                resolved = link.resolve()
-                if pending_bins.get(link) != resolved:
-                    raise ValidationError(f"installed link is broken: {link}") from exc
-            except (OSError, RuntimeError) as exc:
-                raise ValidationError(f"installed link is broken: {link}") from exc
-            if Path(os.readlink(link)).is_absolute() or not resolved.is_relative_to(root):
-                raise ValidationError(f"installed link must be relative and contained: {link}")
+    _validate_tree_symlinks(root, pending_bins)
 
 
 def apply_model_snapshot(url: str, expected_sha256: str, target_dir: Path) -> dict[str, str | int]:
@@ -306,29 +359,13 @@ def validate_source_core_layout(install_root: Path, *, package: str, version: st
             raise ValidationError(f"critical source core runtime missing: {rel}/dist/index.js")
     runtime_hashes = {"package.json": sha256_file(safe_child(install_root, "package.json"))}
     for rel in workspaces.values():
-        root = safe_child(install_root, rel)
-        roots = [root / "package.json", root / "src", root / "dist"]
+        workspace = safe_child(install_root, rel)
+        roots = [workspace / "package.json", workspace / "src", workspace / "dist"]
         if rel == "packages/coding-agent":
-            roots.extend(root / name for name in ("README.md", "CHANGELOG.md", "docs", "examples", "containerization.md"))
+            roots.extend(workspace / name for name in ("README.md", "CHANGELOG.md", "docs", "examples", "containerization.md"))
         for resource in roots:
-            if not resource.exists():
-                if resource.is_symlink():
-                    raise ValidationError(f"source core runtime is symlinked: {resource}")
-                continue
-            paths = [resource]
-            if resource.is_dir():
-                for directory, dirs, files in os.walk(resource, followlinks=False):
-                    dirs[:] = [name for name in dirs if name != "node_modules"]
-                    paths.extend(Path(directory) / name for name in [*dirs, *files])
-            for path in paths:
-                key = path.relative_to(install_root).as_posix()
-                safe_child(install_root, key)
-                if path.is_file():
-                    if path.stat().st_nlink != 1:
-                        raise ValidationError(f"source core runtime must not alias another file: {key}")
-                    runtime_hashes[key] = sha256_file(path)
-                elif not path.is_dir():
-                    raise ValidationError(f"source core runtime is not a regular file: {key}")
+            key_prefix = resource.relative_to(install_root).as_posix()
+            runtime_hashes.update(_hash_runtime_resource(install_root, resource, key_prefix))
     return runtime_hashes
 
 
