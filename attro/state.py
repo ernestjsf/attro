@@ -220,6 +220,7 @@ def release_env(release_path: Path, *, agent_dir: Path | None = None, manifest: 
         "PI_LENS_CONFIG_PATH": str(agent / "lens-config.json"),
         "ATTRO_RESOURCE_DIR": str(release_path.resolve() / "profile/resources"),
         "ATTRO_RELEASE_ID": manifest["releaseId"],
+        "ATTRO_VERSION": manifest["descriptorVersion"],
         "ATTRO_RELEASE_ROOT": str(release_path.resolve()),
         "ATTRO_PI_BIN": manifest["provenance"]["core"]["piBinary"],
         "ATTRO_MANAGED": "1", "PI_OFFLINE": "1", "PI_SKIP_VERSION_CHECK": "1",
