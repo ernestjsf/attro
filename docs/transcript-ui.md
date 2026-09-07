@@ -7,7 +7,8 @@ defaults — not through personal extensions or skills in the distribution profi
 
 | Surface | Owner |
 | --- | --- |
-| User-message labeled frame, minimalist editor, selector borders | Zentui |
+| Native minimalist editor in managed Attro | Attro core |
+| User-message labeled frame, selector borders | Zentui |
 | Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
 | Live working line, current tool, elapsed time and token count | Zentui |
 | Diagnostic, task and subagent panels | Lens, rpiv todo, and subagent packages |
@@ -23,6 +24,24 @@ profiles retain their visibility preference. Compact mode keeps assistant commen
 CC's own working message and agent summary remain disabled. Zentui's turn summary and working-line thought
 preview are disabled; the working message is the literal `Working…`. These
 changes remove duplicate UI, not model reasoning or tool content.
+
+## Native input editor
+
+Managed Attro uses the same native minimalist editor from its first frame through
+session initialization. Project trust still gates drafting, and submission stays
+disabled until initialization finishes. Loading and metadata updates do not
+replace the editor or transfer its draft, cursor, or undo state.
+
+The frame uses the active theme, adaptive borders, compact directory label,
+model/thinking labels, context gauge, session name, timer, and Git status.
+Zentui supplies cached Git status without replacing the input. Its editor
+appearance controls are marked as managed by Attro; its other components remain
+independently configurable. Ordinary Pi retains Zentui's custom editor behavior.
+Other extensions can still explicitly replace the editor.
+
+This removes Attro's startup editor handoff, not synchronous plugin-loading
+stalls. These changes require a new prepared release; retained releases are not
+modified in place.
 
 ## Visual hierarchy
 
