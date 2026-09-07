@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "b5927cfdca9bad1aafd769aa7b0e9117679a733e",
+      "pin": "28f9aa94ab61279cc005fa36c6b28e256bc1ebaa",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1273 files, no changes); interactive startup input and trust-blocking tests passed; draft during loading with submit blocked until trust resolves",
+      "testReport": "Maintained Quattro fork at v0.85.0; npm run check passed (1275 files, no changes); attro-editor and interactive startup input tests passed; native editor from first frame with draft, cursor, and undo preserved through init",
       "provenance": "QUATTRO.md"
     },
     {
@@ -40,7 +40,7 @@
       "name": "pi-zentui",
       "origin": "https://github.com/ernestjsf/attro-zentui.git",
       "upstream": "https://github.com/lmilojevicc/pi-zentui.git",
-      "pin": "343172636f8757a3ae0708cc44e897cf567fa785",
+      "pin": "9cc50fefb0722086671da805030ff24b0e286b0a",
       "baseCommit": "32f0668015f7685a3d3acb7cecb06680ae0a83fc",
       "baseVersion": "0.22.3",
       "packagePath": ".",
@@ -53,7 +53,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "1,383 passed, 1 skipped",
+      "testReport": "1,385 passed, 1 skipped; fmt/verify/pack:check passed; native-editor deferral and git-status publish tests passed",
       "provenance": "QUATTRO.md"
     },
     {
