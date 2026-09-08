@@ -103,7 +103,7 @@
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
       "upstream": "https://github.com/apmantza/pi-lens.git",
-      "pin": "29eee9f24099a5a329c30125889742cd4343d146",
+      "pin": "245e31bd58733ac22839b59d9fc755b8e0acda6a",
       "baseCommit": "6cebeb5dc639531fe0b24b5221f032c5169feb2e",
       "baseVersion": "4.1.0",
       "packagePath": ".",
@@ -119,7 +119,7 @@
       "runtimeBuild": "npm run build:dist && node scripts/download-grammars.js --core --dest grammars && npm run check:grammars",
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Startup/cache fix: 157 focused tests passed, 1 skipped; build/lint/build:dist passed; mutation checks and independent cache-race review cleared. Full suite not rerun; prior baseline reported 11 failures and 6 comment-rule findings.",
+      "testReport": "Docs-only agent-context modularization: root AGENTS.md slimmed to always-loaded contract; detailed reference moved to docs/agent-context/. Link/anchor checks passed; no code suite rerun.",
       "provenance": "QUATTRO.md"
     },
     {
