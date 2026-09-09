@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "f871ddcc3b7dc7c1d03e4e1511ce268d5620df46",
+      "pin": "ae2b810468acf15bd25f6e5f7410f93d235a9473",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Focus return/style: core check and 52 focused tests passed on Node 26.5 after red-to-green navigation/frame regressions. Real plugin UI verified Up clamping, same-shortcut return and draft retention; terminal ANSI captures confirmed inactive cursor hiding, faint border and active-style restoration. No new timers; see docs/dock-plan.md.",
+      "testReport": "Input side borders: npm run check and all 24 attro-editor tests passed on Node 26.7.0. Component renders inspected at 40/100 columns; completion mouse geometry, narrow fallback, startup and focus styling remain covered. Prior focus/navigation verification: see docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
