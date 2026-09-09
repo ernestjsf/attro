@@ -4,8 +4,9 @@
 
 Attro core owns one bottom dock. Preserve the native editor and its editing,
 completion, paste, history, and focus behavior. Place compact task and agent
-sections below the composer; expanded lists share a height budget and full
-content remains available through existing detail interfaces. Background updates
+sections directly below the composer; expanded lists share a height budget and
+long lists are browsable inline, without popup list navigation. Explicit detail
+commands remain available separately. Background updates
 must not reopen sections or steal the draft's focus.
 
 Plugins continue to own task, agent, and diagnostic functionality. Integrate
@@ -106,5 +107,31 @@ Autocomplete placement and queued-message presentation remain native; the
 prototype's floating suggestions and unified queue row are not implemented.
 No live-provider streaming, real IME, or full installed-release/plugin-stack
 certification was performed. Lens detail rendering was not exercised in tmux.
-This is a committed source candidate, not an activated release or a claim that
-all historical release gates have passed.
+The initial checkpoint was subsequently installed at the user's request. It does
+not imply that all historical release gates have passed.
+
+## Inline-list correction (2026-09-09)
+
+The user's follow-up rejects popup list browsing. Header clicks and Alt+T/Alt+A
+now always toggle Todos/Agents inline. Expanded lists contain actual items even
+at 36×12; they no longer substitute a popup link or aggregate details entry.
+Alt+J/Alt+K and the mouse wheel browse overflow in place, and native Down
+navigates the inline Agents list. Row clicks select instead of opening popups.
+Optional explicit detail actions and `/subagents` remain available; unrelated
+question/diagnostic dialogs and the legacy-widget viewer are unchanged.
+
+Verification for this correction:
+
+- Core `npm run check` passed on Node 26.7.0; the existing `dock-sections`,
+  `chat-viewport`, and `attro-editor` Vitest files passed 41 tests after formatting.
+- Subagents' isolated Node 26.5.0 harness passed 311 checks, including inline
+  native Down and preservation of explicit `/subagents` review.
+- Lead primary LSP checks passed for the three changed core implementation files.
+- `bash /private/tmp/attro-inline-dock-check.sh` exercised the real source CLI at
+  100×32, 52×18, and 36×12. At every size, both expanded lists showed items;
+  keyboard navigation reached item 12, header mouse clicks collapsed/reopened
+  Todos, and the draft stayed unchanged. Popup callbacks were instrumented and
+  none fired. Captures: `/private/tmp/attro-inline-dock-captures`.
+
+The follow-up is delivered through a new prepared release, never by replacing
+files inside a running release or rewriting personal configuration.

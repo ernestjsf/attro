@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "04d3deb91ae4711474762abde39b64735f2d3294",
+      "pin": "59bb5c9a0cf85b45814f34f5c8d64e47e9b37b03",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Native dock: npm run check passed on Node 26.5.0; 83 focused tests including paged-widget mouse regression passed; independent review findings corrected; isolated source TUI and todo/agent adapters checked at 100x32, 52x18, 36x12. No new release build or activation; see docs/dock-plan.md.",
+      "testReport": "Inline-list correction: npm run check and 41 focused tests passed on Node 26; source CLI at 100x32, 52x18, 36x12 showed both lists, keyboard overflow and header mouse toggles with unchanged draft and no popup callbacks. See docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "6bb7e4c1c6cfa2cd29bbb130d7fe17684e89c243",
+      "pin": "0003ecf0a16dc63689dd4fc5502fdfad4f7ca19d",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "Native agent dock: 309 checks passed in subagents.test.cjs in a clean environment on Node 26.5.0; independent review findings corrected; source TUI list/details and draft navigation checked. Execution and persistence unchanged.",
+      "testReport": "Inline native Down: 311 checks passed in subagents.test.cjs with env -i HOME and Homebrew PATH on Node 26.5.0, including no list popup and preserved explicit review. Inherited managed subagent environment is not a valid harness environment. Execution and persistence unchanged.",
       "provenance": "QUATTRO.md"
     }
   ],

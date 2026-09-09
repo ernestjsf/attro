@@ -50,22 +50,27 @@ modified in place.
 Managed Attro places Todos and Agents below the native composer. Both start
 collapsed; live updates preserve the chosen disclosure state and typing focus.
 Core measures the draft and other dock content before allocating expanded rows.
-Short terminals open full details instead of growing the inline list; very small
-layouts combine section summaries into a single details entry.
+Clicking a section header always expands/collapses its list in place, including
+in short terminals. Expanded sections reserve actual item rows; overflow scrolls
+inside the list rather than opening a popup. Row clicks select without opening
+details, and the two headers remain separately identifiable when space permits.
 
 - `Alt+T`: toggle Todos (the todo plugin's configured collapse shortcut also works).
 - `Alt+A`: toggle Agents.
-- `Alt+O`: choose a section's full details. These core bindings are configurable.
-- `Down` at the end of the draft: open the existing subagent list navigation.
+- `Alt+J` / `Alt+K`: move forward/backward through the last-used inline list.
+- Mouse wheel over an expanded section: browse that list in place.
+- `Down` at the end of the draft: expand/navigate Agents inline without moving typing focus.
+- `Alt+O`: explicit optional details; not needed for list browsing. Core bindings are configurable.
 - `Alt+D`: retains native forward-word deletion; `Ctrl+O` remains tool expansion.
 
-Todo details are scrollable; agent details retain transcript inspection, steering,
-and cancellation. Enabled Lens widgets contribute a diagnostic summary with a
+Explicit detail commands remain available; `/subagents` retains transcript
+inspection, steering, and cancellation. Enabled Lens widgets contribute a diagnostic summary with a
 separate details overlay. Hidden Lens widgets remain hidden. Legacy widgets stay
 live, including zero-row infrastructure components, and have a bounded preview
 plus a full-content viewer. Unsupported hosts retain the plugins' original UI.
 
-The `setDockSection`, `toggleDockSection`, and `isDockSectionExpanded` contract is
+The `setDockSection`, `toggleDockSection`, `navigateDockSection`, and
+`isDockSectionExpanded` contract is
 in `plugins/attro-core/packages/coding-agent/docs/tui.md`. The implementation plan
 and verification boundary are in [dock-plan.md](dock-plan.md).
 
