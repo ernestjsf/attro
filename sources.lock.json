@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "20eee97d6fce879ecc9329c604e798700910727f",
+      "pin": "82057a52b3b760c7d5dc7c008d63f63a69d3650c",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Input and expanded/collapsed dock frames: npm run check and 44 focused dock-sections/chat-viewport/attro-editor tests passed on Node 26.7.0. Component renders inspected at 40/100 columns; bounded-height fallback and width-sensitive row activation probes passed. Independent review findings corrected. Prior focus/navigation verification: see docs/dock-plan.md.",
+      "testReport": "Scrollbar prompt markers: npm run check and focused layout, alt-screen, chat-viewport, user-message, and keyboard navigation tests passed on Node 26.5.0; dense-marker coalescing confirmed with precise keyboard fallback. Alt+I input focus: npm run check and 45 focused editor/dock/keybinding tests passed on Node 26.7.0, including default/remapped focus return and draft preservation. Prior input and expanded/collapsed dock frames: npm run check and 44 focused dock-sections/chat-viewport/attro-editor tests passed on Node 26.7.0. Component renders inspected at 40/100 columns; bounded-height fallback and width-sensitive row activation probes passed. Independent review findings corrected. Prior focus/navigation verification: see docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -40,7 +40,7 @@
       "name": "pi-zentui",
       "origin": "https://github.com/ernestjsf/attro-zentui.git",
       "upstream": "https://github.com/lmilojevicc/pi-zentui.git",
-      "pin": "9cc50fefb0722086671da805030ff24b0e286b0a",
+      "pin": "8cfd9bf8f5baacafd044e02e516194a12878f80a",
       "baseCommit": "32f0668015f7685a3d3acb7cecb06680ae0a83fc",
       "baseVersion": "0.22.3",
       "packagePath": ".",
@@ -53,7 +53,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "1,385 passed, 1 skipped; fmt/verify/pack:check passed; native-editor deferral and git-status publish tests passed",
+      "testReport": "Scrollbar OSC 133 user-prompt marker: fmt/verify/pack:check and focused user-message, styled render, and sanitizer tests passed on Node 26.5.0. 1,385 passed, 1 skipped; native-editor deferral and git-status publish tests passed.",
       "provenance": "QUATTRO.md"
     },
     {
