@@ -235,3 +235,24 @@ Synthetic registry IO at about 500 files/5.8 MiB still took tens of milliseconds
 per snapshot. IO remains the next bottleneck for large histories; this change
 avoids redundant reads but does not cache or alter durable state. The harness's
 static sibling-work estimate describes the old algorithm, not current tracing.
+
+## Focus return and inactive input appearance (2026-09-09)
+
+The follow-up changes repeated Option/Alt+A or T from idempotent focus to a
+return-to-input action when its own list is already focused. The other shortcut
+still switches lists. Up/previous-row now clamps at the first row rather than
+returning to the editor. Shift variants retain their disclosure-only behavior.
+
+The native editor hides its fake cursor and uses a faint, muted frame while
+unfocused, restoring the original appearance on return. Faint styling keeps the
+states distinguishable even when a theme maps the active border to borderMuted;
+activity/error colors and draft/cursor state remain intact. No timers or polling
+were added.
+
+Existing behavioral tests demonstrated both navigation failures and the inactive
+border failure before the fixes. `npm run check` and all 52 focused core tests
+then passed on Node 26.5.0. The real-plugin terminal acceptance script verified
+repeated Up on both lists, same-shortcut return, cross-list switching and typing
+retention. ANSI captures independently confirmed cursor hiding, a distinct faint
+border, and exact active-border restoration using
+`/private/tmp/attro-check-editor-focus-style.py`.

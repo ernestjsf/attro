@@ -56,17 +56,23 @@ inside the list rather than opening a popup. Row clicks select without opening
 details, and the two headers remain separately identifiable when space permits.
 
 - `Alt+T` / `Alt+A`: focus Todos / Agents, opening the chosen list if collapsed.
+  Press that same shortcut again to return to the input without collapsing the list.
 - `Alt+Shift+T` / `Alt+Shift+A`: expand/collapse without switching lists;
   collapsing the focused list returns to the draft.
 - Only the focus shortcuts enter a list. Down, row clicks, scrolling and
   background updates do not take keyboard focus from the editor.
-- While focused: Up/Down select, Enter/Right inspect the selected agent, `x` stops it,
+- While focused: Up/Down select and stop at the list boundaries; Up never returns
+  to the input. Enter/Right inspect the selected agent, `x` stops it,
   and Escape/Left return to the unchanged draft. Alt+J/K also navigate only while
   the list is focused. Core bindings are configurable; managed Todo no longer
   intercepts them with its legacy `collapseKey` setting.
 - Mouse wheel over an expanded section: browse that list in place.
 - The dock's Extensions entry and Alt+O chooser have been removed.
 - `Alt+D`: retains native forward-word deletion; `Ctrl+O` remains tool expansion.
+
+The input has a faint, muted border and no active cursor while a list is focused;
+its normal appearance is restored when focus returns. Draft text and cursor
+position are preserved.
 
 Agents reuse the full responsive dashboard: names/roles/activity, model and
 thinking level, context, cost, tokens and age where width permits. Selection

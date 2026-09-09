@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "5e3a6a561b1dd9a5e1aa38987ebe4f018f170d80",
+      "pin": "f871ddcc3b7dc7c1d03e4e1511ce268d5620df46",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Shortcut-only focus: core check, 52 focused coding-agent tests and 69 TUI tests passed on Node 26.5. Real default/remapped focus and Shift-toggle interactions verified with Todo, Agents, CC and Zentui. Includes recorded tmux encoding regression; see docs/dock-plan.md.",
+      "testReport": "Focus return/style: core check and 52 focused tests passed on Node 26.5 after red-to-green navigation/frame regressions. Real plugin UI verified Up clamping, same-shortcut return and draft retention; terminal ANSI captures confirmed inactive cursor hiding, faint border and active-style restoration. No new timers; see docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
