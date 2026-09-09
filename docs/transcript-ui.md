@@ -10,8 +10,9 @@ defaults — not through personal extensions or skills in the distribution profi
 | Native minimalist editor in managed Attro | Attro core |
 | User-message labeled frame, selector borders | Zentui |
 | Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
-| Live working line, current tool, elapsed time and token count | Zentui |
-| Diagnostic, task and subagent panels | Lens, rpiv todo, and subagent packages |
+| Working content (current tool, elapsed time, tokens) | Zentui, embedded by Attro core in the composer |
+| Dock layout, disclosure state, height budget and details chooser | Attro core |
+| Diagnostic, task and subagent content/actions | Lens, rpiv todo, and subagent packages |
 
 Optional widgets such as turn-status are **not bundled** in the distribution
 recipe. Users who want them install or copy standalone extensions into their own
@@ -32,9 +33,10 @@ session initialization. Project trust still gates drafting, and submission stays
 disabled until initialization finishes. Loading and metadata updates do not
 replace the editor or transfer its draft, cursor, or undo state.
 
-The frame uses the active theme, adaptive borders, compact directory label,
-model/thinking labels, context gauge, session name, timer, and Git status.
-Zentui supplies cached Git status without replacing the input. Its editor
+The composer uses the active theme, unboxed separator lines, model/thinking
+labels, context gauge, session name, and activity. Working, retry and compaction
+share the composer activity location. A utility row below the sections shows the
+compact directory and Git status. Zentui supplies cached Git status without replacing the input. Its editor
 appearance controls are marked as managed by Attro; its other components remain
 independently configurable. Ordinary Pi retains Zentui's custom editor behavior.
 Other extensions can still explicitly replace the editor.
@@ -42,6 +44,34 @@ Other extensions can still explicitly replace the editor.
 This removes Attro's startup editor handoff, not synchronous plugin-loading
 stalls. These changes require a new prepared release; retained releases are not
 modified in place.
+
+## Shared bottom dock
+
+Managed Attro places Todos and Agents below the native composer. Both start
+collapsed; live updates preserve the chosen disclosure state and typing focus.
+Core measures the draft and other dock content before allocating expanded rows.
+Short terminals open full details instead of growing the inline list; very small
+layouts combine section summaries into a single details entry.
+
+- `Alt+T`: toggle Todos (the todo plugin's configured collapse shortcut also works).
+- `Alt+A`: toggle Agents.
+- `Alt+O`: choose a section's full details. These core bindings are configurable.
+- `Down` at the end of the draft: open the existing subagent list navigation.
+- `Alt+D`: retains native forward-word deletion; `Ctrl+O` remains tool expansion.
+
+Todo details are scrollable; agent details retain transcript inspection, steering,
+and cancellation. Enabled Lens widgets contribute a diagnostic summary with a
+separate details overlay. Hidden Lens widgets remain hidden. Legacy widgets stay
+live, including zero-row infrastructure components, and have a bounded preview
+plus a full-content viewer. Unsupported hosts retain the plugins' original UI.
+
+The `setDockSection`, `toggleDockSection`, and `isDockSectionExpanded` contract is
+in `plugins/attro-core/packages/coding-agent/docs/tui.md`. The implementation plan
+and verification boundary are in [dock-plan.md](dock-plan.md).
+
+Autocomplete and queued-message presentation retain their native behavior; the
+browser prototype's floating completion menu and unified queue row are not
+implemented. Steering and follow-up delivery semantics are unchanged.
 
 ## Visual hierarchy
 

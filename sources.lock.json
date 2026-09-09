@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "111add463ed79c2a8f710692834d5aad41bb8bb4",
+      "pin": "04d3deb91ae4711474762abde39b64735f2d3294",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Maintained Quattro fork at v0.85.0; npm run check and build:offline passed; 115 focused loader/runtime tests passed on Node 26; independent review cleared pinned Cursor host-module loading",
+      "testReport": "Native dock: npm run check passed on Node 26.5.0; 83 focused tests including paged-widget mouse regression passed; independent review findings corrected; isolated source TUI and todo/agent adapters checked at 100x32, 52x18, 36x12. No new release build or activation; see docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -103,7 +103,7 @@
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
       "upstream": "https://github.com/apmantza/pi-lens.git",
-      "pin": "245e31bd58733ac22839b59d9fc755b8e0acda6a",
+      "pin": "68c336a0c09b7f2c5d0c8a097b0cb2cdca81bc12",
       "baseCommit": "6cebeb5dc639531fe0b24b5221f032c5169feb2e",
       "baseVersion": "4.1.0",
       "packagePath": ".",
@@ -119,7 +119,7 @@
       "runtimeBuild": "npm run build:dist && node scripts/download-grammars.js --core --dest grammars && npm run check:grammars",
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Docs-only agent-context modularization: root AGENTS.md slimmed to always-loaded contract; detailed reference moved to docs/agent-context/. Link/anchor checks passed; no code suite rerun.",
+      "testReport": "Optional native diagnostics dock: build and strict lint passed; 93 focused widget/toggle/mode/SDK tests passed on Node 26.5.0; independent review findings corrected. Hidden preference preserved; live Lens terminal integration not exercised.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -127,7 +127,7 @@
       "name": "rpiv-mono",
       "origin": "https://github.com/ernestjsf/attro-rpiv.git",
       "upstream": "https://github.com/juicesharp/rpiv-mono.git",
-      "pin": "289265df6e67ec5af33dc49c8fb606a49035c6f6",
+      "pin": "8d0f5114db28d5f748cc990728b3c63010a25a3c",
       "baseCommit": "59100c75f256a004fe4bb0ce8eb6266d79f0791a",
       "baseVersion": "0.0.0",
       "packageName": "@juicesharp/rpiv-todo",
@@ -144,7 +144,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "263 files / 5185 tests passed with isolated RPIV_CONFIG_HOME; Biome and TypeScript passed; independent isolation review found no blockers",
+      "testReport": "Native task dock: npm run check exited successfully (one pre-existing unrelated Biome info); 244 todo tests passed on Node 26.5.0; independent review findings corrected; source TUI adapter smoke passed. See docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "c160995edd974ac9880fe5012398635ee59660ff",
+      "pin": "6bb7e4c1c6cfa2cd29bbb130d7fe17684e89c243",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "298 checks passed in subagents.test.cjs on Node 26.7.0, including nativeEditor Down navigation, panel return-focus, managed resource/core pinning, and canonical ATTRO with legacy PIATTRO namespace compatibility",
+      "testReport": "Native agent dock: 309 checks passed in subagents.test.cjs in a clean environment on Node 26.5.0; independent review findings corrected; source TUI list/details and draft navigation checked. Execution and persistence unchanged.",
       "provenance": "QUATTRO.md"
     }
   ],
