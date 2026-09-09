@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "82057a52b3b760c7d5dc7c008d63f63a69d3650c",
+      "pin": "ced4743760f2963b00ab45970744c26716691dde",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Scrollbar prompt markers: npm run check and focused layout, alt-screen, chat-viewport, user-message, and keyboard navigation tests passed on Node 26.5.0; dense-marker coalescing confirmed with precise keyboard fallback. Alt+I input focus: npm run check and 45 focused editor/dock/keybinding tests passed on Node 26.7.0, including default/remapped focus return and draft preservation. Prior input and expanded/collapsed dock frames: npm run check and 44 focused dock-sections/chat-viewport/attro-editor tests passed on Node 26.7.0. Component renders inspected at 40/100 columns; bounded-height fallback and width-sensitive row activation probes passed. Independent review findings corrected. Prior focus/navigation verification: see docs/dock-plan.md.",
+      "testReport": "Thicker fullscreen scrollbar: npm run check and focused chat-viewport/scrollbar-theme tests passed on Node 26.5.0; InteractiveShell render at 40/100 columns verified full-cell track/thumb with theme tokens and width compliance. Scrollbar prompt markers: npm run check and focused layout, alt-screen, chat-viewport, user-message, and keyboard navigation tests passed on Node 26.5.0; dense-marker coalescing confirmed with precise keyboard fallback. Alt+I input focus: npm run check and 45 focused editor/dock/keybinding tests passed on Node 26.7.0, including default/remapped focus return and draft preservation. Prior input and expanded/collapsed dock frames: npm run check and 44 focused dock-sections/chat-viewport/attro-editor tests passed on Node 26.7.0. Component renders inspected at 40/100 columns; bounded-height fallback and width-sensitive row activation probes passed. Independent review findings corrected. Prior focus/navigation verification: see docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
