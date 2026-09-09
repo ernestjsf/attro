@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "18129dfccecc5f3eafd825e2734dbd7a247b3469",
+      "pin": "5e3a6a561b1dd9a5e1aa38987ebe4f018f170d80",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Rich inline controls: npm run check and 42 focused tests passed on Node 26.5; Extensions chooser removed, Ctrl+O preserved, responsive dashboard and stable inline selection verified with real plugin stack. See docs/dock-plan.md for direct UI/control evidence and limits.",
+      "testReport": "Shortcut-only focus: core check, 52 focused coding-agent tests and 69 TUI tests passed on Node 26.5. Real default/remapped focus and Shift-toggle interactions verified with Todo, Agents, CC and Zentui. Includes recorded tmux encoding regression; see docs/dock-plan.md.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -127,7 +127,7 @@
       "name": "rpiv-mono",
       "origin": "https://github.com/ernestjsf/attro-rpiv.git",
       "upstream": "https://github.com/juicesharp/rpiv-mono.git",
-      "pin": "8d0f5114db28d5f748cc990728b3c63010a25a3c",
+      "pin": "7095fce34968ad99c3af9c417c26308fa77441ad",
       "baseCommit": "59100c75f256a004fe4bb0ce8eb6266d79f0791a",
       "baseVersion": "0.0.0",
       "packageName": "@juicesharp/rpiv-todo",
@@ -144,7 +144,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Native task dock: npm run check exited successfully (one pre-existing unrelated Biome info); 244 todo tests passed on Node 26.5.0; independent review findings corrected; source TUI adapter smoke passed. See docs/dock-plan.md.",
+      "testReport": "Managed Todo defers shortcuts to core; check passed (one pre-existing unrelated Biome info) and 247 todo tests passed on Node 26.5. Shipped legacy Alt+T config and custom core remaps verified in real TUI without profile changes.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "22e914ce3e5364aee3533e5b038d0ac41b69e543",
+      "pin": "e1ae6180fd537acf63a0f5847b1047a4f9ad3b17",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "Rich inline agents: 321 clean-env checks passed on Node 26.5. Real plugin factory and production spawn tool exercised in tmux with a local fake RPC child: selected-agent inspection, delivered steering, cancellation and draft retention. Inline history and responsive seeded telemetry also checked; no paid provider calls.",
+      "testReport": "Shortcut-only native dock: 325 clean-env checks passed on Node 26.5; default/remapped real TUI focus tests passed. Changed-agent refresh reuses one registry snapshot; sibling formatting is linear. 1000-record visible-row refresh benchmark p50 4.57ms to 0.19ms; polling/storage unchanged.",
       "provenance": "QUATTRO.md"
     }
   ],

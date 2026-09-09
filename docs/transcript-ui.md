@@ -55,11 +55,15 @@ in short terminals. Expanded sections reserve actual item rows; overflow scrolls
 inside the list rather than opening a popup. Row clicks select without opening
 details, and the two headers remain separately identifiable when space permits.
 
-- `Alt+T`: toggle Todos (the todo plugin's configured collapse shortcut also works).
-- `Alt+A`: toggle Agents.
-- `Down` at the end of the draft, `Alt+J`/`Alt+K`, or clicking a row: focus the inline list.
+- `Alt+T` / `Alt+A`: focus Todos / Agents, opening the chosen list if collapsed.
+- `Alt+Shift+T` / `Alt+Shift+A`: expand/collapse without switching lists;
+  collapsing the focused list returns to the draft.
+- Only the focus shortcuts enter a list. Down, row clicks, scrolling and
+  background updates do not take keyboard focus from the editor.
 - While focused: Up/Down select, Enter/Right inspect the selected agent, `x` stops it,
-  and Escape/Left return to the unchanged draft. These bindings are configurable.
+  and Escape/Left return to the unchanged draft. Alt+J/K also navigate only while
+  the list is focused. Core bindings are configurable; managed Todo no longer
+  intercepts them with its legacy `collapseKey` setting.
 - Mouse wheel over an expanded section: browse that list in place.
 - The dock's Extensions entry and Alt+O chooser have been removed.
 - `Alt+D`: retains native forward-word deletion; `Ctrl+O` remains tool expansion.
@@ -67,7 +71,7 @@ details, and the two headers remain separately identifiable when space permits.
 Agents reuse the full responsive dashboard: names/roles/activity, model and
 thinking level, context, cost, tokens and age where width permits. Selection
 tracks the run ID through updates/reordering. `/subagents` shows history inline,
-including dismissed records; it no longer opens a popup list on managed hosts.
+including dismissed records, without opening a popup or acquiring keyboard focus.
 Explicit per-agent inspection retains transcript viewing and steering.
 
 Enabled Lens widgets contribute a diagnostic summary with a separate details

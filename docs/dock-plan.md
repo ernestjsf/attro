@@ -183,3 +183,55 @@ omitted the required task field and its refresh replaced production callbacks.
 The lead replaced that helper with `extensions/real-plugin-check.ts` and
 `try-source.sh` in the same temporary harness directory. No credentials or
 personal profile contents were copied; display defaults alone were used.
+
+## Shortcut-only focus and performance (2026-09-09)
+
+The user confirmed Alt+A/Alt+T for focus and the same shortcuts plus Shift for
+collapse/expand. Focus opens a collapsed list and is idempotent. Toggling another
+list does not steal focus; collapsing the focused list returns to the draft.
+Down, mouse clicks/wheel, background updates, and `/subagents` no longer acquire
+managed dock focus. Ordinary Pi retains its legacy behavior; managed Todo leaves
+shortcut ownership to core so the shipped `collapseKey: alt+t` cannot shadow
+core remaps. The capability guard no longer requires the obsolete optional
+navigation method to recognize a native dock host.
+
+Direct terminal testing caught tmux's Shift+Alt encoding (`ESC[27;3;65~`), where
+Shift is implicit in the uppercase code point. Decoder coverage now includes
+that form, explicit modifiers, CSI-u and legacy ESC+uppercase, while retaining
+ESC+B/F word navigation. The coding-agent Vitest config now aliases the canonical
+TUI package to workspace source rather than testing stale generated output.
+
+Verification on Homebrew Node 26.5.0:
+
+- Core `npm run check` and five focused Vitest files passed (52 tests).
+- TUI `node --test test/keys.test.ts test/keybindings.test.ts` passed 69 tests.
+- Subagents' clean-environment harness passed 325 checks, including a native host
+  without the optional navigation method remaining shortcut-only.
+- Todo `npm run check` and its package tests passed (247 tests); the previously
+  documented unrelated Biome informational finding remains.
+- Real Todo/Agents factories and tool hooks were exercised together with CC and
+  Zentui in `/private/tmp/attro-shortcut-acceptance.sh`: default focus shortcuts,
+  shifted toggles, idempotent refocus, switching between lists, and continued
+  typing after Down, mouse clicks/wheel, and history commands all passed.
+- `/private/tmp/attro-shortcut-remap-check.sh` repeated the interaction checks
+  with custom core bindings, confirming the old Alt+A/T defaults did not retain
+  hidden plugin handlers. No personal configuration was changed.
+
+Performance changes are bounded to presentation: precompute last siblings rather
+than repeatedly filtering the tree; resolve row allocations once per render; pass
+one registry snapshot through a changed-agent poll refresh instead of reading it
+up to three times. No cross-frame content cache, polling interval, storage, or lock
+semantics changed.
+
+An isolated benchmark compared the archived prior plugin pin `562747b` with the
+working correction, invoking real production renderers (five warmups, up to 200
+samples). At 1,000 records/120 columns, an eight-visible-row refresh measured
+p50/p95 **4.5655/5.0455 ms → 0.1909/0.2174 ms**. At 120 records, full DockSections
+render measured **0.7866/1.1292 ms → 0.2495/0.3020 ms**. These are in-memory renderer
+measurements, not an end-to-end UI speedup claim. Artifacts and reproducible
+before/after scripts are under `/private/tmp/attro-dock-perf`.
+
+Synthetic registry IO at about 500 files/5.8 MiB still took tens of milliseconds
+per snapshot. IO remains the next bottleneck for large histories; this change
+avoids redundant reads but does not cache or alter durable state. The harness's
+static sibling-work estimate describes the old algorithm, not current tracing.
