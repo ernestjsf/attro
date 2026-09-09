@@ -135,3 +135,51 @@ Verification for this correction:
 
 The follow-up is delivered through a new prepared release, never by replacing
 files inside a running release or rewriting personal configuration.
+
+## Rich agent controls and direct interaction verification (2026-09-09)
+
+The user clarified that the dock's Extensions entry/chooser should be removed,
+not Ctrl+O tool-output expansion. The chooser and its Alt+O binding are removed.
+Legacy widgets share an inline ScrollView instead, including in very short
+terminals; their component lifecycle and zero-row infrastructure stay intact.
+
+Agents now reuse the existing responsive dashboard renderer rather than the
+name/activity-only projection. Inline rows include role, model/thinking,
+context, cost, tokens and age where width permits. Down-at-editor-end or a row
+click focuses the list; arrows select by stable run ID, Enter inspects that
+agent, x stops it, and Escape returns to the untouched draft. `/subagents`
+shows dismissed/history records inline, not in a popup list. Queued states
+retain attention styling. Explicit per-agent detail/steering remains available.
+
+Verification:
+
+- Final core `npm run check` passed with Homebrew Node 26.5.0 and no formatter
+  changes. The existing dock-sections/chat-viewport/attro-editor Vitest files
+  passed 42 tests; three primary LSP checks were clean.
+- `env -i HOME="$HOME" PATH=/opt/homebrew/bin:/usr/bin:/bin
+  /opt/homebrew/bin/node subagents.test.cjs` passed 321 checks on final source.
+- Independent review found popup history, extreme-height legacy-widget access,
+  and queued-attention issues. All three were corrected and covered by the
+  focused checks; lead directly confirmed inline history after correction.
+- Lead ran the source CLI with real CC, Zentui, todo, and subagent code in
+  isolated state. Valid registry fixtures exercised rich metadata and overflow;
+  no replacement agent-section callbacks were used. Twelve records were
+  verified through the production registry reader before UI testing.
+- The production spawn-agent tool was captured at registration and invoked with
+  the real UI context, launching the repository's local fake RPC child. Enter
+  opened that selected child's real detail view; typed steering was recorded by
+  the child as an RPC steering message; x cancelled that same child. The draft
+  remained intact. This exercises real plugin/process/control wiring, not a
+  paid provider. Automatic parent continuation after cancellation reported the
+  expected missing-key error in the deliberately unauthenticated test profile.
+- Captures during selection/detail/steering/cancellation, narrow resizing, and
+  selection after reordering are under
+  `/private/tmp/attro-real-agent-ui-repro/captures/`. Final control captures use
+  `final-controls-*`; earlier valid source captures use `corrected-*`.
+  `/subagents` was separately checked with a dismissed fixture visible inline.
+
+The earlier helper's baseline captures are not acceptance evidence: its seed
+omitted the required task field and its refresh replaced production callbacks.
+The lead replaced that helper with `extensions/real-plugin-check.ts` and
+`try-source.sh` in the same temporary harness directory. No credentials or
+personal profile contents were copied; display defaults alone were used.

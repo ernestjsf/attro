@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "59bb5c9a0cf85b45814f34f5c8d64e47e9b37b03",
+      "pin": "18129dfccecc5f3eafd825e2734dbd7a247b3469",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Inline-list correction: npm run check and 41 focused tests passed on Node 26; source CLI at 100x32, 52x18, 36x12 showed both lists, keyboard overflow and header mouse toggles with unchanged draft and no popup callbacks. See docs/dock-plan.md.",
+      "testReport": "Rich inline controls: npm run check and 42 focused tests passed on Node 26.5; Extensions chooser removed, Ctrl+O preserved, responsive dashboard and stable inline selection verified with real plugin stack. See docs/dock-plan.md for direct UI/control evidence and limits.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "0003ecf0a16dc63689dd4fc5502fdfad4f7ca19d",
+      "pin": "22e914ce3e5364aee3533e5b038d0ac41b69e543",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "Inline native Down: 311 checks passed in subagents.test.cjs with env -i HOME and Homebrew PATH on Node 26.5.0, including no list popup and preserved explicit review. Inherited managed subagent environment is not a valid harness environment. Execution and persistence unchanged.",
+      "testReport": "Rich inline agents: 321 clean-env checks passed on Node 26.5. Real plugin factory and production spawn tool exercised in tmux with a local fake RPC child: selected-agent inspection, delivered steering, cancellation and draft retention. Inline history and responsive seeded telemetry also checked; no paid provider calls.",
       "provenance": "QUATTRO.md"
     }
   ],

@@ -11,7 +11,7 @@ defaults — not through personal extensions or skills in the distribution profi
 | User-message labeled frame, selector borders | Zentui |
 | Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
 | Working content (current tool, elapsed time, tokens) | Zentui, embedded by Attro core in the composer |
-| Dock layout, disclosure state, height budget and details chooser | Attro core |
+| Dock layout, disclosure state, height budget and inline navigation | Attro core |
 | Diagnostic, task and subagent content/actions | Lens, rpiv todo, and subagent packages |
 
 Optional widgets such as turn-status are **not bundled** in the distribution
@@ -57,17 +57,23 @@ details, and the two headers remain separately identifiable when space permits.
 
 - `Alt+T`: toggle Todos (the todo plugin's configured collapse shortcut also works).
 - `Alt+A`: toggle Agents.
-- `Alt+J` / `Alt+K`: move forward/backward through the last-used inline list.
+- `Down` at the end of the draft, `Alt+J`/`Alt+K`, or clicking a row: focus the inline list.
+- While focused: Up/Down select, Enter/Right inspect the selected agent, `x` stops it,
+  and Escape/Left return to the unchanged draft. These bindings are configurable.
 - Mouse wheel over an expanded section: browse that list in place.
-- `Down` at the end of the draft: expand/navigate Agents inline without moving typing focus.
-- `Alt+O`: explicit optional details; not needed for list browsing. Core bindings are configurable.
+- The dock's Extensions entry and Alt+O chooser have been removed.
 - `Alt+D`: retains native forward-word deletion; `Ctrl+O` remains tool expansion.
 
-Explicit detail commands remain available; `/subagents` retains transcript
-inspection, steering, and cancellation. Enabled Lens widgets contribute a diagnostic summary with a
-separate details overlay. Hidden Lens widgets remain hidden. Legacy widgets stay
-live, including zero-row infrastructure components, and have a bounded preview
-plus a full-content viewer. Unsupported hosts retain the plugins' original UI.
+Agents reuse the full responsive dashboard: names/roles/activity, model and
+thinking level, context, cost, tokens and age where width permits. Selection
+tracks the run ID through updates/reordering. `/subagents` shows history inline,
+including dismissed records; it no longer opens a popup list on managed hosts.
+Explicit per-agent inspection retains transcript viewing and steering.
+
+Enabled Lens widgets contribute a diagnostic summary with a separate details
+overlay. Hidden Lens widgets remain hidden. Legacy widgets share a bounded,
+scrollable inline area; zero-row infrastructure stays live. No Extensions menu
+is needed to access overflow. Unsupported hosts retain their original UI.
 
 The `setDockSection`, `toggleDockSection`, `navigateDockSection`, and
 `isDockSectionExpanded` contract is
