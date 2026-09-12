@@ -10,7 +10,7 @@ defaults — not through personal extensions or skills in the distribution profi
 | Native minimalist editor in managed Attro | Attro core |
 | User-message labeled frame, selector borders | Zentui |
 | Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
-| Working content (current tool, elapsed time, tokens) | Zentui, embedded by Attro core in the composer |
+| Primary progress (phase, current tool, elapsed time) | Attro core |
 | Dock layout, disclosure state, height budget and inline navigation | Attro core |
 | Diagnostic, task and subagent content/actions | Lens, rpiv todo, and subagent packages |
 
@@ -23,8 +23,10 @@ Zentui's experimental thinking renderer is disabled in the shipped
 `profile/settings.json`), with a per-message disclosure; Ctrl+T reveals it. Existing
 profiles retain their visibility preference. Compact mode keeps assistant commentary in chronological order and no longer collects tools into Activity cards.
 CC's own working message and agent summary remain disabled. Zentui's turn summary and working-line thought
-preview are disabled; the working message is the literal `Working…`. These
-changes remove duplicate UI, not model reasoning or tool content.
+preview are disabled. On hosts advertising `nativeEditor.activityOwner: "core"`,
+Zentui and CC yield the primary working indicator to core. Older hosts retain
+Zentui's configured working line. These changes remove duplicate UI, not model
+reasoning or tool content.
 
 ## Native input editor
 
@@ -44,6 +46,26 @@ Other extensions can still explicitly replace the editor.
 This removes Attro's startup editor handoff, not synchronous plugin-loading
 stalls. These changes require a new prepared release; retained releases are not
 modified in place.
+
+## Progress ownership
+
+Core owns the primary activity location and elapsed clock. Its labels follow
+actual lifecycle and tool events: waiting for the model, generating a response,
+executing tools, retrying, compacting, waiting for input, stopping, and settled
+outcomes. Blocking states take priority over ordinary streaming updates. Tool
+labels identify the operation and relevant target; they do not infer successful
+checks, invent percentages, or display reasoning excerpts.
+
+A completed main response is not a claim that background agents finished. Todos
+remain the task plan, Agents own child activity, and Diagnostics own check results.
+Detailed tool output stays in the transcript. The steering queue remains a separate
+user-instruction surface above the input, not a second execution indicator.
+
+Extensions should check `ctx.ui.nativeEditor?.activityOwner === "core"` before
+publishing a competing primary indicator. The capability, rather than the managed
+environment flag alone, preserves fallback behavior on older releases. Personal
+completion extensions can yield their waiting/settled widget while retaining
+independent final-answer headings. Final-answer headings are not bundled by Attro.
 
 ## Shared bottom dock
 
@@ -84,15 +106,18 @@ Enabled Lens widgets contribute a diagnostic summary with a separate details
 overlay. Hidden Lens widgets remain hidden. Legacy widgets share a bounded,
 scrollable inline area; zero-row infrastructure stays live. No Extensions menu
 is needed to access overflow. Unsupported hosts retain their original UI.
+Routine LSP footer status yields to a registered Diagnostics dock; failed-server
+alerts remain visible. Subagent completion notifications are retained because
+an expanded dock does not prove a particular result row is visible.
 
 The `setDockSection`, `toggleDockSection`, `navigateDockSection`, and
 `isDockSectionExpanded` contract is
 in `plugins/attro-core/packages/coding-agent/docs/tui.md`. The implementation plan
 and verification boundary are in [dock-plan.md](dock-plan.md).
 
-Autocomplete and queued-message presentation retain their native behavior; the
-browser prototype's floating completion menu and unified queue row are not
-implemented. Steering and follow-up delivery semantics are unchanged.
+Autocomplete retains its native behavior. Queued steering and follow-ups appear
+above the input in a matching frame. Progress ownership does not change their
+delivery or cancellation semantics.
 
 ## Visual hierarchy
 
