@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "4924d571d71b9dd6a1de203a041a31a86f131b7f",
+      "pin": "c935c1f918dbf46ff5b142b374f57e4c2ba7a40e",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Steering interrupt/abort coordinator: npm run check passed on Node v22.22.3; focused coding-agent 60 passed (5 e2e skipped); agent agent.test.ts and agent-loop.test.ts 46 passed; interactive-mode-steering and compaction UI tests 6 passed; attro lifecycle suite 12 passed.",
+      "testReport": "Steering panel above prompt: npm run check passed on Node v22.22.3; chat-viewport, attro-editor, and interactive-mode-steering tests 37/37 passed; InteractiveShell render at 40/100 columns verified steering panel above input with draft unchanged.",
       "provenance": "QUATTRO.md"
     },
     {
