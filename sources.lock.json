@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "ced4743760f2963b00ab45970744c26716691dde",
+      "pin": "4924d571d71b9dd6a1de203a041a31a86f131b7f",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Thicker fullscreen scrollbar: npm run check and focused chat-viewport/scrollbar-theme tests passed on Node 26.5.0; InteractiveShell render at 40/100 columns verified full-cell track/thumb with theme tokens and width compliance. Scrollbar prompt markers: npm run check and focused layout, alt-screen, chat-viewport, user-message, and keyboard navigation tests passed on Node 26.5.0; dense-marker coalescing confirmed with precise keyboard fallback. Alt+I input focus: npm run check and 45 focused editor/dock/keybinding tests passed on Node 26.7.0, including default/remapped focus return and draft preservation. Prior input and expanded/collapsed dock frames: npm run check and 44 focused dock-sections/chat-viewport/attro-editor tests passed on Node 26.7.0. Component renders inspected at 40/100 columns; bounded-height fallback and width-sensitive row activation probes passed. Independent review findings corrected. Prior focus/navigation verification: see docs/dock-plan.md.",
+      "testReport": "Steering interrupt/abort coordinator: npm run check passed on Node v22.22.3; focused coding-agent 60 passed (5 e2e skipped); agent agent.test.ts and agent-loop.test.ts 46 passed; interactive-mode-steering and compaction UI tests 6 passed; attro lifecycle suite 12 passed.",
       "provenance": "QUATTRO.md"
     },
     {
