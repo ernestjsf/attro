@@ -6,6 +6,44 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Private publication candidate (2026-09-17)
+
+Candidate `2f771c92462ddc43e5abe90f622bdf971fd22421`, before subsequent
+CI-only/documentation corrections, was checked on macOS with Node **26.7.0** and
+Python **3.14.6**:
+
+- `python3 scripts/verify.py`: passed against clean, rewritten submodule pins.
+- `python3 -m unittest discover -s tests -p 'test_*.py' -v`: **209 run,
+  one skipped** (208 passed).
+- `python3 -m unittest tests.test_install -v`: **33 passed**. Bootstrap regressions
+  for relative paths with `CDPATH`, tilde/space handling, and unsafe resume advice
+  were observed RED before correction and GREEN afterward.
+- Primary diagnostics for the bootstrap, installer tests, source verifier, and
+  CI workflow: no findings. Shell syntax and `git diff --check`: passed.
+- A real `./install --bin-dir ...` under `env -i` with isolated `HOME` and
+  `ATTRO_HOME` downloaded dependencies, built core/plugins, and activated a release.
+  No live user configuration or credentials were supplied.
+- `attro exec -- --version`: **0.85.0**; `attro doctor --repo ...`: **OK**.
+- Interactive PTY startup reached the authentication-dependent effort-profile
+  prompt. Explicitly continuing without a profile reached the UI; `/quit` exited
+  **0**. Startup created an empty `auth.json` object, not credentials. A prior
+  bounded attempt stopped at that prompt and required forced cleanup.
+
+The existing histories were sanitized in isolated copies: **137 of 14,268**
+commits changed; **3,162** unchanged signed commits retained their original
+identities. Historical source pins were mapped, with five pre-existing lock/gitlink
+mismatches in three old root commits preserved rather than silently repaired.
+The current candidate's pins are consistent. All **35** historical secret-scanner
+findings were independently classified as synthetic fixtures, public OAuth client
+constants, or other non-credential literals; they were not changed to silence
+the scanner. The candidate root history and added files had no scanner findings.
+
+**Publication remains blocked:** repositories stay private pending GitHub-retained
+commit/PR-cache cleanup and the old CI-log audit/removal decision. Linux, WSL2,
+anonymous recursive retrieval, the actual tagged bootstrap, authenticated provider
+use, and another-machine validation are not verified by these local checks.
+See [publication gates](publication.md). No public tag or stable feed is implied.
+
 ## Automatic release retention (2026-09-07)
 
 After comment review, the retention change passed these local checks:
