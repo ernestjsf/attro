@@ -60,7 +60,7 @@ jobs:
           export PI_OFFLINE=1
           mkdir -p "$HOME"
           ./install --bin-dir "$HOME/.local/bin"
-          "$HOME/.local/bin/attro" --version
-          "$HOME/.local/bin/attro" --help
+          "$HOME/.local/bin/attro" exec -- --version
+          "$HOME/.local/bin/attro" exec -- --help
           "$HOME/.local/bin/attro" doctor --repo "$GITHUB_WORKSPACE"
           test ! -e "$ATTRO_HOME/agent/auth.json"
