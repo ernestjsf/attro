@@ -13,6 +13,54 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL = REPO_ROOT / "install"
+INSTALL_SH = REPO_ROOT / "install.sh"
+
+FAKE_GIT = """#!/bin/sh
+set -eu
+log=${FAKE_GIT_LOG:?}
+printf '%s\\n' "$*" >> "$log"
+if [ "$1" = "clone" ]; then
+  shift
+  dest=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --recurse-submodules) shift ;;
+      --branch) shift 2 ;;
+      --*) shift ;;
+      *)
+        dest="$1"
+        shift
+        ;;
+    esac
+  done
+  if [ -z "$dest" ] || [ -z "${FAKE_CLONE_TEMPLATE:-}" ]; then
+    echo "fake git: missing dest or template" >&2
+    exit 1
+  fi
+  mkdir -p "$dest"
+  cp -R "$FAKE_CLONE_TEMPLATE/." "$dest/"
+  mkdir -p "$dest/.git"
+  exit 0
+fi
+exit 1
+"""
+
+FAKE_NPM = "#!/bin/sh\nexit 0\n"
+
+FAKE_NODE = """#!/bin/sh
+if [ "$1" = "-e" ]; then
+  if [ "${FAKE_NODE_FAIL_VERSION:-0}" = "1" ]; then
+    exit 1
+  fi
+  exit 0
+fi
+if [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
+  echo "${FAKE_NODE_VERSION:-v22.19.0}"
+  exit 0
+fi
+echo "unsupported fake node invocation: $*" >&2
+exit 1
+"""
 
 FAKE_ATTRO = '''#!/usr/bin/env python3
 import fcntl
@@ -337,6 +385,167 @@ raise SystemExit(ns["main"]([]))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((real_bin / "attro").is_symlink())
         self.assertEqual((real_bin / "attro").resolve(), (self.repo / "bin" / "attro").resolve())
+
+
+class BootstrapInstallTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name).resolve()
+        self.home = self.base / "home"
+        self.home.mkdir()
+        self.managed = self.base / "managed"
+        self.bin_dir = self.base / "launchers"
+        self.source_dir = self.home / ".local" / "share" / "attro"
+        self.fake_bin = self.base / "fake-bin"
+        self.fake_bin.mkdir()
+        self.git_log = self.base / "git.log"
+        self.clone_template = self.base / "clone-template"
+        self.clone_template.mkdir()
+        shutil.copy2(INSTALL, self.clone_template / "install")
+        (self.clone_template / "install").chmod(0o755)
+        bin_root = self.clone_template / "bin"
+        bin_root.mkdir()
+        (bin_root / "attro").write_text(FAKE_ATTRO)
+        (bin_root / "attro").chmod(0o755)
+        for name, body in (("git", FAKE_GIT), ("npm", FAKE_NPM), ("node", FAKE_NODE)):
+            path = self.fake_bin / name
+            path.write_text(body)
+            path.chmod(0o755)
+        for helper in ("python3", "uname"):
+            resolved = shutil.which(helper)
+            if resolved:
+                (self.fake_bin / helper).symlink_to(resolved)
+        self.env = {
+            "HOME": str(self.home),
+            "ATTRO_HOME": str(self.managed),
+            "PIATTRO_HOME": str(self.managed),
+            "ATTRO_BIN_DIR": str(self.bin_dir),
+            "PATH": f"{self.fake_bin}:/usr/bin:/bin",
+            "FAKE_GIT_LOG": str(self.git_log),
+            "FAKE_CLONE_TEMPLATE": str(self.clone_template),
+        }
+
+    def run_bootstrap(self, *extra_env: str | tuple[str, str], success: bool = True, pipe: bool = False) -> subprocess.CompletedProcess[str]:
+        env = dict(self.env)
+        for item in extra_env:
+            if isinstance(item, tuple):
+                key, value = item
+                env[key] = value
+        script = INSTALL_SH.read_text()
+        if pipe:
+            result = subprocess.run(
+                ["/bin/sh"],
+                input=script,
+                env=env,
+                cwd=self.base,
+                capture_output=True,
+                text=True,
+            )
+        else:
+            result = subprocess.run(
+                ["/bin/sh", str(INSTALL_SH)],
+                env=env,
+                cwd=self.base,
+                capture_output=True,
+                text=True,
+            )
+        if success:
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+        else:
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+        return result
+
+    def test_install_sh_passes_shell_syntax_check(self):
+        result = subprocess.run(["/bin/sh", "-n", str(INSTALL_SH)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_bootstrap_clones_tag_and_runs_install(self):
+        result = self.run_bootstrap()
+        log = self.git_log.read_text()
+        self.assertIn("--recurse-submodules", log)
+        self.assertIn("--branch v0.2.0-preview.1", log)
+        self.assertIn("https://github.com/ernestjsf/attro.git", log)
+        self.assertIn(str(self.source_dir), log)
+        link = self.bin_dir / "attro"
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(link.resolve(), (self.source_dir / "bin" / "attro").resolve())
+        self.assertIn("Installed attro launcher", result.stdout)
+
+    def test_bootstrap_forwards_attro_bin_dir(self):
+        self.run_bootstrap(("ATTRO_BIN_DIR", str(self.bin_dir)))
+        self.assertTrue((self.bin_dir / "attro").is_symlink())
+
+    def test_bootstrap_honors_attro_source_dir(self):
+        custom = self.home / "src" / "attro"
+        self.run_bootstrap(("ATTRO_SOURCE_DIR", str(custom)))
+        self.assertTrue(custom.is_dir())
+        self.assertTrue((custom / "install").is_file())
+        self.assertFalse(self.source_dir.exists())
+
+    def test_bootstrap_refuses_untrusted_existing_directory(self):
+        self.source_dir.mkdir(parents=True)
+        sentinel = self.source_dir / "keep-me.txt"
+        sentinel.write_text("preserve")
+        result = self.run_bootstrap(success=False)
+        self.assertIn("refusing to use existing path", result.stderr)
+        self.assertEqual(sentinel.read_text(), "preserve")
+        self.assertFalse(self.git_log.exists())
+
+    def test_bootstrap_refuses_symlink_target(self):
+        real = self.home / "real-checkout"
+        real.mkdir()
+        self.source_dir.parent.mkdir(parents=True)
+        self.source_dir.symlink_to(real)
+        result = self.run_bootstrap(success=False)
+        self.assertIn("refusing to use symlink path", result.stderr)
+        self.assertFalse(self.git_log.exists())
+
+    def test_bootstrap_existing_checkout_does_not_recommend_execution(self):
+        self.source_dir.mkdir(parents=True)
+        shutil.copy2(INSTALL, self.source_dir / "install")
+        (self.source_dir / "install").chmod(0o755)
+        (self.source_dir / ".git").mkdir()
+        result = self.run_bootstrap(success=False)
+        self.assertIn("refusing to use existing path", result.stderr)
+        self.assertNotIn("&& ./install", result.stderr)
+        self.assertFalse(self.git_log.exists())
+
+    def test_bootstrap_expands_tilde_and_accepts_spaces(self):
+        self.run_bootstrap(("ATTRO_SOURCE_DIR", "~/source with spaces/attro"),
+                           ("ATTRO_BIN_DIR", "~/bin with spaces"))
+        source = self.home / "source with spaces/attro"
+        self.assertTrue((source / "install").is_file())
+        self.assertEqual((self.home / "bin with spaces/attro").resolve(),
+                         source / "bin/attro")
+
+    def test_bootstrap_relative_destination_ignores_cdpath(self):
+        foreign = self.base / "foreign"
+        (foreign / "source").mkdir(parents=True)
+        installer = foreign / "source/install"
+        installer.write_text("#!/bin/sh\necho wrong-installer >&2\nexit 41\n")
+        installer.chmod(0o755)
+        self.run_bootstrap(("ATTRO_SOURCE_DIR", "source"), ("CDPATH", str(foreign)))
+        self.assertEqual((self.bin_dir / "attro").resolve(), self.base / "source/bin/attro")
+
+    def test_bootstrap_missing_git_fails_before_clone(self):
+        minimal = self.base / "minimal-path"
+        minimal.mkdir()
+        for helper in ("python3", "uname", "node", "npm"):
+            source = self.fake_bin / helper
+            if source.exists():
+                (minimal / helper).symlink_to(source.resolve())
+        result = self.run_bootstrap(("PATH", str(minimal)), success=False)
+        self.assertIn("required command not found: git", result.stderr)
+        self.assertFalse(self.source_dir.exists())
+
+    def test_bootstrap_old_node_fails_before_clone(self):
+        result = self.run_bootstrap(("FAKE_NODE_FAIL_VERSION", "1"), success=False)
+        self.assertIn("Node 22.19.0+ required", result.stderr)
+        self.assertFalse(self.source_dir.exists())
+
+    def test_bootstrap_piped_invocation_succeeds(self):
+        self.run_bootstrap(pipe=True)
 
 
 if __name__ == "__main__":
