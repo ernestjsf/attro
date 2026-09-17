@@ -77,7 +77,7 @@ def verify_submodule(entry: dict, runtime: bool, failures: list[str], notes: lis
 
     origin = git("remote", "get-url", "origin", cwd=path)
     if origin != entry["origin"]:
-        fail(f"{rel}: origin does not match the approved private origin", failures)
+        fail(f"{rel}: origin does not match the approved Attro origin", failures)
     if origin == PUBLIC_SUBAGENTS:
         fail(f"{rel}: public pi-subagents origin is forbidden", failures)
 

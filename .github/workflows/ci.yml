@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-          submodules: false
+          submodules: recursive
           fetch-depth: 0
       - name: Run isolated lifecycle and discovery tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -33,3 +33,34 @@ jobs:
             BASE_SHA=$(git hash-object -t tree /dev/null)
           fi
           git diff --check "$BASE_SHA" "$HEAD_SHA"
+
+  install-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.3'
+      - name: Verify pinned sources
+        run: python3 scripts/verify.py
+      - name: Install and launch without provider credentials
+        shell: bash
+        run: |
+          export HOME="$RUNNER_TEMP/attro-smoke-home"
+          export ATTRO_HOME="$HOME/.attro"
+          export PI_TELEMETRY=0
+          export PI_OFFLINE=1
+          mkdir -p "$HOME"
+          ./install --bin-dir "$HOME/.local/bin"
+          "$HOME/.local/bin/attro" --version
+          "$HOME/.local/bin/attro" --help
+          "$HOME/.local/bin/attro" doctor --repo "$GITHUB_WORKSPACE"
+          test ! -e "$ATTRO_HOME/agent/auth.json"
