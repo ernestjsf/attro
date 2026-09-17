@@ -5,14 +5,16 @@ This page covers consumer install, developer source preparation, and the legacy
 workbench live-migration reference. Managed setup builds its own copies; do not
 perform the live migration below merely to try a managed release.
 
-This repository is a reviewed, private source manifest. Preparation is separate
-from activation: setup commands below do not edit Pi settings, install/remove live
+This repository contains the source manifest. Preparation is separate from
+activation: setup commands below do not edit Pi settings, install/remove live
 packages, or bypass guarded settings writes.
 
 ## Consumer install (Attro 0.2.0)
 
-After prerequisites (Python 3.10+, Git, npm, Node 22.19.0+) and private GitHub
-authentication for the recursive clone:
+Requires Python 3.10+, Git, npm, and Node 22.19.0+ on macOS, Linux, or
+Windows through WSL2. Native Windows is not supported. For the tagged one-command
+bootstrap and WSL instructions, see [Install](../README.md#install).
+The manual equivalent is:
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git \
@@ -64,8 +66,8 @@ attro
 
 ## Developer fresh checkout
 
-Authenticate to the private GitHub repositories with the GitHub credential
-helper/PAT or SSH, then clone the root with its canonical submodules:
+Clone the root with its canonical submodules. After publication, these HTTPS
+URLs require no GitHub account or token:
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git \
@@ -74,9 +76,9 @@ cd ~/projects/pi-customizations
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
-The eight submodule origins are the private Quattro mirrors (seven plugin forks
+The eight submodule origins are the maintained Attro mirrors (seven plugin forks
 plus `plugins/attro-core`); the subagents origin is specifically
-`pi-subagents-quattro`, never public `ernestjsf/pi-subagents`.
+`ernestjsf/attro-subagents`, not the unrelated `ernestjsf/pi-subagents`.
 
 Submodule remotes are local clone configuration and are not versioned. To add the
 provenance remotes to a fresh clone:

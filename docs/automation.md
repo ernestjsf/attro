@@ -43,8 +43,11 @@ not describe a failed lookup as "up to date".
   uploads the report for review. It uses read-only repository permissions and
   does not need fork checkout credentials for the default upstream-only check.
 - `.github/workflows/ci.yml` runs offline lifecycle/discovery tests on macOS and
-  Linux. It does not require private submodules and does not certify real plugin
-  installation, source-core build, `./install`, or combined TUI readiness.
+  Linux, plus a separate recursive-checkout install smoke job on both platforms.
+  The smoke job verifies pins, builds a release using `./install` in an isolated
+  profile, and checks CLI version/help and doctor without provider credentials.
+  It requires accessible fork pins. It does not certify authenticated provider
+  use, combined interactive TUI behavior, or Windows/WSL integration.
 
 Both workflows use pinned action commits. No privileged `pull_request_target`
 job executes contributor code. No deployment or cross-repository write token is

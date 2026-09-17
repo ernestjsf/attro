@@ -6,33 +6,51 @@ and an isolated release manager. Use **`attro`** as the everyday launcher; it fo
 pinned releases. Customizations live in plugins and the distribution profile;
 Pi core is built from the maintained `attro-core` fork, not edited in place.
 
-**Development status:** Attro **0.2.0** implements a shared-profile portable
-distribution with a one-command installer for trusted local checkouts. This
-repository is still **private**, **not yet publicly installable**, and **not
-fully verified** as a stable release. No remote stable feed, automatic release
-PRs, or public artifacts are published by the current workflows. An isolated
-macOS install, maintained-core build, and UI startup with the configured dock
-color have passed without credentials or model prompts. Authenticated use and
-public/fresh-machine delivery remain unverified. See
-[publication gates](docs/publication.md).
+**Preview release:** Attro **0.2.0** is a source-built distribution, not a
+certified stable release. There is no automatic stable update feed. See
+[verification evidence](docs/verification.md) for tested platforms and remaining
+limits, and [publication gates](docs/publication.md) for history sanitization.
 
-## Install from a trusted checkout
+## Install
 
-Requires Python 3.10+, Git, npm, and Node satisfying the pinned Pi engine
-(currently Node **22.19.0+**). macOS and Linux are the target platforms;
-local macOS installation and UI startup have been verified; Linux and
-fresh-machine validation remain pending. Windows is not supported by this first implementation. Source-core
-preparation needs network access for locked dependency installs and the
-hash-pinned upstream model-data archive.
+Requires **Git, Python 3.10+, Node 22.19.0+, and npm** on PATH, plus `curl`
+for the command below. Supported environments are **macOS, Linux, and Windows
+through WSL2**. Native Windows/PowerShell installation is not supported.
+Install prerequisites using your preferred package/version manager first; the
+installer does not use `sudo` or install system dependencies.
 
-Start with a trusted, clean, **recursive** clone whose pinned forks you can
-access. Review its sources before executing dependency installation or builds.
+Once the `v0.2.0-preview.1` tag is published:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ernestjsf/attro/v0.2.0-preview.1/install.sh | sh
+```
+
+The script clones the tagged source and pinned forks into `~/.local/share/attro`
+and runs the existing installer. Keep that source directory: the launcher uses
+it. It refuses an existing source directory rather than overwriting your files.
+Downloads and local builds can take several minutes and require network access.
+Like any source installer, this executes downloaded code with your user
+permissions; inspect `install.sh` and the tagged sources before running it.
+
+On Windows, install WSL2 (for example `wsl --install` from an administrator
+PowerShell), finish Linux setup, then run the prerequisites and install command
+**inside the WSL terminal**. Use a directory in the Linux filesystem rather than
+`/mnt/c` for the checkout and managed state. WSL2 uses the Linux implementation;
+Linux CI is not a separate verification of Windows/WSL integration.
+
+### Install from a trusted checkout
+
+Alternatively, start with a clean, **recursive** clone. Review its sources before
+executing dependency installation or builds.
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git
 cd attro
 ./install
 ```
+
+The clone above follows the development branch. For a reproducible preview,
+clone with `--branch v0.2.0-preview.1` after that tag is published.
 
 `./install` runs `attro doctor`, prepares a pinned release from this checkout,
 activates it, and symlinks **`attro`** into `~/.local/bin` (or `--bin-dir`).
@@ -172,7 +190,8 @@ session. Cursor Cloud attribution is not covered.
 
 ```text
 bin/                    attro launcher (everyday + management); pi/piattro compat wrappers (not installed)
-install                 one-command prepare/activate/attro launcher install
+install.sh              tagged-source bootstrap for macOS/Linux/WSL2
+install                 prepare/activate/attro launcher install
 attro/                preparation, validation, activation, and launch code
 attro.json            distribution recipe (v0.2.0; source-core install method)
 runtime/                committed npm package-lock inputs for descriptor npmPackages
@@ -183,7 +202,7 @@ config/                 reviewed shared display defaults copied into releases
 themes/                 Quattro theme sources for originalPi; not bundled in new Attro releases
 scripts/                source verification and upstream update discovery
 tests/                  isolated runtime, installer, and discovery regression tests
-.github/workflows/      macOS/Linux tests and weekly update reports
+.github/workflows/      macOS/Linux tests, real install smoke checks, and update reports
 docs/                   setup, maintenance, design, and publication gates
 ```
 

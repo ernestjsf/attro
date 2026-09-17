@@ -4,31 +4,34 @@ Attro's original code is MIT, as selected by its owner. See `LICENSE` and
 `THIRD_PARTY_NOTICES.md`. That does not make the existing private workbench or
 fork histories automatically safe to publish.
 
-**Current status:** the root repository `ernestjsf/attro` remains
-**private**. No visibility change, public tag, or consumer release feed has been
-published. Audits of the final committed candidate and full intended histories
-are **pending**. **No history rewrite is authorized now.** A separate decision
-is required before any push or visibility change that would expose prior commits
-containing personal configuration, bundled skills, or other removed material.
+**Publication preparation:** the owner has authorized sanitizing the existing
+repositories' histories before making them public. Keep the same GitHub
+repositories; do not replace them with new snapshot repositories. Remove the
+historical `profile/agent/`, `profile/resources/`, and `profile/inventory.json`
+bundles, real credentials, private endpoints, and maintainer-specific filesystem
+paths. Retain product defaults, upstream examples, licenses, credits, and Git
+author/committer names and emails.
+
+Work in isolated copies and preserve existing local work. Rewrite affected fork
+references first, then map root gitlinks and source-lock pins to their rewritten
+commits. Scan every intended public branch/tag and check GitHub-side retained
+material before force-pushing with explicit expected-ref leases or changing
+visibility. Revoke/rotate any genuine credentials; history removal alone cannot
+invalidate them. The final scan, publication, and install evidence must be
+recorded before advertising a tag. No stable consumer update feed is enabled.
 
 ## Current source topology
 
 The root checkout is `pi-customizations`, with a `quattro` branch and GitHub
 remote `https://github.com/ernestjsf/attro.git`. Its **eight submodule**
-URLs point to the maintainer's private fork mirrors (attro-core plus seven
-plugin forks). Setup documentation currently requires private GitHub
-authentication. This implementation does not rename repositories, change
-visibility, push branches, or certify anonymous retrieval.
+URLs point to the maintained Attro fork mirrors (attro-core plus seven plugin
+forks). The canonical public URLs remain the existing `ernestjsf/attro*` names.
+For each rewritten fork, update the gitlink and `sources.lock.json` together;
+`.gitmodules` keeps those canonical URLs. The source verifier disallows replacing
+the subagents mirror with the unrelated `ernestjsf/pi-subagents` repository:
+that identity rule remains in force after publication.
 
-A public launch must choose canonical public URLs. Either audit and publish the
-existing histories with explicit approval, or create sanitized public repositories
-while preserving upstream licenses and provenance. For each migrated fork,
-update the gitlink, `.gitmodules`, and `sources.lock.json` together, then adapt
-any private-origin verification rules deliberately. In particular, the existing
-source verifier explicitly disallows replacing the subagents mirror with the
-older public `ernestjsf/pi-subagents` repository: do not silently bypass that rule.
-
-Attro **0.2.0** builds Pi core from the private `ernestjsf/attro-core` fork
+Attro **0.2.0** builds Pi core from the `ernestjsf/attro-core` fork
 (pinned in `sources.lock.json`) rather than relying on public npm publication of
 that core package. Legacy upstream npm releases remain readable for comparison.
 
@@ -91,8 +94,9 @@ themselves; Attro does not edit `~/.attro/agent` during recipe cleanup.
    review findings without printing credentials into CI logs or issue reports.
    Preliminary scans found fixture-like patterns requiring explicit
    content/context review; **no final committed-candidate scan is complete**.
-   Treat earlier commits that contained personal bundles as **still present in
-   Git history** until a sanitized publication path is explicitly approved.
+   Verify removed personal bundles are absent from every intended public ref,
+   not merely the current tree. Inspect commit messages and GitHub retained refs
+   as well as file contents; branches/tags alone do not cover cached PR diffs.
 2. Inspect fork-specific changes, copied assets, attribution, attro-core monorepo
    notices, and any generated artifacts. The initial source license audit is not a
    complete dependency SBOM.
