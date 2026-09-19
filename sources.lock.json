@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "4abd4334199c4f03de68cf6b7b1049fbfbf0464b",
+      "pin": "35f0bdaf60aef20b3baddc29d878842497389f31",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "Effective thinking: full subagents.test.cjs suite passed on Node 26.7 against source core. Authoritative child RPC thinking, clamping, legacy uncertainty, runtime events, and profile envelope isolation covered. Independent review found no blockers.",
+      "testReport": "Resource optimization: 421 subagent and 30 concurrency checks passed on Node 26.7. Real RPC delayed-start readiness, saved-session resume, generation/permission guards, pending-message races, and cooperative helper cleanup covered. Native-dock benchmark: 853 records, 40 idle ticks, zero registry reads. Independent sensitive review cleared corrections; real-provider memory drainage not measured.",
       "provenance": "QUATTRO.md"
     }
   ],
