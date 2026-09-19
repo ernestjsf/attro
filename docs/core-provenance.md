@@ -9,7 +9,8 @@ are not invariant across future pins.
 
 | Role | Git commit | Notes |
 | --- | --- | --- |
-| **Fork pin** (`sources.lock.json` `pin`) | `4cf75e855d51d24cdb6a533bfca4374285566a18` | Reviewed Attro fork tree built during preparation (`ernestjsf/attro-core`). |
+| **AUDITED SNAPSHOT** (`forkComparison.pin`) | `4cf75e855d51d24cdb6a533bfca4374285566a18` | Frozen commit for archive diff counts below; **not** automatically the current `sources.lock.json` submodule pin after core updates. |
+| **Current recipe pin** (`sources.lock.json` `pin`) | (see lock file) | Reviewed Attro fork tree built during preparation (`ernestjsf/attro-core`); may advance when the recipe gitlink updates. |
 | **Upstream base** (`baseCommit`) | `107d79f11072bbc8a3a757ed7fd69596bee7d68c` | Genuine upstream Pi **0.85.0** release commit (may not exist in the fork clone). |
 | **Sanitized fork root** (`forkRootCommit`) | `36b02b695383ad89bc3a22b73633be3fa27be3c1` | Local fork history root after sanitization; **not** the upstream base. |
 

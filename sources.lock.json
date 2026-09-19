@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "4cf75e855d51d24cdb6a533bfca4374285566a18",
+      "pin": "1d28706e5a1faf41c9f4ea1f4eb0abd15e3a25b0",
       "baseCommit": "107d79f11072bbc8a3a757ed7fd69596bee7d68c",
       "forkRootCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.85.0",
@@ -50,7 +50,7 @@
         "archiveOnlyPathCount": 40,
         "archiveOnlyNote": "All 40 archive-only paths are generated provider model data under packages/ai/src/providers/data."
       },
-      "testReport": "Opt-in first-prompt profile suggestions: npm run check passed on Node 26.7.0; seven focused suites 168 passed, 10 credential-gated tests skipped. Isolated TUI verified at 100x32 and 36x12 with mocked Jev responses; global consent, cancel/restore, and accept/switch verified. Independent sensitive review cleared privacy and session-replacement corrections. Live Jev inference not tested.",
+      "testReport": "Native Zentui parity in attro-core: npm run check passed on Node 22.23.2; 103 affected tests passed after TUI rebuild. Real Attro CLI smoke in tmux at 40x80 without credentials (no separate pi-zentui package). Independent review corrections cleared.",
       "provenance": "docs/core-provenance.md"
     },
     {
