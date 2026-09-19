@@ -332,8 +332,8 @@ def check_node(requirement: str) -> str:
 
 def validate_sources_lock(manifest: dict[str, Any]) -> None:
     schema(manifest)
-    if manifest.get("branch") != "quattro":
-        raise ValidationError("sources.lock.json branch must be quattro")
+    if manifest.get("branch") not in ("main", "quattro"):
+        raise ValidationError("sources.lock.json branch must be main or quattro")
     entries, configs = manifest.get("submodules"), manifest.get("configs")
     if not isinstance(entries, list) or not isinstance(configs, list):
         raise ValidationError("sources lock requires submodules and configs arrays")

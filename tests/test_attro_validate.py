@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from attro.validate import ValidationError, render_profile, validate_descriptor  # noqa: E402
+from attro.validate import ValidationError, render_profile, validate_descriptor, validate_sources_lock  # noqa: E402
 
 
 class DescriptorValidationTests(unittest.TestCase):
@@ -35,6 +35,18 @@ class DescriptorValidationTests(unittest.TestCase):
             path.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaises(ValidationError):
                 validate_descriptor(path)
+
+
+class SourcesLockValidationTests(unittest.TestCase):
+    def test_accepts_shipped_and_legacy_branches(self) -> None:
+        manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+        validate_sources_lock(manifest)
+        validate_sources_lock({**manifest, "branch": "quattro"})
+
+    def test_rejects_unsupported_branch(self) -> None:
+        manifest = {"schemaVersion": 1, "branch": "feature", "submodules": [], "configs": []}
+        with self.assertRaisesRegex(ValidationError, "branch must"):
+            validate_sources_lock(manifest)
 
 
 class RenderProfileTests(unittest.TestCase):
