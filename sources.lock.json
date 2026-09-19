@@ -54,27 +54,6 @@
       "provenance": "docs/core-provenance.md"
     },
     {
-      "path": "plugins/pi-zentui",
-      "name": "pi-zentui",
-      "origin": "https://github.com/ernestjsf/attro-zentui.git",
-      "upstream": "https://github.com/lmilojevicc/pi-zentui.git",
-      "pin": "d179791b3c2f3a2e761347e36fdf7023c1c2138a",
-      "baseCommit": "32f0668015f7685a3d3acb7cecb06680ae0a83fc",
-      "baseVersion": "0.22.3",
-      "packagePath": ".",
-      "sourceEntryFiles": [
-        "extensions/zentui/index.ts"
-      ],
-      "runtimeEntryFiles": [
-        "extensions/zentui/index.ts"
-      ],
-      "runtimeGenerated": false,
-      "dependencyLock": "package-lock.json",
-      "dependencyLockVersion": 3,
-      "testReport": "Working-line core gate: fmt/verify/pack:check passed; 1,388 passed, 1 skipped; working-line and settings-command gate tests passed.",
-      "provenance": "QUATTRO.md"
-    },
-    {
       "path": "plugins/pi-cc-extensions",
       "name": "pi-cc-extensions",
       "origin": "https://github.com/ernestjsf/attro-cc-extensions.git",
@@ -196,12 +175,6 @@
     }
   ],
   "configs": [
-    {
-      "path": "config/zentui.json",
-      "source": "~/.pi/agent/zentui.json",
-      "sha256": "7ef5d08bda4d072a0a912c45b9c8966e7c31b7a9e8df8c646019af01f866f1a7",
-      "provenance": "Shared display defaults: CC owns thinking and Zentui owns live progress. Standalone personal status integrations are not bundled."
-    },
     {
       "path": "config/claude-code-style.json",
       "source": "~/.pi/agent/claude-code-style.json",

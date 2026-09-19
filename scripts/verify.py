@@ -206,8 +206,8 @@ def main() -> int:
     config_paths = {entry["path"] for entry in manifest["configs"]}
     if config_paths & {"themes/quattro-green.json", "themes/quattro-amber.json"}:
         fail("sources.lock.json must not copy Quattro themes into new Attro releases", failures)
-    if config_paths != {"config/zentui.json", "config/claude-code-style.json", "config/rpiv-todo.json"}:
-        fail("sources.lock.json configs must match the three shared display defaults", failures)
+    if config_paths != {"config/claude-code-style.json", "config/rpiv-todo.json"}:
+        fail("sources.lock.json configs must match the two shared display defaults", failures)
 
     expected_gitmodules = {
         entry["path"]: entry["origin"] for entry in manifest["submodules"]

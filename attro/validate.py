@@ -18,6 +18,12 @@ from attro.paths import safe_child
 
 RELEASE_ID_RE = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}")
 CORE_PACKAGE = "@earendil-works/pi-coding-agent"
+SHIPPED_CONFIG_PATHS = frozenset({"config/claude-code-style.json", "config/rpiv-todo.json"})
+LEGACY_CONFIG_PATHS = frozenset({"config/zentui.json"})
+ALLOWED_CONFIG_PATHS = SHIPPED_CONFIG_PATHS | LEGACY_CONFIG_PATHS | frozenset(
+    {"themes/quattro-green.json", "themes/quattro-amber.json"}
+)
+RETIRED_SUBMODULE_PATHS = frozenset({"plugins/pi-zentui", "plugins/pi-web-access", "plugins/pi-ask-user"})
 NODE_MIN_RE = re.compile(r">=(\d+)\.(\d+)\.(\d+)")
 
 
@@ -151,7 +157,12 @@ def validate_core_sources_lock_entry(entry: dict[str, Any]) -> None:
 
 def validate_shipped_sources_lock(manifest: dict[str, Any]) -> None:
     validate_sources_lock(manifest)
+    config_paths = {text(config.get("path"), "config path") for config in manifest["configs"]}
+    if config_paths != SHIPPED_CONFIG_PATHS:
+        raise ValidationError("shipped sources lock configs must match the active shared display defaults")
     for entry in manifest["submodules"]:
+        if entry["path"] in RETIRED_SUBMODULE_PATHS:
+            raise ValidationError(f"shipped sources lock must not include retired submodule: {entry['path']}")
         if entry["path"] == CORE_SOURCE_SUBMODULE:
             validate_core_sources_lock_entry(entry)
             return
@@ -465,12 +476,11 @@ def validate_sources_lock(manifest: dict[str, Any]) -> None:
                 relative_path(value, key)
         text(entry.get("provenance"), f"npmPackages[{index}].provenance")
     seen = set()
-    allowed_configs = {"themes/quattro-green.json", "themes/quattro-amber.json", "config/zentui.json", "config/claude-code-style.json", "config/rpiv-todo.json"}
     for config in configs:
         if not isinstance(config, dict):
             raise ValidationError("invalid config entry")
         rel = relative_path(config.get("path"), "config path")
-        if rel not in allowed_configs or rel in seen:
+        if rel not in ALLOWED_CONFIG_PATHS or rel in seen:
             raise ValidationError(f"config not allowlisted or duplicated: {rel}")
         seen.add(rel)
         if not re.fullmatch(r"[0-9a-f]{64}", text(config.get("sha256"), "config sha256")):

@@ -2,7 +2,7 @@
 
 Attro is an opinionated distribution of upstream Pi, not a fork of Pi core in
 this repository. Its release is a recipe: Pi **0.85.0** built from the pinned
-`plugins/attro-core` source tree, the five plugin submodule source pins in
+`plugins/attro-core` source tree, the four plugin submodule source pins in
 `sources.lock.json`, upstream npm pins for `pi-web-access` and `pi-ask-user`,
 UI/package defaults, and committed runtime lock inputs for descriptor npm packages. **`attro`** is the everyday launcher and release
 manager; it forwards standard Pi flags/prompts and exposes explicit management
@@ -44,8 +44,9 @@ the shared profile; they do not rewrite it with new repository defaults.
 
 ## Release records
 
-`sources.lock.json` remains the canonical source inventory (attro-core plus five
-plugin forks, with upstream npm provenance for retired visual forks). `attro.json`
+`sources.lock.json` remains the canonical source inventory (attro-core plus four
+plugin forks, with upstream npm provenance for retired visual forks). Zentui UI
+surfaces move to attro-core (Phase 2); see `docs/zentui-native-parity.md`. `attro.json`
 adds the distribution version (**0.2.0**), core
 install method (**source**), profile path, and compatibility requirements.
 Installed metadata records source identity, `agentMode: shared-v1`, and
@@ -79,7 +80,7 @@ via local Quattro styling in `curator-page.ts`.
 **Profile layout:**
 
 - `profile/settings.json` — initial UI and package defaults (no personal model routing or theme selection)
-- `config/` — shared display defaults copied into each prepared release (`zentui.json`, `claude-code-style.json`, `rpiv-todo.json`)
+- `config/` — shared display defaults copied into each prepared release (`claude-code-style.json`, `rpiv-todo.json`); historical Zentui defaults archived under `docs/archive/`
 - `themes/` — Quattro theme source files for originalPi checkout use; not copied into new Attro releases
 
 On first activation Attro initializes `~/.attro/agent` once from those defaults

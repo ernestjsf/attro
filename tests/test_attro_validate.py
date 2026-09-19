@@ -115,6 +115,21 @@ class SourcesLockValidationTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_shipped_sources_lock(legacy)
 
+    def test_retained_manifest_sources_lock_accepts_zentui_config_record(self) -> None:
+        manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+        manifest = copy.deepcopy(manifest)
+        manifest["configs"].append(
+            {
+                "path": "config/zentui.json",
+                "source": "~/.pi/agent/zentui.json",
+                "sha256": "7ef5d08bda4d072a0a912c45b9c8966e7c31b7a9e8df8c646019af01f866f1a7",
+                "provenance": "Historical Zentui display defaults (retired from shipped recipe).",
+            }
+        )
+        validate_sources_lock(manifest)
+        with self.assertRaises(ValidationError):
+            validate_shipped_sources_lock(manifest)
+
 
 class RenderProfileTests(unittest.TestCase):
     def test_uses_final_release_root_paths(self) -> None:

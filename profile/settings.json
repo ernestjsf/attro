@@ -20,8 +20,7 @@
     "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",
-    "{{PLUGIN_PI_CC_EXTENSIONS}}",
-    "{{PLUGIN_PI_ZENTUI}}"
+    "{{PLUGIN_PI_CC_EXTENSIONS}}"
   ],
   "collapseChangelog": true,
   "markdown": {

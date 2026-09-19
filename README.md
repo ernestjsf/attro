@@ -195,8 +195,8 @@ install                 prepare/activate/attro launcher install
 attro/                preparation, validation, activation, and launch code
 attro.json            distribution recipe (v0.2.0; source-core install method)
 runtime/                committed npm package-lock inputs for descriptor npmPackages
-sources.lock.json       canonical six-submodule pins, npm provenance, and copied config hashes
-plugins/                six Git submodules (attro-core + five customized plugin forks)
+sources.lock.json       canonical five-submodule pins, npm provenance, and copied config hashes
+plugins/                five Git submodules (attro-core + four customized plugin forks)
 profile/                portable UI/package defaults and managed-state guidance
 config/                 reviewed shared display defaults copied into releases
 themes/                 Quattro theme sources for originalPi; not bundled in new Attro releases

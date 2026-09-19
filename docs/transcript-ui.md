@@ -8,7 +8,7 @@ defaults — not through personal extensions or skills in the distribution profi
 | Surface | Owner |
 | --- | --- |
 | Native minimalist editor in managed Attro | Attro core |
-| User-message labeled frame, selector borders | Zentui |
+| User-message labeled frame, selector borders | Attro core (formerly Zentui plugin) |
 | Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
 | Primary progress (phase, current tool, elapsed time) | Attro core |
 | Dock layout, disclosure state, height budget and inline navigation | Attro core |
@@ -18,8 +18,8 @@ Optional widgets such as turn-status are **not bundled** in the distribution
 recipe. Users who want them install or copy standalone extensions into their own
 `~/.attro/agent` directory (or another Pi discovery path).
 
-Zentui's experimental thinking renderer is disabled in the shipped
-`config/zentui.json` to avoid overlapping CC's assistant renderer. Thinking starts folded on fresh profiles (`hideThinkingBlock: true` in
+Experimental thinking rendering is disabled in core/Zentui parity defaults to
+avoid overlapping CC's assistant renderer. Thinking starts folded on fresh profiles (`hideThinkingBlock: true` in
 `profile/settings.json`), with a per-message disclosure; Ctrl+T reveals it. Existing
 profiles retain their visibility preference. Compact mode keeps assistant commentary in chronological order and no longer collects tools into Activity cards.
 CC's own working message and agent summary remain disabled. Zentui's turn summary and working-line thought
@@ -164,7 +164,9 @@ bar. Spawn, delivery, and execution behavior are unchanged.
 ## Source and configuration
 
 - `plugins/pi-cc-extensions/` is the active tool-rendering source tree.
-- `config/zentui.json` is the reviewed Zentui display default.
+- Historical Zentui display defaults are archived in
+  `docs/archive/zentui-display-defaults-retired.json`; see
+  [zentui-native-parity.md](zentui-native-parity.md).
 - `config/claude-code-style.json` is the reviewed CC display default.
 - `config/rpiv-todo.json` is the reviewed rpiv todo display default.
 - `themes/quattro-green.json` and `themes/quattro-amber.json` remain in the

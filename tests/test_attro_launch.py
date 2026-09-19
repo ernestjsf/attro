@@ -31,7 +31,6 @@ from test_attro_activation import _write_release
 def _fake_release(tmp: Path, release_id: str) -> Path:
     release_path = _write_release(tmp, release_id, marker="launch")
     config = release_path / "config"
-    (config / "zentui.json").write_text("{}\n", encoding="utf-8")
     (config / "claude-code-style.json").write_text("{}\n", encoding="utf-8")
     (release_path / "agent/auth.json").write_text("{}\n", encoding="utf-8")
     return release_path
@@ -52,7 +51,7 @@ class LaunchHelperTests(unittest.TestCase):
             isolated = Path(tmp) / "sandbox" / "agent"
             populate_try_agent(release_path, isolated)
             self.assertTrue((isolated / "settings.json").is_file())
-            self.assertTrue((isolated / "zentui.json").is_file())
+            self.assertFalse((isolated / "zentui.json").exists())
             self.assertTrue((isolated / "claude-code-style.json").is_file())
             self.assertFalse((isolated / "auth.json").exists())
 

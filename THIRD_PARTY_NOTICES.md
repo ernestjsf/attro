@@ -6,14 +6,13 @@ and attribution files in each source tree and installed dependency.
 
 ## Fork sources
 
-The six current fork trees each carry upstream licenses. Upstream npm packages
+The five current fork trees each carry upstream licenses. Upstream npm packages
 `pi-web-access@0.27.0` and `pi-ask-user@0.14.0` are pinned via `runtime/npm`.
 Exact origin URLs and reviewed commits are recorded in `sources.lock.json`.
 
 | Source | Authoritative license |
 | --- | --- |
 | attro-core (Pi monorepo) | `plugins/attro-core/LICENSE` and per-package notices under `plugins/attro-core/packages/` |
-| Zentui | `plugins/pi-zentui/LICENSE` |
 | CC extensions | `plugins/pi-cc-extensions/LICENSE` |
 | Lens | `plugins/pi-lens/LICENSE` |
 | rpiv mono / selected todo package | `plugins/rpiv-mono/LICENSE` |
@@ -30,18 +29,15 @@ Additional upstream notices inside those trees remain authoritative:
 
 - CC diff rendering: `plugins/pi-cc-extensions/extensions/renderer/tool/diff/ATTRIBUTION.md`
   (MIT, pi-tool-display / MasuRii and contributors).
-- Zentui experimental thinking: notices in
-  `plugins/pi-zentui/extensions/zentui/thinking-experimental.ts`
-  (MIT, Zach Yuen and Marc Mironescu / FluxGear).
-- Zentui spinners: notices in
-  `plugins/pi-zentui/extensions/zentui/working-line-spinners.ts`
-  (MIT, Marko Nakic and FammasMaz / pi-cc-tools contributors).
+- **Zentui (native in attro-core):** portions adapted from upstream `pi-zentui`
+  (MIT; copyright Luka). Authoritative notices are the full MIT headers in:
+  `plugins/attro-core/packages/coding-agent/src/core/native-git-status.ts`,
+  `plugins/attro-core/packages/coding-agent/src/modes/interactive/components/labeled-user-message-render.ts`,
+  `plugins/attro-core/packages/coding-agent/src/modes/interactive/components/user-message-osc.ts`.
+  Attro does not ship a separate `pi-zentui` recipe package. Archived former
+  recipe defaults: `docs/archive/zentui-display-defaults-retired.json`.
 - Lens coderabbit rules:
   `plugins/pi-lens/rules/ast-grep-rules/coderabbit/LICENSE` (Apache-2.0).
-- Zentui's README credits a Mohammad Alizade / Unsplash showcase image under
-  the **Unsplash License**, not MIT. Do not treat that image as Attro artwork
-  or imply that all repository assets use the source-code license.
-
 Source-core preparation downloads the hash-pinned upstream **0.85.0** model-data
 archive declared in `attro.json`; that asset carries its own upstream provenance
 and must be retained in audit material for prebuilt releases.

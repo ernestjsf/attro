@@ -35,7 +35,6 @@ EXPECTED_PACKAGES = [
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",
     "{{PLUGIN_PI_CC_EXTENSIONS}}",
-    "{{PLUGIN_PI_ZENTUI}}",
 ]
 
 EXPECTED_UI_DEFAULTS = {
@@ -108,13 +107,14 @@ class ProfileBoundaryTests(unittest.TestCase):
             config = release / "config"
             config.mkdir(parents=True)
             (config / "settings.json").write_text(json.dumps(rendered) + "\n")
-            for name in ("zentui.json", "claude-code-style.json", "rpiv-todo.json"):
+            for name in ("claude-code-style.json", "rpiv-todo.json"):
                 shutil_copy = ROOT / "config" / name
                 if shutil_copy.is_file():
                     (config / name).write_bytes(shutil_copy.read_bytes())
             (release / "profile" / "agent").mkdir(parents=True)
             target = Path(work) / "agent"
             seed_agent(release, target)
+            self.assertFalse((target / "zentui.json").exists())
             settings = load_json(target / "settings.json")
             for key in PERSONAL_SETTINGS_KEYS:
                 self.assertNotIn(key, settings, msg=key)
@@ -133,7 +133,7 @@ class ProfileBoundaryTests(unittest.TestCase):
         self.assertFalse(config_paths & {"themes/quattro-green.json", "themes/quattro-amber.json"})
         self.assertEqual(
             config_paths,
-            {"config/zentui.json", "config/claude-code-style.json", "config/rpiv-todo.json"},
+            {"config/claude-code-style.json", "config/rpiv-todo.json"},
         )
 
     def test_root_package_exports_quattro_themes_for_original_pi_only(self) -> None:
@@ -149,7 +149,6 @@ class ProfileBoundaryTests(unittest.TestCase):
         self.assertTrue(cc_themes)
         self.assertTrue(all("quattro" not in path for path in cc_themes))
         managed_packages = [
-            ROOT / "plugins/pi-zentui/package.json",
             ROOT / "plugins/pi-lens/package.json",
             ROOT / "plugins/pi-subagents/package.json",
             ROOT / "plugins/rpiv-mono/packages/rpiv-todo/package.json",
@@ -209,7 +208,7 @@ class ProfileBoundaryTests(unittest.TestCase):
             config = release / "config"
             config.mkdir(parents=True)
             (config / "settings.json").write_text(json.dumps(rendered) + "\n")
-            for name in ("zentui.json", "claude-code-style.json", "rpiv-todo.json"):
+            for name in ("claude-code-style.json", "rpiv-todo.json"):
                 source = ROOT / "config" / name
                 if source.is_file():
                     (config / name).write_bytes(source.read_bytes())

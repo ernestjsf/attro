@@ -680,7 +680,7 @@ process.stdin.destroy();
     def test_profile_ui_and_package_order(self):
         root = Path(__file__).resolve().parents[1]
         profile = json.loads((root / "profile/settings.json").read_text())
-        self.assertEqual(profile["packages"], ["{{NPM:@narumitw/pi-caffeinate}}", "{{NPM:pi-btw}}", "{{NPM:pi-ask-user}}", "{{PLUGIN_PI_LENS}}", "{{NPM:pi-web-access}}", "{{NPM:pi-cursor-sdk}}", "{{PLUGIN_PI_SUBAGENTS}}", "{{PLUGIN_RPIV_TODO}}", "{{PLUGIN_PI_CC_EXTENSIONS}}", "{{PLUGIN_PI_ZENTUI}}"])
+        self.assertEqual(profile["packages"], ["{{NPM:@narumitw/pi-caffeinate}}", "{{NPM:pi-btw}}", "{{NPM:pi-ask-user}}", "{{PLUGIN_PI_LENS}}", "{{NPM:pi-web-access}}", "{{NPM:pi-cursor-sdk}}", "{{PLUGIN_PI_SUBAGENTS}}", "{{PLUGIN_RPIV_TODO}}", "{{PLUGIN_PI_CC_EXTENSIONS}}"])
         expected = {"quietStartup": True, "hideThinkingBlock": True, "editorPaddingX": 0, "outputPad": 1, "tuiMode": "fullscreen", "fullscreenScrollbar": "auto", "fullscreenExitOutput": "resume-hint", "collapseChangelog": True, "markdown": {"mermaid": "final"}}
         for key, value in expected.items():
             self.assertEqual(profile[key], value)

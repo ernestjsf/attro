@@ -24,7 +24,6 @@ CORE_CLI_REL = "packages/coding-agent/dist/bundle/cli.js"
 RUNTIME_GENERATED_SUBMODULES = frozenset({"plugins/pi-lens", "plugins/attro-core"})
 
 PLUGIN_PATHS = {
-    "pi-zentui": "plugins/pi-zentui",
     "pi-cc-extensions": "plugins/pi-cc-extensions",
     "pi-lens": "plugins/pi-lens",
     "rpiv-todo": "plugins/rpiv-mono/packages/rpiv-todo",
@@ -32,7 +31,6 @@ PLUGIN_PATHS = {
 }
 
 PROFILE_PLACEHOLDERS = {
-    "{{PLUGIN_PI_ZENTUI}}": PLUGIN_PATHS["pi-zentui"],
     "{{PLUGIN_PI_CC_EXTENSIONS}}": PLUGIN_PATHS["pi-cc-extensions"],
     "{{PLUGIN_PI_LENS}}": PLUGIN_PATHS["pi-lens"],
     "{{PLUGIN_RPIV_TODO}}": PLUGIN_PATHS["rpiv-todo"],
@@ -42,7 +40,6 @@ PROFILE_PLACEHOLDERS = {
 }
 
 AGENT_SEED_CONFIGS = (
-    "zentui.json",
     "claude-code-style.json",
     "rpiv-todo.json",
 )

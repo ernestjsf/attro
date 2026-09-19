@@ -76,9 +76,10 @@ cd ~/projects/pi-customizations
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
-The six submodule origins are the maintained Attro mirrors (five plugin forks
+The five submodule origins are the maintained Attro mirrors (four plugin forks
 plus `plugins/attro-core`); `pi-web-access` and `pi-ask-user` are pinned from
-public npm instead. The subagents origin is specifically
+public npm instead. Zentui is native in attro-core (see
+[zentui-native-parity](zentui-native-parity.md)). The subagents origin is specifically
 `ernestjsf/attro-subagents`, not the unrelated `ernestjsf/pi-subagents`.
 
 Submodule remotes are local clone configuration and are not versioned. To add the
@@ -86,7 +87,6 @@ provenance remotes to a fresh clone:
 
 ```sh
 git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi-mono.git
-git -C plugins/pi-zentui remote add upstream https://github.com/lmilojevicc/pi-zentui.git
 git -C plugins/pi-cc-extensions remote add upstream https://github.com/minuque/pi-cc-extensions.git
 git -C plugins/pi-lens remote add upstream https://github.com/apmantza/pi-lens.git
 git -C plugins/rpiv-mono remote add upstream https://github.com/juicesharp/rpiv-mono.git
@@ -96,7 +96,7 @@ git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/p
 Install each lockfile-bearing source independently, without lifecycle scripts:
 
 ```sh
-for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-lens plugins/rpiv-mono; do
+for p in plugins/pi-cc-extensions plugins/pi-lens plugins/rpiv-mono; do
   (cd "$p" && npm ci --ignore-scripts --no-audit --no-fund)
 done
 ```
@@ -127,6 +127,13 @@ accepted for stock upstream):
 when invoked; npm preparation uses the public registry only (`runtime/npm` lock
 validation). The `pi.video` metadata URL in the package manifest is unchanged
 from upstream and is not fetched at install time.
+
+### Retired Zentui submodule (Phase 2)
+
+Attro no longer ships `pi-zentui` as a recipe submodule or profile package.
+Native attro-core owns the former Zentui surfaces. New releases do **not**
+seed `zentui.json`; existing `~/.attro/agent/zentui.json` files are preserved.
+See [zentui-native-parity](zentui-native-parity.md).
 
 ## attro-core and Lens preparation
 
@@ -193,7 +200,7 @@ replacement full settings JSON:
 
 | Existing package identity | Replacement local path |
 | --- | --- |
-| `pi-zentui` | `~/projects/pi-customizations/plugins/pi-zentui` |
+| `pi-zentui` | native attro-core (no separate recipe package) |
 | `pi-cc-extensions` | `~/projects/pi-customizations/plugins/pi-cc-extensions` |
 | `pi-lens` | `~/projects/pi-customizations/plugins/pi-lens` |
 | `@juicesharp/rpiv-todo` | `~/projects/pi-customizations/plugins/rpiv-mono/packages/rpiv-todo` |
