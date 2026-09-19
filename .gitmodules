@@ -4,18 +4,12 @@
 [submodule "plugins/pi-cc-extensions"]
 	path = plugins/pi-cc-extensions
 	url = https://github.com/ernestjsf/attro-cc-extensions.git
-[submodule "plugins/pi-web-access"]
-	path = plugins/pi-web-access
-	url = https://github.com/ernestjsf/attro-web-access.git
 [submodule "plugins/pi-lens"]
 	path = plugins/pi-lens
 	url = https://github.com/ernestjsf/attro-lens.git
 [submodule "plugins/rpiv-mono"]
 	path = plugins/rpiv-mono
 	url = https://github.com/ernestjsf/attro-rpiv.git
-[submodule "plugins/pi-ask-user"]
-	path = plugins/pi-ask-user
-	url = https://github.com/ernestjsf/attro-ask-user.git
 [submodule "plugins/pi-subagents"]
 	path = plugins/pi-subagents
 	url = https://github.com/ernestjsf/attro-subagents.git

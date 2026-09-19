@@ -96,6 +96,82 @@ def validate_model_snapshot_url(value: Any) -> str:
     return url
 
 
+def _validate_fork_comparison_snapshot(comparison: dict[str, Any], *, rel: str) -> None:
+    pin = comparison.get("pin")
+    if pin is not None and not re.fullmatch(r"[0-9a-f]{40,64}", text(pin, "forkComparison.pin")):
+        raise ValidationError(f"{rel}: invalid forkComparison.pin")
+    for key in ("method", "archiveOnlyNote"):
+        value = comparison.get(key)
+        if value is not None:
+            text(value, f"forkComparison.{key}")
+    for key in (
+        "forkTreePathCount",
+        "commonPathCount",
+        "identicalPathCount",
+        "differentPathCount",
+        "forkOnlyPathCount",
+        "archiveOnlyPathCount",
+    ):
+        count = comparison.get(key)
+        if count is not None and (type(count) is not int or count < 0):
+            raise ValidationError(f"{rel}: forkComparison.{key} must be a non-negative integer")
+
+
+def validate_core_sources_lock_entry(entry: dict[str, Any]) -> None:
+    from attro.npm_packages import validate_version
+
+    rel = CORE_SOURCE_SUBMODULE
+    if text(entry.get("provenance"), f"{rel} provenance") != "docs/core-provenance.md":
+        raise ValidationError(f"{rel}: provenance must be docs/core-provenance.md")
+    base_commit = text(entry.get("baseCommit"), "baseCommit")
+    if not re.fullmatch(r"[0-9a-f]{40,64}", base_commit):
+        raise ValidationError(f"{rel}: invalid baseCommit")
+    fork_root = text(entry.get("forkRootCommit"), "forkRootCommit")
+    if not re.fullmatch(r"[0-9a-f]{40,64}", fork_root):
+        raise ValidationError(f"{rel}: invalid forkRootCommit")
+    if fork_root == base_commit:
+        raise ValidationError(f"{rel}: forkRootCommit must differ from upstream baseCommit")
+    validate_version(text(entry.get("baseVersion"), "baseVersion"))
+    archive = entry.get("sourceArchive")
+    if not isinstance(archive, dict):
+        raise ValidationError(f"{rel}: sourceArchive required")
+    validate_model_snapshot_url(archive.get("url"))
+    if not re.fullmatch(r"[0-9a-f]{64}", text(archive.get("sha256"), "sourceArchive.sha256")):
+        raise ValidationError(f"{rel}: invalid sourceArchive.sha256")
+    if text(archive.get("commit"), "sourceArchive.commit") != base_commit:
+        raise ValidationError(f"{rel}: sourceArchive.commit must equal baseCommit")
+    if not re.fullmatch(r"[0-9a-f]{40,64}", text(archive.get("tree"), "sourceArchive.tree")):
+        raise ValidationError(f"{rel}: invalid sourceArchive.tree")
+    comparison = entry.get("forkComparison")
+    if comparison is not None:
+        if not isinstance(comparison, dict):
+            raise ValidationError(f"{rel}: forkComparison must be an object")
+        _validate_fork_comparison_snapshot(comparison, rel=rel)
+
+
+def validate_shipped_sources_lock(manifest: dict[str, Any]) -> None:
+    validate_sources_lock(manifest)
+    for entry in manifest["submodules"]:
+        if entry["path"] == CORE_SOURCE_SUBMODULE:
+            validate_core_sources_lock_entry(entry)
+            return
+    raise ValidationError(f"sources lock missing {CORE_SOURCE_SUBMODULE}")
+
+
+def validate_core_source_archive_alignment(entry: dict[str, Any], descriptor: dict[str, Any]) -> None:
+    rel = CORE_SOURCE_SUBMODULE
+    archive = entry.get("sourceArchive")
+    if not isinstance(archive, dict):
+        raise ValidationError(f"{rel}: sourceArchive required")
+    snapshot = descriptor.get("core", {}).get("source", {}).get("modelSnapshot")
+    if not isinstance(snapshot, dict):
+        raise ValidationError("descriptor core.source.modelSnapshot required")
+    if archive.get("url") != snapshot.get("url") or archive.get("sha256") != snapshot.get("sha256"):
+        raise ValidationError(f"{rel}: sourceArchive url/sha256 must match descriptor modelSnapshot")
+    if text(descriptor.get("core", {}).get("version"), "core.version") != text(entry.get("baseVersion"), "baseVersion"):
+        raise ValidationError(f"{rel}: baseVersion must match descriptor core.version")
+
+
 def validate_descriptor(path: Path) -> dict[str, Any]:
     from attro.npm_packages import normalize_npm_packages, validate_version
 
@@ -331,12 +407,19 @@ def check_node(requirement: str) -> str:
 
 
 def validate_sources_lock(manifest: dict[str, Any]) -> None:
+    from attro.npm_packages import validate_package_name, validate_version
+
     schema(manifest)
     if manifest.get("branch") not in ("main", "quattro"):
         raise ValidationError("sources.lock.json branch must be main or quattro")
     entries, configs = manifest.get("submodules"), manifest.get("configs")
     if not isinstance(entries, list) or not isinstance(configs, list):
         raise ValidationError("sources lock requires submodules and configs arrays")
+    npm_entries = manifest.get("npmPackages", [])
+    if npm_entries is None:
+        npm_entries = []
+    if not isinstance(npm_entries, list):
+        raise ValidationError("sources lock npmPackages must be an array")
     seen = set()
     for entry in entries:
         if not isinstance(entry, dict):
@@ -363,6 +446,24 @@ def validate_sources_lock(manifest: dict[str, Any]) -> None:
         lock = entry.get("dependencyLock")
         if lock is not None and lock != "package-lock.json":
             raise ValidationError(f"unsupported dependency lock for {rel}")
+    npm_seen = set()
+    for index, entry in enumerate(npm_entries):
+        if not isinstance(entry, dict):
+            raise ValidationError("invalid npmPackages entry")
+        package = validate_package_name(text(entry.get("package"), f"npmPackages[{index}].package"))
+        if package in npm_seen:
+            raise ValidationError(f"duplicate npmPackages entry: {package}")
+        npm_seen.add(package)
+        validate_version(text(entry.get("version"), f"npmPackages[{index}].version"))
+        text(entry.get("upstream"), f"npmPackages[{index}].upstream")
+        if not re.fullmatch(r"[0-9a-f]{40,64}", text(entry.get("baseCommit"), f"npmPackages[{index}].baseCommit")):
+            raise ValidationError(f"invalid baseCommit for npm package: {package}")
+        for key in ("sourceEntryFiles", "runtimeEntryFiles"):
+            if not isinstance(entry.get(key), list) or not entry[key]:
+                raise ValidationError(f"npmPackages[{index}].{key} must be a non-empty array")
+            for value in entry[key]:
+                relative_path(value, key)
+        text(entry.get("provenance"), f"npmPackages[{index}].provenance")
     seen = set()
     allowed_configs = {"themes/quattro-green.json", "themes/quattro-amber.json", "config/zentui.json", "config/claude-code-style.json", "config/rpiv-todo.json"}
     for config in configs:
@@ -383,6 +484,20 @@ def validate_checkout(root: Path, descriptor: dict[str, Any], runtime: bool = Fa
         raise ValidationError("checkout is dirty (including untracked files/submodules)")
     manifest = sources_lock if sources_lock is not None else load_json(safe_child(root, descriptor["sourcesLock"]))
     validate_sources_lock(manifest)
+    if descriptor["core"].get("installMethod") == "source":
+        core_entry = next((entry for entry in manifest["submodules"] if entry["path"] == CORE_SOURCE_SUBMODULE), None)
+        if core_entry is None:
+            raise ValidationError(f"sources lock missing {CORE_SOURCE_SUBMODULE}")
+        validate_core_sources_lock_entry(core_entry)
+        validate_core_source_archive_alignment(core_entry, descriptor)
+        provenance_doc = safe_child(root, text(core_entry.get("provenance"), "provenance"))
+        if not provenance_doc.is_file():
+            raise ValidationError(f"missing core provenance document: {core_entry['provenance']}")
+    descriptor_npm = {entry["package"]: entry["version"] for entry in descriptor["npmPackages"]}
+    for entry in manifest.get("npmPackages", []):
+        package, version = entry["package"], entry["version"]
+        if descriptor_npm.get(package) != version:
+            raise ValidationError(f"sources lock npm pin {package}@{version} missing or mismatched in descriptor")
     for entry in manifest["submodules"]:
         rel, pin = entry["path"], entry["pin"]
         path = safe_child(root, rel)

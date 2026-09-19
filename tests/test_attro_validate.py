@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import sys
 import tempfile
@@ -11,7 +12,36 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from attro.validate import ValidationError, render_profile, validate_descriptor, validate_sources_lock  # noqa: E402
+from attro.constants import CORE_SOURCE_SUBMODULE  # noqa: E402
+from attro.validate import (  # noqa: E402
+    ValidationError,
+    render_profile,
+    validate_core_source_archive_alignment,
+    validate_core_sources_lock_entry,
+    validate_descriptor,
+    validate_shipped_sources_lock,
+    validate_sources_lock,
+)
+
+LEGACY_CORE_BASE_COMMIT = "36b02b695383ad89bc3a22b73633be3fa27be3c1"
+LEGACY_CORE_BASE_VERSION = "0.0.3"
+LEGACY_CORE_PROVENANCE = "QUATTRO.md"
+
+
+def legacy_retained_sources_lock_manifest() -> dict:
+    """Pre–Phase-1A core entry shape for retained-release manifest regression."""
+    manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+    manifest = copy.deepcopy(manifest)
+    for entry in manifest["submodules"]:
+        if entry["path"] == CORE_SOURCE_SUBMODULE:
+            entry["baseCommit"] = LEGACY_CORE_BASE_COMMIT
+            entry["baseVersion"] = LEGACY_CORE_BASE_VERSION
+            entry["provenance"] = LEGACY_CORE_PROVENANCE
+            entry.pop("forkRootCommit", None)
+            entry.pop("sourceArchive", None)
+            entry.pop("forkComparison", None)
+            break
+    return manifest
 
 
 class DescriptorValidationTests(unittest.TestCase):
@@ -40,13 +70,50 @@ class DescriptorValidationTests(unittest.TestCase):
 class SourcesLockValidationTests(unittest.TestCase):
     def test_accepts_shipped_and_legacy_branches(self) -> None:
         manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
-        validate_sources_lock(manifest)
-        validate_sources_lock({**manifest, "branch": "quattro"})
+        validate_shipped_sources_lock(manifest)
+        validate_shipped_sources_lock({**manifest, "branch": "quattro"})
 
     def test_rejects_unsupported_branch(self) -> None:
         manifest = {"schemaVersion": 1, "branch": "feature", "submodules": [], "configs": []}
         with self.assertRaisesRegex(ValidationError, "branch must"):
             validate_sources_lock(manifest)
+
+    def test_accepts_shipped_npm_provenance_entries(self) -> None:
+        manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+        npm = manifest.get("npmPackages")
+        self.assertIsInstance(npm, list)
+        self.assertEqual(len(npm), 2)
+        validate_sources_lock(manifest)
+
+    def test_shipped_core_provenance_matches_descriptor(self) -> None:
+        manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+        descriptor = validate_descriptor(ROOT / "attro.json")
+        core = next(entry for entry in manifest["submodules"] if entry["path"] == CORE_SOURCE_SUBMODULE)
+        self.assertEqual(core["baseCommit"], "107d79f11072bbc8a3a757ed7fd69596bee7d68c")
+        self.assertEqual(core["forkRootCommit"], "36b02b695383ad89bc3a22b73633be3fa27be3c1")
+        self.assertEqual(core["provenance"], "docs/core-provenance.md")
+        comparison = core["forkComparison"]
+        self.assertEqual(comparison["commonPathCount"], 1658)
+        self.assertEqual(comparison["identicalPathCount"], 1588)
+        self.assertEqual(comparison["forkTreePathCount"], 1688)
+        self.assertEqual(comparison["differentPathCount"], 70)
+        self.assertEqual(comparison["forkOnlyPathCount"], 30)
+        self.assertEqual(comparison["archiveOnlyPathCount"], 40)
+        validate_shipped_sources_lock(manifest)
+        validate_core_source_archive_alignment(core, descriptor)
+        self.assertTrue((ROOT / "docs/core-provenance.md").is_file())
+
+    def test_fork_comparison_pin_may_differ_from_submodule_pin(self) -> None:
+        manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+        core = next(entry for entry in manifest["submodules"] if entry["path"] == CORE_SOURCE_SUBMODULE)
+        core = {**core, "forkComparison": {**core["forkComparison"], "pin": "0" * 40}}
+        validate_core_sources_lock_entry(core)
+
+    def test_retained_manifest_sources_lock_accepts_baseline_core_shape(self) -> None:
+        legacy = legacy_retained_sources_lock_manifest()
+        validate_sources_lock(legacy)
+        with self.assertRaises(ValidationError):
+            validate_shipped_sources_lock(legacy)
 
 
 class RenderProfileTests(unittest.TestCase):

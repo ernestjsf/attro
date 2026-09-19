@@ -73,7 +73,7 @@ class RenderProfileNpmTests(unittest.TestCase):
 
 
 class DescriptorNpmTests(unittest.TestCase):
-    def test_repo_descriptor_includes_three_live_packages(self) -> None:
+    def test_repo_descriptor_includes_five_live_packages(self) -> None:
         data = validate_descriptor(ROOT / "attro.json")
         packages = [(entry["package"], entry["version"]) for entry in data["npmPackages"]]
         self.assertEqual(
@@ -81,6 +81,8 @@ class DescriptorNpmTests(unittest.TestCase):
             [
                 ("@narumitw/pi-caffeinate", "0.49.4"),
                 ("pi-btw", "0.4.1"),
+                ("pi-ask-user", "0.14.0"),
+                ("pi-web-access", "0.27.0"),
                 ("pi-cursor-sdk", "0.3.6"),
             ],
         )

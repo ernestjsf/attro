@@ -14,9 +14,9 @@
   "packages": [
     "{{NPM:@narumitw/pi-caffeinate}}",
     "{{NPM:pi-btw}}",
-    "{{PLUGIN_PI_ASK_USER}}",
+    "{{NPM:pi-ask-user}}",
     "{{PLUGIN_PI_LENS}}",
-    "{{PLUGIN_PI_WEB_ACCESS}}",
+    "{{NPM:pi-web-access}}",
     "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",

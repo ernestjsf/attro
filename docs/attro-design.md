@@ -2,9 +2,9 @@
 
 Attro is an opinionated distribution of upstream Pi, not a fork of Pi core in
 this repository. Its release is a recipe: Pi **0.85.0** built from the pinned
-`plugins/attro-core` source tree, the seven plugin source pins in
-`sources.lock.json`, UI/package defaults, and committed runtime lock inputs
-for descriptor npm packages. **`attro`** is the everyday launcher and release
+`plugins/attro-core` source tree, the five plugin submodule source pins in
+`sources.lock.json`, upstream npm pins for `pi-web-access` and `pi-ask-user`,
+UI/package defaults, and committed runtime lock inputs for descriptor npm packages. **`attro`** is the everyday launcher and release
 manager; it forwards standard Pi flags/prompts and exposes explicit management
 subcommands. The existing private workbench remains the source of the first
 candidate, not an already-public product.
@@ -44,8 +44,9 @@ the shared profile; they do not rewrite it with new repository defaults.
 
 ## Release records
 
-`sources.lock.json` remains the canonical fork inventory (attro-core plus seven
-plugin forks). `attro.json` adds the distribution version (**0.2.0**), core
+`sources.lock.json` remains the canonical source inventory (attro-core plus five
+plugin forks, with upstream npm provenance for retired visual forks). `attro.json`
+adds the distribution version (**0.2.0**), core
 install method (**source**), profile path, and compatibility requirements.
 Installed metadata records source identity, `agentMode: shared-v1`, and
 preparation information.
@@ -56,14 +57,24 @@ runs `npm ci` against its committed lock, applies the hash-pinned upstream
 retained CLI is `packages/coding-agent/dist/bundle/cli.js`. Core and TUI packages
 are built together. Network access is required during preparation. Retained
 `releases/<id>/pi/` trees are larger than legacy npm-core installs. Provenance
-is recorded in `pi/core.json`. There is no live catalog hydration or package
-publication step in this mode.
+is recorded in `pi/core.json`. Fork vs upstream archive semantics, tarball recipe,
+and snapshot diff counts live in `docs/core-provenance.md` (referenced from
+`sources.lock.json` for attro-core). There is no live catalog hydration or
+package publication step in this mode.
 
 **Runtime lock inputs:** `runtime/npm` holds committed `package.json` and
 `package-lock.json` for descriptor npm packages. Preparation runs `npm ci`
 against these inputs. Plugin trees use their own committed locks. Legacy
 `runtime/core` npm lock inputs remain in the repository for historical reference
 but are **not** used when `core.installMethod` is `source`.
+
+**Retired npm pins (Phase 1B):** `pi-web-access@0.27.0` and `pi-ask-user@0.14.0`
+replace the former visual-fork submodules. Provenance in `sources.lock.json`
+records upstream git commits; detailed provenance text may be refined when scout
+evidence lands before commit. Accepted stock behavior includes upstream web
+**curator** pages requesting **Google Fonts** in the user’s browser when the
+curator UI is opened (not at npm install). The retired fork avoided those requests
+via local Quattro styling in `curator-page.ts`.
 
 **Profile layout:**
 

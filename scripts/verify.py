@@ -17,6 +17,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from attro.constants import CORE_SOURCE_SUBMODULE  # noqa: E402
+
 LOCK = ROOT / "sources.lock.json"
 PUBLIC_SUBAGENTS = "https://github.com/ernestjsf/pi-subagents.git"
 
@@ -100,7 +103,22 @@ def verify_submodule(entry: dict, runtime: bool, failures: list[str], notes: lis
             package = {}
         if package.get("name") != entry["name"]:
             fail(f"{rel}: root package name does not match manifest", failures)
-        if package.get("version") != entry["baseVersion"]:
+        if rel == CORE_SOURCE_SUBMODULE:
+            coding_agent = path / "packages/coding-agent/package.json"
+            if not coding_agent.is_file():
+                fail(f"{rel}: packages/coding-agent/package.json is missing", failures)
+            else:
+                try:
+                    agent_pkg = load_json(coding_agent)
+                except RuntimeError as error:
+                    fail(f"{rel}: {error}", failures)
+                    agent_pkg = {}
+                if agent_pkg.get("version") != entry["baseVersion"]:
+                    fail(
+                        f"{rel}: coding-agent version does not match manifest baseVersion (upstream Pi release)",
+                        failures,
+                    )
+        elif package.get("version") != entry["baseVersion"]:
             fail(f"{rel}: root package version does not match manifest baseVersion", failures)
 
     package_path = path / entry["packagePath"]
@@ -201,6 +219,50 @@ def main() -> int:
 
     for entry in manifest["submodules"]:
         verify_submodule(entry, args.runtime, failures, notes)
+
+    try:
+        from attro.validate import (
+            ValidationError,
+            load_json as attro_load_json,
+            validate_core_source_archive_alignment,
+            validate_descriptor,
+            validate_public_npm_lock,
+            validate_runtime_lock_package,
+            validate_shipped_sources_lock,
+        )
+
+        validate_shipped_sources_lock(manifest)
+        descriptor = validate_descriptor(ROOT / "attro.json")
+        for entry in manifest["submodules"]:
+            if entry["path"] == CORE_SOURCE_SUBMODULE:
+                try:
+                    validate_core_source_archive_alignment(entry, descriptor)
+                except ValidationError as error:
+                    fail(str(error), failures)
+                provenance = entry.get("provenance")
+                if not isinstance(provenance, str) or not (ROOT / provenance).is_file():
+                    fail(f"{CORE_SOURCE_SUBMODULE}: provenance document missing: {provenance!r}", failures)
+        lock_npm = {entry["package"]: entry["version"] for entry in manifest.get("npmPackages", [])}
+        descriptor_npm = {entry["package"]: entry["version"] for entry in descriptor["npmPackages"]}
+        for package, version in lock_npm.items():
+            if descriptor_npm.get(package) != version:
+                fail(f"descriptor npm pin mismatch for {package}@{version}", failures)
+        runtime_locks = descriptor.get("runtimeLocks") or {}
+        npm_lock_rel = runtime_locks.get("npm")
+        if npm_lock_rel:
+            npm_lock_dir = ROOT / npm_lock_rel
+            package_json = npm_lock_dir / "package.json"
+            lock_file = npm_lock_dir / "package-lock.json"
+            if not package_json.is_file() or not lock_file.is_file():
+                fail(f"runtime npm lock inputs missing under {npm_lock_rel}", failures)
+            else:
+                try:
+                    validate_runtime_lock_package(attro_load_json(package_json), descriptor["npmPackages"], label=npm_lock_rel)
+                    validate_public_npm_lock(lock_file)
+                except ValidationError as error:
+                    fail(str(error), failures)
+    except (RuntimeError, ValidationError) as error:
+        fail(str(error), failures)
 
     for config in manifest["configs"]:
         path = ROOT / config["path"]

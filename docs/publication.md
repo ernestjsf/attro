@@ -23,9 +23,9 @@ recorded before advertising a tag. No stable consumer update feed is enabled.
 ## Current source topology
 
 The root checkout is `pi-customizations`, with a `main` branch and GitHub
-remote `https://github.com/ernestjsf/attro.git`. Its **eight submodule**
-URLs point to the maintained Attro fork mirrors (attro-core plus seven plugin
-forks). The canonical public URLs remain the existing `ernestjsf/attro*` names.
+remote `https://github.com/ernestjsf/attro.git`. Its **six submodule**
+URLs point to the maintained Attro fork mirrors (attro-core plus five plugin
+forks). `pi-web-access` and `pi-ask-user` are pinned from public npm instead. The canonical public URLs remain the existing `ernestjsf/attro*` names.
 For each rewritten fork, update the gitlink and `sources.lock.json` together;
 `.gitmodules` keeps those canonical URLs. The source verifier disallows replacing
 the subagents mirror with the unrelated `ernestjsf/pi-subagents` repository:
@@ -61,7 +61,7 @@ state when the recipe changes.
 
 ## What the source manifest does not capture
 
-The eight-submodule manifest is not a full backup of any maintainer's live
+The six-submodule manifest (plus npm pins) is not a full backup of any maintainer's live
 environment. Additional live-only resources require separate review if ever
 selected for a public profile:
 

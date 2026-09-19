@@ -26,20 +26,16 @@ RUNTIME_GENERATED_SUBMODULES = frozenset({"plugins/pi-lens", "plugins/attro-core
 PLUGIN_PATHS = {
     "pi-zentui": "plugins/pi-zentui",
     "pi-cc-extensions": "plugins/pi-cc-extensions",
-    "pi-web-access": "plugins/pi-web-access",
     "pi-lens": "plugins/pi-lens",
     "rpiv-todo": "plugins/rpiv-mono/packages/rpiv-todo",
-    "pi-ask-user": "plugins/pi-ask-user",
     "pi-subagents": "plugins/pi-subagents",
 }
 
 PROFILE_PLACEHOLDERS = {
     "{{PLUGIN_PI_ZENTUI}}": PLUGIN_PATHS["pi-zentui"],
     "{{PLUGIN_PI_CC_EXTENSIONS}}": PLUGIN_PATHS["pi-cc-extensions"],
-    "{{PLUGIN_PI_WEB_ACCESS}}": PLUGIN_PATHS["pi-web-access"],
     "{{PLUGIN_PI_LENS}}": PLUGIN_PATHS["pi-lens"],
     "{{PLUGIN_RPIV_TODO}}": PLUGIN_PATHS["rpiv-todo"],
-    "{{PLUGIN_PI_ASK_USER}}": PLUGIN_PATHS["pi-ask-user"],
     "{{PLUGIN_PI_SUBAGENTS}}": PLUGIN_PATHS["pi-subagents"],
     "{{THEME_QUATTRO_GREEN}}": "config/quattro-green.json",
     "{{THEME_QUATTRO_AMBER}}": "config/quattro-amber.json",

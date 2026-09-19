@@ -28,9 +28,9 @@ PERSONAL_SETTINGS_KEYS = frozenset({
 EXPECTED_PACKAGES = [
     "{{NPM:@narumitw/pi-caffeinate}}",
     "{{NPM:pi-btw}}",
-    "{{PLUGIN_PI_ASK_USER}}",
+    "{{NPM:pi-ask-user}}",
     "{{PLUGIN_PI_LENS}}",
-    "{{PLUGIN_PI_WEB_ACCESS}}",
+    "{{NPM:pi-web-access}}",
     "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",
@@ -150,9 +150,7 @@ class ProfileBoundaryTests(unittest.TestCase):
         self.assertTrue(all("quattro" not in path for path in cc_themes))
         managed_packages = [
             ROOT / "plugins/pi-zentui/package.json",
-            ROOT / "plugins/pi-web-access/package.json",
             ROOT / "plugins/pi-lens/package.json",
-            ROOT / "plugins/pi-ask-user/package.json",
             ROOT / "plugins/pi-subagents/package.json",
             ROOT / "plugins/rpiv-mono/packages/rpiv-todo/package.json",
         ]

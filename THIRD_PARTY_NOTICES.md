@@ -6,18 +6,19 @@ and attribution files in each source tree and installed dependency.
 
 ## Fork sources
 
-The eight current fork trees each carry upstream licenses. Their exact origin
-URLs and reviewed commits are recorded in `sources.lock.json`.
+The six current fork trees each carry upstream licenses. Upstream npm packages
+`pi-web-access@0.27.0` and `pi-ask-user@0.14.0` are pinned via `runtime/npm`.
+Exact origin URLs and reviewed commits are recorded in `sources.lock.json`.
 
 | Source | Authoritative license |
 | --- | --- |
 | attro-core (Pi monorepo) | `plugins/attro-core/LICENSE` and per-package notices under `plugins/attro-core/packages/` |
 | Zentui | `plugins/pi-zentui/LICENSE` |
 | CC extensions | `plugins/pi-cc-extensions/LICENSE` |
-| Web access | `plugins/pi-web-access/LICENSE` |
 | Lens | `plugins/pi-lens/LICENSE` |
 | rpiv mono / selected todo package | `plugins/rpiv-mono/LICENSE` |
-| Ask user | `plugins/pi-ask-user/LICENSE` |
+| Web access (npm) | upstream `pi-web-access@0.27.0` package LICENSE |
+| Ask user (npm) | upstream `pi-ask-user@0.14.0` package LICENSE |
 | Subagents | `plugins/pi-subagents/LICENSE` |
 
 Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` source tree
@@ -55,9 +56,17 @@ retaining the applicable licenses and notices in their own environment.
 ## Runtime and dependency notices
 
 The attro-core monorepo and the inspected optional npm plugins (`pi-caffeinate`,
-`pi-btw`, and `pi-cursor-sdk`) declare MIT in their respective package
-metadata. Installed dependency license files must still be retained. Notable other
-licenses in the selected package graph:
+`pi-btw`, `pi-web-access`, `pi-ask-user`, and `pi-cursor-sdk`) declare MIT in
+their respective package metadata. Installed dependency license files must still
+be retained.
+
+**`pi-web-access@0.27.0` curator UI:** when a user opens the stock upstream
+curator page in a browser, the page loads web fonts from Google (`fonts.googleapis.com`
+/ `fonts.gstatic.com`). That is expected stock behavior and was explicitly accepted
+for Attro managed releases; it is separate from npm install-time fetches and from
+tool-driven search/fetch traffic. See [setup](docs/setup.md#retired-visual-forks-pi-web-access-pi-ask-user).
+
+Notable other licenses in the selected package graph:
 
 | Dependency | Declared license |
 | --- | --- |

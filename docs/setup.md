@@ -76,8 +76,9 @@ cd ~/projects/pi-customizations
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
-The eight submodule origins are the maintained Attro mirrors (seven plugin forks
-plus `plugins/attro-core`); the subagents origin is specifically
+The six submodule origins are the maintained Attro mirrors (five plugin forks
+plus `plugins/attro-core`); `pi-web-access` and `pi-ask-user` are pinned from
+public npm instead. The subagents origin is specifically
 `ernestjsf/attro-subagents`, not the unrelated `ernestjsf/pi-subagents`.
 
 Submodule remotes are local clone configuration and are not versioned. To add the
@@ -87,25 +88,45 @@ provenance remotes to a fresh clone:
 git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi-mono.git
 git -C plugins/pi-zentui remote add upstream https://github.com/lmilojevicc/pi-zentui.git
 git -C plugins/pi-cc-extensions remote add upstream https://github.com/minuque/pi-cc-extensions.git
-git -C plugins/pi-web-access remote add upstream https://github.com/nicobailon/pi-web-access.git
 git -C plugins/pi-lens remote add upstream https://github.com/apmantza/pi-lens.git
 git -C plugins/rpiv-mono remote add upstream https://github.com/juicesharp/rpiv-mono.git
-git -C plugins/pi-ask-user remote add upstream https://github.com/edlsh/pi-ask-user.git
 git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/pi-subagents.git
 ```
 
 Install each lockfile-bearing source independently, without lifecycle scripts:
 
 ```sh
-for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-web-access \
-  plugins/pi-lens plugins/rpiv-mono plugins/pi-ask-user; do
+for p in plugins/pi-zentui plugins/pi-cc-extensions plugins/pi-lens plugins/rpiv-mono; do
   (cd "$p" && npm ci --ignore-scripts --no-audit --no-fund)
 done
 ```
 
 `pi-subagents` has no dependency lockfile because it has no external runtime
 dependencies: it uses host-provided Pi APIs/peer facilities. No `npm ci` is needed
-for that submodule. The root package has no runtime dependency installation.
+for that submodule. Descriptor npm packages (`pi-web-access`, `pi-ask-user`, and
+the other pins in `attro.json`) install from committed `runtime/npm` during
+release preparation, not from submodule paths.
+
+### Retired visual forks (`pi-web-access`, `pi-ask-user`)
+
+Attro **0.2.0** pins **`pi-web-access@0.27.0`** and **`pi-ask-user@0.14.0`**
+from public npm instead of the former Attro submodule forks. Tools, bundled
+`pi-ask-user` skills, and profile package order are unchanged; local fork trees
+under `plugins/pi-web-access` and `plugins/pi-ask-user` are reference-only until
+gitlinks are removed.
+
+Behavioral differences from the retired Quattro visual forks (reviewed and
+accepted for stock upstream):
+
+| Area | Stock npm | Retired fork |
+| --- | --- | --- |
+| **Web curator UI** | Upstream styling; opening the curator page in a browser loads **Google Fonts** from `fonts.googleapis.com` and `fonts.gstatic.com` (Outfit, Instrument Serif). | Local Quattro monospace/amber styling without those remote font requests in `curator-page.ts`. |
+| **Ask-user UI** | Upstream `index.ts` theme API. | Extra `theme.bg` fallback for hosts/tests that omit background helpers. |
+
+`pi-web-access` search/fetch tools still perform their normal outbound requests
+when invoked; npm preparation uses the public registry only (`runtime/npm` lock
+validation). The `pi.video` metadata URL in the package manifest is unchanged
+from upstream and is not fetched at install time.
 
 ## attro-core and Lens preparation
 
@@ -174,10 +195,10 @@ replacement full settings JSON:
 | --- | --- |
 | `pi-zentui` | `~/projects/pi-customizations/plugins/pi-zentui` |
 | `pi-cc-extensions` | `~/projects/pi-customizations/plugins/pi-cc-extensions` |
-| `pi-web-access` | `~/projects/pi-customizations/plugins/pi-web-access` |
 | `pi-lens` | `~/projects/pi-customizations/plugins/pi-lens` |
 | `@juicesharp/rpiv-todo` | `~/projects/pi-customizations/plugins/rpiv-mono/packages/rpiv-todo` |
-| `pi-ask-user` | `~/projects/pi-customizations/plugins/pi-ask-user` |
+| `pi-web-access` | npm pin `pi-web-access@0.27.0` (see `runtime/npm`) |
+| `pi-ask-user` | npm pin `pi-ask-user@0.14.0` (see `runtime/npm`) |
 | `@williamcr01/pi-subagents` | `~/projects/pi-customizations/plugins/pi-subagents` |
 
 Pi core itself is **not** migrated through this table; Attro builds it from

@@ -30,6 +30,9 @@ from attro.state import prepared_manifest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT_URL = "https://github.com/earendil-works/pi/releases/download/v0.85.0/pi-0.85.0-source.tar.gz"
+CORE_UPSTREAM_COMMIT = "107d79f11072bbc8a3a757ed7fd69596bee7d68c"
+CORE_UPSTREAM_TREE = "f5103239060686ea2983e18906857b3df54428f5"
+CORE_FORK_ROOT_COMMIT = "36b02b695383ad89bc3a22b73633be3fa27be3c1"
 
 class SourceCoreTests(unittest.TestCase):
     def setUp(self):
@@ -93,19 +96,46 @@ class SourceCoreTests(unittest.TestCase):
         (self.repo / "themes").mkdir()
         theme = self.repo / "themes/quattro-green.json"
         theme.write_text("{}\n")
+        docs = self.repo / "docs"
+        docs.mkdir()
+        shutil.copyfile(REPO_ROOT / "docs/core-provenance.md", docs / "core-provenance.md")
         self.lock = {
             "schemaVersion": 1,
             "branch": "quattro",
             "submodules": [
                 {
                     "path": CORE_SOURCE_SUBMODULE,
+                    "name": "pi-monorepo",
                     "origin": "https://example.invalid/attro-core.git",
+                    "upstream": "https://github.com/earendil-works/pi-mono.git",
                     "pin": self.core_pin,
+                    "baseCommit": CORE_UPSTREAM_COMMIT,
+                    "forkRootCommit": CORE_FORK_ROOT_COMMIT,
+                    "baseVersion": "0.85.0",
                     "packagePath": ".",
                     "runtimeGenerated": True,
                     "sourceEntryFiles": ["package.json", "package-lock.json", "packages/coding-agent/package.json"],
                     "runtimeEntryFiles": [CORE_CLI_REL],
                     "dependencyLock": "package-lock.json",
+                    "dependencyLockVersion": 3,
+                    "sourceArchive": {
+                        "url": SNAPSHOT_URL,
+                        "sha256": self.snapshot_sha,
+                        "commit": CORE_UPSTREAM_COMMIT,
+                        "tree": CORE_UPSTREAM_TREE,
+                    },
+                    "forkComparison": {
+                        "pin": self.core_pin,
+                        "method": "git-archive-pinned-commit-vs-release-archive",
+                        "forkTreePathCount": 1688,
+                        "commonPathCount": 1658,
+                        "identicalPathCount": 1588,
+                        "differentPathCount": 70,
+                        "forkOnlyPathCount": 30,
+                        "archiveOnlyPathCount": 40,
+                        "archiveOnlyNote": "All 40 archive-only paths are generated provider model data under packages/ai/src/providers/data.",
+                    },
+                    "provenance": "docs/core-provenance.md",
                 },
                 {
                     "path": "plugins/rpiv-mono",
