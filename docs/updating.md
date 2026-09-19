@@ -5,7 +5,7 @@ candidate discovery see [automation](automation.md); for preparing and switching
 managed Attro releases see the [README](../README.md). A consumer update does
 not merge upstream branches into these workbench sources.
 
-The root branch is `quattro`. Submodule gitlinks and `sources.lock.json` are the
+The root branch is `main`. Submodule gitlinks and `sources.lock.json` are the
 canonical pins. Do not rewrite a source pin, force-reset, or discard dirty
 submodule work. The existing `~/projects/pi-forks` directories are preparation
 copies; future work should use these parent-repository submodules to avoid
@@ -38,7 +38,7 @@ has already been pruned. Legacy per-release user data is preserved. See the
    migration work. Existing `~/...ui-backups` are retained.
 2. Fetch an `upstream` remote inside the relevant submodule.
 3. Review the upstream range and merge the intended changes into that submodule's
-   `quattro` branch. Keep the private `origin` URL and do not publish source from
+   `main` branch. Keep the private `origin` URL and do not publish source from
    this root.
 4. Run the source package's locked checks. Use `npm ci --ignore-scripts` first
    when dependencies are absent. For Lens, run `npm run build:dist`, download core

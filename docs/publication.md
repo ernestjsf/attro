@@ -22,7 +22,7 @@ recorded before advertising a tag. No stable consumer update feed is enabled.
 
 ## Current source topology
 
-The root checkout is `pi-customizations`, with a `quattro` branch and GitHub
+The root checkout is `pi-customizations`, with a `main` branch and GitHub
 remote `https://github.com/ernestjsf/attro.git`. Its **eight submodule**
 URLs point to the maintained Attro fork mirrors (attro-core plus seven plugin
 forks). The canonical public URLs remain the existing `ernestjsf/attro*` names.

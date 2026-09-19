@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "branch": "quattro",
+  "branch": "main",
   "rootPackage": {
     "name": "attro",
     "version": "0.1.0",
@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "336bea43ba42e66979f1b267e9069ece923777aa",
+      "pin": "4cf75e855d51d24cdb6a533bfca4374285566a18",
       "baseCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.0.3",
       "packagePath": ".",
@@ -32,7 +32,7 @@
       "runtimeGenerated": true,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Primary activity ownership: npm run check passed on Node v22.22.3; 9 focused coding-agent test files 161/161 passed; InteractiveShell render at 40/100 columns verified; stop priority and branch-summary outcome fixes reviewed.",
+      "testReport": "Opt-in first-prompt profile suggestions: npm run check passed on Node 26.7.0; seven focused suites 168 passed, 10 credential-gated tests skipped. Isolated TUI verified at 100x32 and 36x12 with mocked Jev responses; global consent, cancel/restore, and accept/switch verified. Independent sensitive review cleared privacy and session-replacement corrections. Live Jev inference not tested.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -127,7 +127,7 @@
       "name": "rpiv-mono",
       "origin": "https://github.com/ernestjsf/attro-rpiv.git",
       "upstream": "https://github.com/juicesharp/rpiv-mono.git",
-      "pin": "7095fce34968ad99c3af9c417c26308fa77441ad",
+      "pin": "1a1d78187d8b689492ee441a56ad25e8df65ad9a",
       "baseCommit": "59100c75f256a004fe4bb0ce8eb6266d79f0791a",
       "baseVersion": "0.0.0",
       "packageName": "@juicesharp/rpiv-todo",
@@ -144,7 +144,7 @@
       "runtimeGenerated": false,
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "Managed Todo defers shortcuts to core; check passed (one pre-existing unrelated Biome info) and 247 todo tests passed on Node 26.5. Shipped legacy Alt+T config and custom core remaps verified in real TUI without profile changes.",
+      "testReport": "Dock summary progress and i18n labels: 253 rpiv-todo tests passed on Node 26.7; TypeScript noEmit and focused Biome checks passed. Pin aligned with the committed root gitlink.",
       "provenance": "QUATTRO.md"
     },
     {
@@ -173,7 +173,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "9d777ce473aa945e9b8d5eab6afc6396d38ede81",
+      "pin": "4abd4334199c4f03de68cf6b7b1049fbfbf0464b",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -185,7 +185,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "Shortcut-only native dock: 325 clean-env checks passed on Node 26.5; default/remapped real TUI focus tests passed. Changed-agent refresh reuses one registry snapshot; sibling formatting is linear. 1000-record visible-row refresh benchmark p50 4.57ms to 0.19ms; polling/storage unchanged.",
+      "testReport": "Effective thinking: full subagents.test.cjs suite passed on Node 26.7 against source core. Authoritative child RPC thinking, clamping, legacy uncertainty, runtime events, and profile envelope isolation covered. Independent review found no blockers.",
       "provenance": "QUATTRO.md"
     }
   ],
