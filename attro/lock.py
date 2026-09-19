@@ -17,8 +17,17 @@ class OperationBusy(ValidationError):
     pass
 
 
+LAUNCH_LOCK_WAIT_SECONDS = 5.0
+_LOCK_POLL_INTERVAL = 0.05
+
+
 @contextmanager
-def operation_lock(state_root: Path, *, fault_after_acquire: bool = False) -> Iterator[None]:
+def operation_lock(
+    state_root: Path,
+    *,
+    fault_after_acquire: bool = False,
+    wait_timeout: float = 0,
+) -> Iterator[None]:
     """Acquire an exclusive operations lock under state_root."""
     path = lock_path(state_root)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -26,12 +35,17 @@ def operation_lock(state_root: Path, *, fault_after_acquire: bool = False) -> It
     try:
         if os.fstat(fd).st_nlink != 1:
             raise ValidationError("operations lock must not be hardlinked")
-        try:
-            import fcntl
+        import fcntl
 
-            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            raise OperationBusy("another Attro operation is already running") from exc
+        deadline = time.monotonic() + wait_timeout if wait_timeout > 0 else None
+        while True:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError as exc:
+                if deadline is None or time.monotonic() >= deadline:
+                    raise OperationBusy("another Attro operation is already running") from exc
+                time.sleep(_LOCK_POLL_INTERVAL)
         payload = {
             "pid": os.getpid(),
             "startedAt": time.time(),

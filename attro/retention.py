@@ -22,7 +22,21 @@ from attro.validate import ValidationError
 LEASE_NAME = ".attro-lease"
 REAPER_LOCK_NAME = ".retention-reaper.lock"
 REAPER_INTERVAL = 7.0
+_ROUTINE_IN_USE_RETENTION_MARKERS = (
+    ": running session holds its lease",
+    ": still used by a process",
+)
 _reapers: list[subprocess.Popen] = []
+
+
+def filter_launch_retention_warnings(warnings: list[str]) -> list[str]:
+    """Drop expected in-use retention notices during ordinary managed launch."""
+    filtered: list[str] = []
+    for warning in warnings:
+        if warning.startswith("retaining ") and any(marker in warning for marker in _ROUTINE_IN_USE_RETENTION_MARKERS):
+            continue
+        filtered.append(warning)
+    return filtered
 
 
 class LeaseBusy(Exception):

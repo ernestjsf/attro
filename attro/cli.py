@@ -13,8 +13,8 @@ from pathlib import Path
 from attro import __version__
 from attro.doctor import run_doctor
 from attro.launch import build_exec_env, build_try_env, exec_pi, managed_resource_args, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
-from attro.lock import operation_lock
-from attro.retention import reconcile_and_maybe_reap, release_lease
+from attro.lock import LAUNCH_LOCK_WAIT_SECONDS, operation_lock
+from attro.retention import filter_launch_retention_warnings, reconcile_and_maybe_reap, release_lease
 from attro.paths import home, release_dir, validate_state_root
 from attro.prepare import prepare_release
 from attro.state import activate_release, load_state, prepared_manifest, register_release, rollback
@@ -179,14 +179,14 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
         return run(pi_bin, full_command, env)
 
     with ExitStack() as leases:
-        with operation_lock(args.root):
+        with operation_lock(args.root, wait_timeout=LAUNCH_LOCK_WAIT_SECONDS):
             state = load_state(args.root)
             release_id, release = resolve(state)
             lease = leases.enter_context(release_lease(release, inheritable=True))
             manifest = prepared_manifest(release, release_id)
             pi_bin = resolve_pi_binary(release, manifest=manifest)
             full_command = [*managed_resource_args(release, manifest=manifest), *command]
-            warnings = reconcile_and_maybe_reap(args.root)
+            warnings = filter_launch_retention_warnings(reconcile_and_maybe_reap(args.root))
         for warning in warnings:
             print(f"warning: {warning}", file=sys.stderr)
         if not trial:

@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -20,7 +21,15 @@ sys.path.insert(0, str(ROOT))
 
 from attro.cli import main
 from attro.lock import OperationBusy, operation_lock
-from attro.retention import LeaseBusy, _reaper_main, _reapers, reconcile_releases, release_lease, start_reaper
+from attro.retention import (
+    LeaseBusy,
+    _reaper_main,
+    _reapers,
+    filter_launch_retention_warnings,
+    reconcile_releases,
+    release_lease,
+    start_reaper,
+)
 from attro.state import activate_release, load_state, register_release, save_state
 from attro.validate import ValidationError
 from test_attro_activation import _write_release
@@ -407,6 +416,71 @@ class RetentionTests(unittest.TestCase):
             self.assertEqual(_reaper_main(self.state), 0)
         self.assertEqual(calls, 2)
         self.assertFalse(old.exists())
+
+    def test_operation_lock_wait_timeout(self) -> None:
+        with operation_lock(self.state):
+            start = time.monotonic()
+            with self.assertRaises(OperationBusy):
+                with operation_lock(self.state, wait_timeout=0.15):
+                    pass
+            self.assertGreaterEqual(time.monotonic() - start, 0.1)
+
+    def test_operation_lock_bounded_wait_acquires(self) -> None:
+        acquired = threading.Event()
+
+        def holder() -> None:
+            with operation_lock(self.state):
+                acquired.set()
+                time.sleep(0.3)
+
+        thread = threading.Thread(target=holder)
+        thread.start()
+        self.addCleanup(thread.join)
+        self.assertTrue(acquired.wait(timeout=2))
+        start = time.monotonic()
+        with operation_lock(self.state, wait_timeout=2.0):
+            elapsed = time.monotonic() - start
+        self.assertGreaterEqual(elapsed, 0.05)
+        self.assertLess(elapsed, 1.5)
+
+    def test_filter_launch_retention_warnings(self) -> None:
+        warnings = [
+            "retaining attro-0.1.0-abc: still used by a process",
+            "retaining attro-0.1.0-def: directory identity changed during cleanup",
+            "retaining attro-0.1.0-ghi: running session holds its lease",
+            "retaining attro-0.1.0-jkl: process inspection unavailable; cleanup deferred",
+            "release cleanup deferred: registry unavailable",
+        ]
+        self.assertEqual(
+            filter_launch_retention_warnings(warnings),
+            [
+                "retaining attro-0.1.0-def: directory identity changed during cleanup",
+                "retaining attro-0.1.0-jkl: process inspection unavailable; cleanup deferred",
+                "release cleanup deferred: registry unavailable",
+            ],
+        )
+
+    def test_launch_hides_routine_in_use_warnings(self) -> None:
+        release = self._prunable("attro-0.1.0-launch00000", "launch")
+        register_release(self.state, release.name, release)
+        activate_release(self.state, release.name)
+        pi_bin = release / "pi/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js"
+        pi_bin.parent.mkdir(parents=True, exist_ok=True)
+        pi_bin.write_text("#!/usr/bin/env python3\nimport sys\nsys.exit(0)\n", encoding="utf-8")
+        pi_bin.chmod(0o755)
+        routine = [
+            "retaining attro-0.1.0-old000000000: still used by a process",
+            "retaining attro-0.1.0-old000000001: running session holds its lease",
+        ]
+        safety = ["retaining attro-0.1.0-old000000002: directory identity changed during cleanup"]
+        with mock.patch("attro.cli.reconcile_and_maybe_reap", return_value=routine + safety), mock.patch(
+            "attro.cli.exec_pi", return_value=None
+        ):
+            _, stderr = self.cli("exec", "--", "--version")
+        joined = stderr
+        self.assertNotIn("still used by a process", joined)
+        self.assertNotIn("running session holds its lease", joined)
+        self.assertIn("directory identity changed", joined)
 
 
 if __name__ == "__main__":
