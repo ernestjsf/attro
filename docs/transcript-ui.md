@@ -190,8 +190,10 @@ The native implementation reads supported fields from
 `~/.attro/agent/claude-code-style.json`. The recipe continues to seed this file
 only for new profiles. `/reload` re-reads preferences; updates do not overwrite
 existing files. `previewLines` controls folded thinking, not the independent
-three-line compact tool preview. The original `cc-dark` and `cc-light` theme
-assets remain available in managed Attro, without changing the selected theme.
+three-line compact tool preview. `mode: "off"` disables compact presentation;
+`mode: "on"` keeps ordinary native tool cards rather than the retired CC grouping
+renderer. The original `cc-dark` and `cc-light` theme assets remain available in
+managed Attro, without changing the selected theme.
 Diff highlighting uses core's syntax highlighter instead of the former optional
 Shiki CLI; token colors can differ, while diff contents and layout remain native.
 

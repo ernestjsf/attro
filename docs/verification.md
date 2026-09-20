@@ -6,6 +6,64 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Fork maintenance cutover (local)
+
+Tested recipe **`8c10f9240a11780c9c656289548e36fe5f4b79c9`**, core
+**`e7c1886b8b0831629699e7f10337f8380ac65a8d`**, on macOS. This evidence
+precedes this documentation-only record; executable inputs are unchanged.
+The recipe has four submodules (core, Lens, rpiv, subagents) and five pinned
+npm packages. Web-access and ask-user use upstream npm; selected Zentui and CC
+surfaces are first-party core code.
+
+- Clean pinned source verification and `git submodule status`: passed. Local Git
+  objects supplied unpublished commits; anonymous remote retrieval was not tested.
+- Root `python3 -m unittest discover -s tests -p 'test_*.py'`: **221 run, one
+  skipped**. The final run used Python **3.11.15**, with Python **3.14.6** first
+  on PATH for bootstrap subprocesses. An earlier PATH preferring macOS Python
+  3.9 correctly failed the bootstrap's Python 3.10+ prerequisite; correcting PATH
+  passed without changing source.
+- Core `npm run check`: passed on Node **22.23.2**, including typechecking,
+  dependency/import checks, entry budgets, lock checks, and browser smoke.
+  **20 focused suites / 199 tests passed** after formatting. The preceding native
+  composer cutover passed 103 focused tests. Primary LSP checks confirmed clean
+  results on the changed runtime and root validation seams.
+- Independent reviews cleared corrections to narrow OSC framing, asynchronous
+  Git invalidation, custom renderer ownership/exclusions, write metadata, and
+  referenced-session loading/context ordering. Reference reads do not repair or
+  migrate files on disk; orphaned references are omitted from provider context
+  after compaction. Delimiters are guidance, not an injection sandbox.
+- Actual `attro setup --repo <clean-source>` in a disposable home/state root
+  installed locked dependencies, built core and Lens, hydrated pinned model data,
+  and applied the pinned Cursor SDK patch. Candidate
+  **`attro-0.2.0-552ea05bdede`** records build Node **26.5.0**; runtime checks used
+  Node **22.23.2**. `try --release-id <candidate> -- --version` returned **0.85.0**;
+  `doctor --repo <clean-source>` reported **OK**. The disposable state remained
+  **`active: null`** throughout.
+- Full managed-plugin interactive startup/restored transcripts were rendered at
+  40 and 80 columns. `/context`, `/model`, `/reload`, and tool expansion worked
+  without loader errors. Native-only synthetic captures additionally exercised
+  streaming thinking, rich diffs, and mouse/global thinking expansion.
+- Full managed registry snapshots contained **35 unique tools / 38 unique
+  commands**, including each web/ask tool, the selected first-party commands,
+  Lens, todo, and subagent tools. Runtime prompt discovery included **ask-user
+  exactly once**. Counts remained stable after `/reload`; `cc-dark` and `cc-light`
+  resolved through the theme API. No retired UI plugin paths were loaded.
+- Credential-free synthetic providers completed both print and interactive turns
+  with the full managed plugin set. Persisted tool results showed successful
+  **read → write → edit**, and the expected final file mutation was checked.
+  A deliberately empty effort-profile catalog was written only to disposable
+  test profiles. Without it, the unauthenticated default profile correctly refused
+  startup. Product authentication/profile policy was not relaxed.
+- Tests launched under `env -i` to avoid inheriting a verification subagent's
+  incarnation metadata. No live credentials were copied, no real provider or web
+  query was made, and no live release was activated or published.
+
+Linux/WSL, authenticated provider turns (including Cursor), real model-driven
+nested agents, binary archive execution, and public publication remain outside
+this local evidence. Existing personal extensions were not rewritten. The
+unrelated dirty subagents worktree was excluded by verifying its committed pin
+in a clean clone.
+
 ## Private publication candidate (2026-09-17)
 
 Candidate `2f771c92462ddc43e5abe90f622bdf971fd22421`, before subsequent
