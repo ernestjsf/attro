@@ -24,14 +24,12 @@ CORE_CLI_REL = "packages/coding-agent/dist/bundle/cli.js"
 RUNTIME_GENERATED_SUBMODULES = frozenset({"plugins/pi-lens", "plugins/attro-core"})
 
 PLUGIN_PATHS = {
-    "pi-cc-extensions": "plugins/pi-cc-extensions",
     "pi-lens": "plugins/pi-lens",
     "rpiv-todo": "plugins/rpiv-mono/packages/rpiv-todo",
     "pi-subagents": "plugins/pi-subagents",
 }
 
 PROFILE_PLACEHOLDERS = {
-    "{{PLUGIN_PI_CC_EXTENSIONS}}": PLUGIN_PATHS["pi-cc-extensions"],
     "{{PLUGIN_PI_LENS}}": PLUGIN_PATHS["pi-lens"],
     "{{PLUGIN_RPIV_TODO}}": PLUGIN_PATHS["rpiv-todo"],
     "{{PLUGIN_PI_SUBAGENTS}}": PLUGIN_PATHS["pi-subagents"],

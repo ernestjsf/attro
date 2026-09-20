@@ -6,14 +6,13 @@ and attribution files in each source tree and installed dependency.
 
 ## Fork sources
 
-The five current fork trees each carry upstream licenses. Upstream npm packages
+The four current fork trees each carry upstream licenses. Upstream npm packages
 `pi-web-access@0.27.0` and `pi-ask-user@0.14.0` are pinned via `runtime/npm`.
 Exact origin URLs and reviewed commits are recorded in `sources.lock.json`.
 
 | Source | Authoritative license |
 | --- | --- |
 | attro-core (Pi monorepo) | `plugins/attro-core/LICENSE` and per-package notices under `plugins/attro-core/packages/` |
-| CC extensions | `plugins/pi-cc-extensions/LICENSE` |
 | Lens | `plugins/pi-lens/LICENSE` |
 | rpiv mono / selected todo package | `plugins/rpiv-mono/LICENSE` |
 | Web access (npm) | upstream `pi-web-access@0.27.0` package LICENSE |
@@ -27,8 +26,15 @@ Legacy upstream npm releases of that package remain readable for comparison.
 
 Additional upstream notices inside those trees remain authoritative:
 
-- CC diff rendering: `plugins/pi-cc-extensions/extensions/renderer/tool/diff/ATTRIBUTION.md`
-  (MIT, pi-tool-display / MasuRii and contributors).
+- **CC (selected first-party features):** retained notices are in
+  `plugins/attro-core/packages/coding-agent/src/attro-features/NOTICES.md`.
+  Native diff rendering retains MIT attribution to pi-tool-display / MasuRii and
+  contributors in
+  `plugins/attro-core/packages/coding-agent/src/modes/interactive/components/rich-diff/ATTRIBUTION.md`.
+  The original `cc-dark` / `cc-light` themes are retained in core with
+  `packages/coding-agent/src/modes/interactive/theme/CC-LICENSE` and
+  `CC-ATTRIBUTION.md`. Built assets include these adopted-code notices under
+  `dist/notices/`. The standalone `pi-cc-extensions` package is no longer shipped.
 - **Zentui (native in attro-core):** portions adapted from upstream `pi-zentui`
   (MIT; copyright Luka). Authoritative notices are the full MIT headers in:
   `plugins/attro-core/packages/coding-agent/src/core/native-git-status.ts`,

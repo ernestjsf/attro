@@ -115,6 +115,25 @@ class SourcesLockValidationTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_shipped_sources_lock(legacy)
 
+    def test_retained_cc_source_is_accepted_but_not_in_new_recipes(self) -> None:
+        manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
+        manifest["submodules"] = [entry for entry in manifest["submodules"] if entry["path"] != "plugins/pi-cc-extensions"]
+        manifest["submodules"].append({
+            "path": "plugins/pi-cc-extensions",
+            "name": "pi-cc-extensions",
+            "origin": "https://github.com/ernestjsf/attro-cc-extensions.git",
+            "upstream": "https://github.com/minuque/pi-cc-extensions.git",
+            "pin": "31e251856f5e6dfc92dc567c54b1694046c8acf1",
+            "packagePath": ".",
+            "sourceEntryFiles": ["extensions/index.ts"],
+            "runtimeEntryFiles": ["extensions/index.ts"],
+            "runtimeGenerated": False,
+            "dependencyLock": "package-lock.json",
+        })
+        validate_sources_lock(manifest)
+        with self.assertRaisesRegex(ValidationError, "retired submodule"):
+            validate_shipped_sources_lock(manifest)
+
     def test_retained_manifest_sources_lock_accepts_zentui_config_record(self) -> None:
         manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
         manifest = copy.deepcopy(manifest)

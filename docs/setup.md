@@ -76,7 +76,7 @@ cd ~/projects/pi-customizations
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
-The five submodule origins are the maintained Attro mirrors (four plugin forks
+The four submodule origins are the maintained Attro mirrors (three plugin forks
 plus `plugins/attro-core`); `pi-web-access` and `pi-ask-user` are pinned from
 public npm instead. Zentui is native in attro-core (see
 [zentui-native-parity](zentui-native-parity.md)). The subagents origin is specifically
@@ -87,7 +87,6 @@ provenance remotes to a fresh clone:
 
 ```sh
 git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi-mono.git
-git -C plugins/pi-cc-extensions remote add upstream https://github.com/minuque/pi-cc-extensions.git
 git -C plugins/pi-lens remote add upstream https://github.com/apmantza/pi-lens.git
 git -C plugins/rpiv-mono remote add upstream https://github.com/juicesharp/rpiv-mono.git
 git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/pi-subagents.git
@@ -96,7 +95,7 @@ git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/p
 Install each lockfile-bearing source independently, without lifecycle scripts:
 
 ```sh
-for p in plugins/pi-cc-extensions plugins/pi-lens plugins/rpiv-mono; do
+for p in plugins/pi-lens plugins/rpiv-mono; do
   (cd "$p" && npm ci --ignore-scripts --no-audit --no-fund)
 done
 ```
@@ -111,9 +110,8 @@ release preparation, not from submodule paths.
 
 Attro **0.2.0** pins **`pi-web-access@0.27.0`** and **`pi-ask-user@0.14.0`**
 from public npm instead of the former Attro submodule forks. Tools, bundled
-`pi-ask-user` skills, and profile package order are unchanged; local fork trees
-under `plugins/pi-web-access` and `plugins/pi-ask-user` are reference-only until
-gitlinks are removed.
+`pi-ask-user` skills, and relative profile package order are unchanged. The old
+forks are no longer submodules or release inputs.
 
 Behavioral differences from the retired Quattro visual forks (reviewed and
 accepted for stock upstream):
@@ -134,6 +132,16 @@ Attro no longer ships `pi-zentui` as a recipe submodule or profile package.
 Native attro-core owns the former Zentui surfaces. New releases do **not**
 seed `zentui.json`; existing `~/.attro/agent/zentui.json` files are preserved.
 See [zentui-native-parity](zentui-native-parity.md).
+
+### Retired CC submodule
+
+Selected compact transcript rendering, `/clear`, `/exit`, `/context`, session
+references, and Markdown enhancements are first-party Attro code. The legacy
+`claude-code-style.json` filename remains the read-only preference input; edit
+supported settings and use `/reload`. The former `/ccstyle` configuration panel
+is not bundled. Existing user files and sessions are not migrated or rewritten.
+Do not additionally load the retired CC package in managed Attro: its prototype
+patches can compete with native rendering. See [transcript UI](transcript-ui.md).
 
 ## attro-core and Lens preparation
 
@@ -201,7 +209,7 @@ replacement full settings JSON:
 | Existing package identity | Replacement local path |
 | --- | --- |
 | `pi-zentui` | native attro-core (no separate recipe package) |
-| `pi-cc-extensions` | `~/projects/pi-customizations/plugins/pi-cc-extensions` |
+| `pi-cc-extensions` | selected features native in managed Attro; no separate recipe package |
 | `pi-lens` | `~/projects/pi-customizations/plugins/pi-lens` |
 | `@juicesharp/rpiv-todo` | `~/projects/pi-customizations/plugins/rpiv-mono/packages/rpiv-todo` |
 | `pi-web-access` | npm pin `pi-web-access@0.27.0` (see `runtime/npm`) |

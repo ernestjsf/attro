@@ -9,7 +9,7 @@ defaults — not through personal extensions or skills in the distribution profi
 | --- | --- |
 | Native minimalist editor in managed Attro | Attro core |
 | User-message labeled frame, selector borders | Attro core (formerly Zentui plugin) |
-| Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | CC extensions |
+| Work-first tool rows, output previews, expandable details, edit/write diffs, per-message thinking | Attro core (selected CC behavior) |
 | Primary progress (phase, current tool, elapsed time) | Attro core |
 | Dock layout, disclosure state, height budget and inline navigation | Attro core |
 | Diagnostic, task and subagent content/actions | Lens, rpiv todo, and subagent packages |
@@ -18,15 +18,14 @@ Optional widgets such as turn-status are **not bundled** in the distribution
 recipe. Users who want them install or copy standalone extensions into their own
 `~/.attro/agent` directory (or another Pi discovery path).
 
-Experimental thinking rendering is disabled in core/Zentui parity defaults to
-avoid overlapping CC's assistant renderer. Thinking starts folded on fresh profiles (`hideThinkingBlock: true` in
-`profile/settings.json`), with a per-message disclosure; Ctrl+T reveals it. Existing
-profiles retain their visibility preference. Compact mode keeps assistant commentary in chronological order and no longer collects tools into Activity cards.
-CC's own working message and agent summary remain disabled. Zentui's turn summary and working-line thought
-preview are disabled. On hosts advertising `nativeEditor.activityOwner: "core"`,
-Zentui and CC yield the primary working indicator to core. Older hosts retain
-Zentui's configured working line. These changes remove duplicate UI, not model
-reasoning or tool content.
+Thinking starts folded on fresh profiles (`hideThinkingBlock: true` in
+`profile/settings.json`), with per-message disclosure; Ctrl+T reveals it. Existing
+profiles retain their visibility preference. Compact mode keeps assistant
+commentary in chronological order rather than collecting tools into Activity
+cards. Native transcript components own this presentation; neither the Zentui
+nor CC renderer package is loaded by the managed recipe. Core alone publishes
+primary activity. These changes remove duplicate UI, not model reasoning or tool
+content.
 
 ## Native input editor
 
@@ -38,10 +37,10 @@ replace the editor or transfer its draft, cursor, or undo state.
 The composer uses the active theme, unboxed separator lines, model/thinking
 labels, context gauge, session name, and activity. Working, retry and compaction
 share the composer activity location. A utility row below the sections shows the
-compact directory and Git status. Zentui supplies cached Git status without replacing the input. Its editor
-appearance controls are marked as managed by Attro; its other components remain
-independently configurable. Ordinary Pi retains Zentui's custom editor behavior.
-Other extensions can still explicitly replace the editor.
+compact directory and Git status. Core's footer data provider supplies cached
+Git status without replacing the input. Completed tools and user shell commands
+invalidate outstanding Git snapshots; routine streaming redraws do not. Other
+extensions can still explicitly replace the editor.
 
 This removes Attro's startup editor handoff, not synchronous plugin-loading
 stalls. These changes require a new prepared release; retained releases are not
@@ -121,8 +120,8 @@ delivery or cancellation semantics.
 
 ## Visual hierarchy
 
-Compact mode prioritizes evidence over tool plumbing: file and symbol reads show
-up to three source lines with line numbers when the returned location is known,
+Compact mode prioritizes evidence over tool plumbing: default-rendered file and
+symbol reads show up to three source lines with line numbers when the returned location is known,
 beneath their path/range or symbol header. Omitted content stays expandable.
 Read-limit/truncation notices and partial-symbol notices remain visible separately
 from the preview's own omitted-line count. Image classification uses actual image
@@ -135,6 +134,8 @@ baseline use a neutral content preview, not an all-add diff. Ordinary rows are u
 the active theme's title/status tokens, with state glyphs rather than color alone.
 Fuller input/output remains accessible through tool expansion. A tool updates in
 place as it runs and settles; tool rows are not moved into expanded Activity cards.
+Explicit plugin `renderCall` / `renderResult` slots and self-rendered shells retain
+their ownership rather than being replaced by name-based styling.
 
 Assistant commentary remains ordinary Markdown between actions, without repeated
 Assistant labels. In compact interactive mode, a short appended prompt guideline
@@ -163,11 +164,14 @@ bar. Spawn, delivery, and execution behavior are unchanged.
 
 ## Source and configuration
 
-- `plugins/pi-cc-extensions/` is the active tool-rendering source tree.
+- `plugins/attro-core/packages/coding-agent/src/modes/interactive/` owns native
+  transcript components. Selected commands and Markdown transformations live in
+  `packages/coding-agent/src/attro-features/` within that core tree.
 - Historical Zentui display defaults are archived in
   `docs/archive/zentui-display-defaults-retired.json`; see
   [zentui-native-parity.md](zentui-native-parity.md).
-- `config/claude-code-style.json` is the reviewed CC display default.
+- `config/claude-code-style.json` remains the reviewed native transcript default;
+  keeping the legacy filename avoids rewriting existing user preferences.
 - `config/rpiv-todo.json` is the reviewed rpiv todo display default.
 - `themes/quattro-green.json` and `themes/quattro-amber.json` remain in the
   checkout for originalPi compatibility; new Attro releases do not copy them or
@@ -179,6 +183,24 @@ The root checkout exports Quattro themes through `package.json` for originalPi
 use only. Do not copy full global settings,
 credentials, sessions, or safety policy into this repository. Provider, model,
 permission, and unrelated plugin configurations are user-owned.
+
+## Native transcript preferences and commands
+
+The native implementation reads supported fields from
+`~/.attro/agent/claude-code-style.json`. The recipe continues to seed this file
+only for new profiles. `/reload` re-reads preferences; updates do not overwrite
+existing files. `previewLines` controls folded thinking, not the independent
+three-line compact tool preview. The original `cc-dark` and `cc-light` theme
+assets remain available in managed Attro, without changing the selected theme.
+Diff highlighting uses core's syntax highlighter instead of the former optional
+Shiki CLI; token colors can differ, while diff contents and layout remain native.
+
+Selected `/clear`, `/exit`, `/context`, session references, Markdown enhancements,
+and compact response guidance are retained as first-party features. The former
+`/ccstyle` configuration panel and unused CC feature collection are not bundled;
+edit supported preferences in the same JSON file instead. Avoid loading the
+retired CC renderer alongside native rendering. Personal prototype patches such
+as a final-answer heading extension are user-owned and were not rewritten.
 
 ## Applying changes
 
@@ -196,16 +218,11 @@ the existing renderer interaction layer.
 
 ## Verification and rollback
 
-Use the same Homebrew Node as the live Pi wrapper (verified with Node 26.5.0),
-not the older nvm Node that may come first on the shell PATH:
-
-```sh
-cd ~/projects/pi-customizations/plugins/pi-cc-extensions
-export PATH=/opt/homebrew/bin:$PATH
-npm run typecheck
-npm run lint
-npm test
-```
+Use a supported Node version (22.19.0 or newer) and build TUI dependencies
+before tests that import their compiled entrypoints. From `plugins/attro-core`,
+run `npm run check` and the affected focused non-e2e tests following its
+`AGENTS.md`. Exercise the actual CLI in an isolated profile at normal and narrow
+terminal widths, without the retired renderer packages.
 
 Exercise collapsed/expanded, pending/error, multiline arguments, restored messages
 and narrow-width component rendering. Thinking remains attached to its original
@@ -216,15 +233,14 @@ release copies. No new dependencies or additional UI plugin are needed.
 
 `python3 scripts/verify.py --runtime` checks source pins, clean submodules, private
 origins, runtime-file presence, and copied config hashes. It intentionally fails
-while the CC fork has uncommitted edits; do not weaken this check or fabricate a
-pin to hide them. Commit reviewed submodule changes and update the gitlink/pin
+when source submodules have uncommitted edits; do not weaken this check or
+fabricate a pin to hide them. Commit reviewed submodule changes and update the gitlink/pin
 only as part of the normal source-publication workflow. This check does not
 inspect activation or certify live combined-TUI compatibility.
 
-Verification used real installed-Pi transcript components at 40/80 columns,
-final-heading/status components at narrow and normal widths, the CC test suite,
-and the subagent test harness. This is component/automated evidence, not a
-screenshot or manual interaction test of the entire live combined terminal.
+The dated evidence below describes the retired fork, not verification of the
+native cutover. Current candidate verification must record its exact core and
+recipe pins, supported Node version, focused checks, and actual combined render.
 
 ### Work-first verification (2026-09-07)
 

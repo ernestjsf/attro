@@ -1,6 +1,3 @@
-[submodule "plugins/pi-cc-extensions"]
-	path = plugins/pi-cc-extensions
-	url = https://github.com/ernestjsf/attro-cc-extensions.git
 [submodule "plugins/pi-lens"]
 	path = plugins/pi-lens
 	url = https://github.com/ernestjsf/attro-lens.git

@@ -23,7 +23,7 @@ LEGACY_CONFIG_PATHS = frozenset({"config/zentui.json"})
 ALLOWED_CONFIG_PATHS = SHIPPED_CONFIG_PATHS | LEGACY_CONFIG_PATHS | frozenset(
     {"themes/quattro-green.json", "themes/quattro-amber.json"}
 )
-RETIRED_SUBMODULE_PATHS = frozenset({"plugins/pi-zentui", "plugins/pi-web-access", "plugins/pi-ask-user"})
+RETIRED_SUBMODULE_PATHS = frozenset({"plugins/pi-zentui", "plugins/pi-cc-extensions", "plugins/pi-web-access", "plugins/pi-ask-user"})
 NODE_MIN_RE = re.compile(r">=(\d+)\.(\d+)\.(\d+)")
 
 
@@ -163,10 +163,10 @@ def validate_shipped_sources_lock(manifest: dict[str, Any]) -> None:
     for entry in manifest["submodules"]:
         if entry["path"] in RETIRED_SUBMODULE_PATHS:
             raise ValidationError(f"shipped sources lock must not include retired submodule: {entry['path']}")
-        if entry["path"] == CORE_SOURCE_SUBMODULE:
-            validate_core_sources_lock_entry(entry)
-            return
-    raise ValidationError(f"sources lock missing {CORE_SOURCE_SUBMODULE}")
+    core_entry = next((entry for entry in manifest["submodules"] if entry["path"] == CORE_SOURCE_SUBMODULE), None)
+    if core_entry is None:
+        raise ValidationError(f"sources lock missing {CORE_SOURCE_SUBMODULE}")
+    validate_core_sources_lock_entry(core_entry)
 
 
 def validate_core_source_archive_alignment(entry: dict[str, Any], descriptor: dict[str, Any]) -> None:

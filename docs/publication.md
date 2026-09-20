@@ -23,8 +23,8 @@ recorded before advertising a tag. No stable consumer update feed is enabled.
 ## Current source topology
 
 The root checkout is `pi-customizations`, with a `main` branch and GitHub
-remote `https://github.com/ernestjsf/attro.git`. Its **five submodule**
-URLs point to the maintained Attro fork mirrors (attro-core plus four plugin
+remote `https://github.com/ernestjsf/attro.git`. Its **four submodule**
+URLs point to the maintained Attro fork mirrors (attro-core plus three plugin
 forks). `pi-web-access` and `pi-ask-user` are pinned from public npm instead. The canonical public URLs remain the existing `ernestjsf/attro*` names.
 For each rewritten fork, update the gitlink and `sources.lock.json` together;
 `.gitmodules` keeps those canonical URLs. The source verifier disallows replacing
@@ -42,8 +42,8 @@ Attro ships the maintained core recipe, not a maintainer's personal Pi setup:
 | Shipped in the recipe | Not bundled in the recipe |
 | --- | --- |
 | Source-built Pi core from `plugins/attro-core` | Personal instructions and agent definitions |
-| Seven customized plugin forks | Model/provider routing and reasoning preferences |
-| Three descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-cursor-sdk`) | Personal skills, prompts, and standalone user extensions |
+| Three customized plugin forks (Lens, rpiv todo, subagents) | Model/provider routing and reasoning preferences |
+| Five descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-cursor-sdk`, `pi-web-access`, `pi-ask-user`) | Personal skills, prompts, and standalone user extensions |
 | Shared display defaults in `config/` | Quattro custom themes, personal plugin preferences, and policy extensions |
 | UI/package defaults in `profile/settings.json` | OAuth tokens, sessions, trust state, or live `~/.pi/agent` copies |
 
@@ -61,7 +61,7 @@ state when the recipe changes.
 
 ## What the source manifest does not capture
 
-The five-submodule manifest (plus npm pins) is not a full backup of any maintainer's live
+The four-submodule manifest (plus npm pins) is not a full backup of any maintainer's live
 environment. Additional live-only resources require separate review if ever
 selected for a public profile:
 
@@ -119,7 +119,8 @@ automatic consumer release feed.
 
 ## Fork URL identities (Attro mirrors)
 
-These GitHub repository names are Attro mirror identities; plugin directory names in this checkout are unchanged:
+These historical GitHub mirror identities remain useful for provenance. Zentui,
+CC, web-access, and ask-user are no longer submodules of the current recipe:
 
 | Legacy fork URL | Attro fork URL |
 |---|---|

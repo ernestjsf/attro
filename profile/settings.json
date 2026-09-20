@@ -19,8 +19,7 @@
     "{{NPM:pi-web-access}}",
     "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
-    "{{PLUGIN_RPIV_TODO}}",
-    "{{PLUGIN_PI_CC_EXTENSIONS}}"
+    "{{PLUGIN_RPIV_TODO}}"
   ],
   "collapseChangelog": true,
   "markdown": {

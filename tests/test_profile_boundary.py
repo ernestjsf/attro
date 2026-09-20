@@ -34,7 +34,6 @@ EXPECTED_PACKAGES = [
     "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",
-    "{{PLUGIN_PI_CC_EXTENSIONS}}",
 ]
 
 EXPECTED_UI_DEFAULTS = {
@@ -115,6 +114,7 @@ class ProfileBoundaryTests(unittest.TestCase):
             target = Path(work) / "agent"
             seed_agent(release, target)
             self.assertFalse((target / "zentui.json").exists())
+            self.assertEqual(load_json(target / "claude-code-style.json"), load_json(ROOT / "config/claude-code-style.json"))
             settings = load_json(target / "settings.json")
             for key in PERSONAL_SETTINGS_KEYS:
                 self.assertNotIn(key, settings, msg=key)
@@ -144,10 +144,6 @@ class ProfileBoundaryTests(unittest.TestCase):
             self.assertTrue((ROOT / rel.removeprefix("./")).is_file(), rel)
 
     def test_managed_plugin_themes_are_not_quattro_recipe(self) -> None:
-        cc = load_json(ROOT / "plugins/pi-cc-extensions/package.json")
-        cc_themes = cc.get("pi", {}).get("themes", [])
-        self.assertTrue(cc_themes)
-        self.assertTrue(all("quattro" not in path for path in cc_themes))
         managed_packages = [
             ROOT / "plugins/pi-lens/package.json",
             ROOT / "plugins/pi-subagents/package.json",

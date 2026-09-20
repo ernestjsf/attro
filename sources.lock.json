@@ -54,27 +54,6 @@
       "provenance": "docs/core-provenance.md"
     },
     {
-      "path": "plugins/pi-cc-extensions",
-      "name": "pi-cc-extensions",
-      "origin": "https://github.com/ernestjsf/attro-cc-extensions.git",
-      "upstream": "https://github.com/minuque/pi-cc-extensions.git",
-      "pin": "31e251856f5e6dfc92dc567c54b1694046c8acf1",
-      "baseCommit": "5d7a2666f51da9f450bd019af10200c88cc1df98",
-      "baseVersion": "0.8.69",
-      "packagePath": ".",
-      "sourceEntryFiles": [
-        "extensions/index.ts"
-      ],
-      "runtimeEntryFiles": [
-        "extensions/index.ts"
-      ],
-      "runtimeGenerated": false,
-      "dependencyLock": "package-lock.json",
-      "dependencyLockVersion": 3,
-      "testReport": "Working-message core gate: typecheck, lint, and format:check passed; 3 focused working-message tests passed.",
-      "provenance": "QUATTRO.md"
-    },
-    {
       "path": "plugins/pi-lens",
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
