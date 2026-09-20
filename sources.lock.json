@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "1d28706e5a1faf41c9f4ea1f4eb0abd15e3a25b0",
+      "pin": "e7c1886b8b0831629699e7f10337f8380ac65a8d",
       "baseCommit": "107d79f11072bbc8a3a757ed7fd69596bee7d68c",
       "forkRootCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.85.0",
@@ -50,7 +50,7 @@
         "archiveOnlyPathCount": 40,
         "archiveOnlyNote": "All 40 archive-only paths are generated provider model data under packages/ai/src/providers/data."
       },
-      "testReport": "Native Zentui parity in attro-core: npm run check passed on Node 22.23.2; 103 affected tests passed after TUI rebuild. Real Attro CLI smoke in tmux at 40x80 without credentials (no separate pi-zentui package). Independent review corrections cleared.",
+      "testReport": "First-party transcript and managed features: npm run check passed on Node 22.23.2; 20 focused suites, 199 tests passed after formatting. Actual CLI synthetic-provider renders at 40 and 80 columns verified without CC/Zentui plugins or provider credentials, including tool/thinking expansion. Write-sidecar and reference-boundary Astra reviews cleared corrections. Native Zentui phase previously passed 103 focused tests. Combined clean recipe preparation remains a separate gate.",
       "provenance": "docs/core-provenance.md"
     },
     {
