@@ -123,7 +123,7 @@ These historical GitHub mirror identities remain useful for provenance. Zentui,
 CC, web-access, and ask-user are no longer submodules of the current recipe:
 
 | Legacy fork URL | Attro fork URL |
-|---|---|
+| --- | --- |
 | `ernestjsf/pi-zentui` | `ernestjsf/attro-zentui` |
 | `ernestjsf/pi-cc-extensions` | `ernestjsf/attro-cc-extensions` |
 | `ernestjsf/pi-web-access` | `ernestjsf/attro-web-access` |
