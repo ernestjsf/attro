@@ -158,7 +158,12 @@ still retained, rollback switches binaries while **keeping the shared profile**;
 otherwise, prepare the desired recipe again. Rollback does not undo shared plugin
 data changes, external side effects, or modifications made by an agent.
 
-Running managed sessions hold release leases. A detached cleanup process retries
+Running managed sessions hold release leases. Normal launches only schedule
+background cleanup; retired-release validation, process inspection, and deletion
+run outside the global operations lock, so they do not block active launches.
+Management commands still attempt synchronous cleanup and report retention warnings.
+All cleaners share a permanent mutex; checkpointed releases cannot be prepared,
+reactivated, or launched until cleanup finishes. A detached cleanup process retries
 pending deletion after sessions exit, without replacing or supervising the Pi
 process. It exits when cleanup is finished. Process inspection also conservatively
 protects older unleased sessions and detached children; inspection failure retains
@@ -169,8 +174,9 @@ binaries bypasses the managed launch/cleanup locking protocol.
 Cleanup never sweeps arbitrary directories or deletes `~/.attro/agent`. Legacy
 releases with per-release user state are preserved for manual handling. Interrupted
 cleanup is retried; a later preparation, activation, or real launch also resumes
-pending cleanup if the cleanup process was stopped. Never manually delete releases
-while sessions still use them.
+pending cleanup if the cleanup process was stopped. If another management operation
+holds the operations lock, launch waits briefly, then reports its recorded operation
+and PID when available. Never manually delete releases while sessions still use them.
 
 [Update automation](docs/automation.md) explains scheduled candidate discovery,
 optional disposable fork-merge assessment, and the remaining release-PR lane.

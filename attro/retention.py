@@ -10,7 +10,7 @@ import stat
 import subprocess
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
@@ -21,22 +21,9 @@ from attro.validate import ValidationError
 
 LEASE_NAME = ".attro-lease"
 REAPER_LOCK_NAME = ".retention-reaper.lock"
+PENDING_NAME = ".retention-pending"
 REAPER_INTERVAL = 7.0
-_ROUTINE_IN_USE_RETENTION_MARKERS = (
-    ": running session holds its lease",
-    ": still used by a process",
-)
 _reapers: list[subprocess.Popen] = []
-
-
-def filter_launch_retention_warnings(warnings: list[str]) -> list[str]:
-    """Drop expected in-use retention notices during ordinary managed launch."""
-    filtered: list[str] = []
-    for warning in warnings:
-        if warning.startswith("retaining ") and any(marker in warning for marker in _ROUTINE_IN_USE_RETENTION_MARKERS):
-            continue
-        filtered.append(warning)
-    return filtered
 
 
 class LeaseBusy(Exception):
@@ -133,78 +120,196 @@ def scan_processes(release_root: Path) -> tuple[bool, bool]:
     return False, True
 
 
-def _remove_record(state_root: Path, release_id: str) -> None:
+def _remove_record(state_root: Path, release_id: str, checkpoint: dict) -> None:
+    """Finalize only our absent, inactive checkpoint; caller holds operation_lock."""
     from attro.state import load_state, save_state
 
     state = load_state(state_root)
+    if (state["active"] == release_id or state["releases"].get(release_id) != checkpoint
+            or not checkpoint.get("deleting") or release_dir(release_id, state_root).exists()):
+        return
     del state["releases"][release_id]
     if state["previous"] == release_id:
         state["previous"] = None
     save_state(state_root, state)
 
 
-def _delete_one(state_root: Path, release_id: str) -> tuple[str | None, bool]:
+def _directory_identity(path: Path) -> list[int]:
+    metadata = path.lstat()
+    if not stat.S_ISDIR(metadata.st_mode):
+        raise ValidationError(f"release missing or symlinked: {path}")
+    return [metadata.st_dev, metadata.st_ino]
+
+
+def _delete_one(state_root: Path, release_id: str, entry: dict) -> tuple[str | None, bool]:
     from attro.state import load_state, prepared_manifest, save_state
 
-    state = load_state(state_root)
-    if release_id == state["active"]:
-        return None, False
-    entry = state["releases"][release_id]
-    path = release_dir(release_id, state_root)
-    if entry.get("deleting") and not path.exists():
-        _remove_record(state_root, release_id)
-        return None, False
-    if safe_child(path, "agent").exists():
-        return f"retaining {release_id}: per-release user data requires manual handling", False
+    with operation_lock(state_root, operation="cleanup"):
+        state = load_state(state_root)
+        if state["active"] == release_id or state["releases"].get(release_id) != entry:
+            return None, False
+        path = release_dir(release_id, state_root)
+        if entry.get("deleting") and not path.exists():
+            _remove_record(state_root, release_id, entry)
+            return None, False
+        identity = _directory_identity(path)
+        if entry.get("deleting") and entry["deletionIdentity"] != identity:
+            return f"retaining {release_id}: directory identity changed during cleanup", False
+        if safe_child(path, "agent").exists():
+            return f"retaining {release_id}: per-release user data requires manual handling", False
+
+    if not entry.get("deleting"):
+        manifest = prepared_manifest(path, release_id)
+        if manifest.get("agentMode") != "shared-v1":
+            return f"retaining {release_id}: legacy user state requires manual handling", False
+    protected, succeeded = scan_processes(path)
+    if not succeeded:
+        return f"retaining {release_id}: process inspection unavailable; cleanup deferred", True
+    if protected:
+        return f"retaining {release_id}: still used by a process", True
+    if not getattr(shutil.rmtree, "avoids_symlink_attacks", False):
+        return f"retaining {release_id}: symlink-resistant deletion unavailable", False
+
     try:
-        with release_lease(path, exclusive=True):
-            metadata = path.stat()
-            identity = [metadata.st_dev, metadata.st_ino]
-            if entry.get("deleting"):
-                if entry["deletionIdentity"] != identity:
+        with ExitStack() as leases:
+            with operation_lock(state_root, operation="cleanup"):
+                state = load_state(state_root)
+                current = state["releases"].get(release_id)
+                if state["active"] == release_id or current != entry:
+                    return None, False
+                path = release_dir(release_id, state_root)
+                if _directory_identity(path) != identity:
                     return f"retaining {release_id}: directory identity changed during cleanup", False
-            else:
-                manifest = prepared_manifest(path, release_id)
-                if manifest.get("agentMode") != "shared-v1":
-                    return f"retaining {release_id}: legacy user state requires manual handling", False
+                if safe_child(path, "agent").exists():
+                    return f"retaining {release_id}: per-release user data requires manual handling", False
+                # Do not exclude reactivation or trial launches during slow inspection.
+                leases.enter_context(release_lease(path, exclusive=True))
+                checkpoint = {**entry, "deleting": True, "retention": "retired", "deletionIdentity": identity}
+                state["releases"][release_id] = checkpoint
+                if state["previous"] == release_id:
+                    state["previous"] = None
+                save_state(state_root, state)
+            # A completed trial may have left an unleased child after the first scan.
+            # The checkpoint now excludes new managed launches; inspect off-lock.
             protected, succeeded = scan_processes(path)
             if not succeeded:
                 return f"retaining {release_id}: process inspection unavailable; cleanup deferred", True
             if protected:
                 return f"retaining {release_id}: still used by a process", True
-            if not getattr(shutil.rmtree, "avoids_symlink_attacks", False):
-                return f"retaining {release_id}: symlink-resistant deletion unavailable", False
-            if not entry.get("deleting"):
-                entry.update(deleting=True, retention="retired", deletionIdentity=identity)
-                if state["previous"] == release_id:
-                    state["previous"] = None
-                save_state(state_root, state)
+            # The permanent cleaner mutex survives removal of the release lease inode.
+            path = release_dir(release_id, state_root)
+            if _directory_identity(path) != identity:
+                return f"retaining {release_id}: directory identity changed during cleanup", False
+            if safe_child(path, "agent").exists():
+                return f"retaining {release_id}: per-release user data requires manual handling", False
             shutil.rmtree(path)
-            _remove_record(state_root, release_id)
+            with operation_lock(state_root, operation="cleanup"):
+                _remove_record(state_root, release_id, checkpoint)
     except LeaseBusy:
         return f"retaining {release_id}: running session holds its lease", True
     return None, False
 
 
-def reconcile_releases(state_root: Path) -> CleanupResult:
-    """Caller holds operation_lock, including throughout deletion and registry saves."""
+def _cleanup_pass(state_root: Path) -> CleanupResult:
     from attro.state import load_state
 
-    state = load_state(state_root)
+    with operation_lock(state_root, operation="cleanup"):
+        state = load_state(state_root)
+        safe_child(state_root, PENDING_NAME).unlink(missing_ok=True)
     result = CleanupResult()
     for rid, entry in state["releases"].items():
         if rid == state["active"] or entry.get("retention") != "retired":
             continue
         try:
-            warning, retryable = _delete_one(state_root, rid)
+            warning, retryable = _delete_one(state_root, rid, entry)
+        except (OperationBusy, OSError) as exc:
+            warning, retryable = f"retaining {rid}: cleanup deferred ({exc})", True
         except ValidationError as exc:
             warning, retryable = f"retaining {rid}: {exc}", False
-        except OSError as exc:
-            warning, retryable = f"retaining {rid}: cleanup deferred ({exc})", True
         if warning:
             result.warnings.append(warning)
         result.retryable |= retryable
     return result
+
+
+def request_cleanup(state_root: Path) -> list[str]:
+    """Request background work only. Caller holds operation_lock through spawning."""
+    from attro.state import load_state
+
+    try:
+        state = load_state(state_root)
+        if not any(rid != state["active"] and entry.get("retention") == "retired"
+                   for rid, entry in state["releases"].items()):
+            return []
+        os.close(_open_lock(safe_child(state_root, PENDING_NAME)))
+        if not start_reaper(state_root):
+            return ["cleanup process could not start; a later operation will retry"]
+        return []
+    except (OSError, ValidationError) as exc:
+        return [f"release cleanup deferred: {exc}"]
+
+
+def _run_cleanup(state_root: Path, *, background: bool = False) -> CleanupResult:
+    # All cleaners share the old reaper's permanent mutex, never a deleted inode.
+    fd = _open_lock(safe_child(state_root, REAPER_LOCK_NAME))
+    result = CleanupResult()
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            if not background:
+                while True:
+                    try:
+                        with operation_lock(state_root, operation="cleanup"):
+                            result.warnings = request_cleanup(state_root)
+                        break
+                    except OperationBusy:
+                        time.sleep(REAPER_INTERVAL)
+            return result
+        try:
+            while True:
+                try:
+                    result = _cleanup_pass(state_root)
+                except OperationBusy:
+                    time.sleep(REAPER_INTERVAL)
+                    continue
+                if not background:
+                    return result
+                while True:
+                    try:
+                        with operation_lock(state_root, operation="cleanup"):
+                            pending = safe_child(state_root, PENDING_NAME).exists()
+                            if not pending and not result.retryable:
+                                os.close(fd)
+                                fd = -1
+                                return result
+                        break
+                    except OperationBusy:
+                        time.sleep(REAPER_INTERVAL)
+                if not pending:
+                    time.sleep(REAPER_INTERVAL)
+        finally:
+            # Requests and singleton release are ordered by the operations lock.
+            # A losing requester either leaves pending work or spawns the next owner.
+            while fd >= 0:
+                try:
+                    with operation_lock(state_root, operation="cleanup"):
+                        pending = safe_child(state_root, PENDING_NAME).exists()
+                        os.close(fd)
+                        fd = -1
+                        if pending or result.retryable:
+                            result.warnings.extend(request_cleanup(state_root))
+                    break
+                except OperationBusy:
+                    time.sleep(REAPER_INTERVAL)
+    finally:
+        if fd >= 0:
+            os.close(fd)
+
+
+def reconcile_releases(state_root: Path) -> CleanupResult:
+    """Run one serialized cleanup pass without an outer operation_lock."""
+    return _run_cleanup(state_root)
 
 
 def start_reaper(state_root: Path) -> bool:
@@ -230,39 +335,17 @@ def reconcile_and_maybe_reap(state_root: Path) -> list[str]:
     # Retention must not turn an already committed activation into a failed install.
     try:
         result = reconcile_releases(state_root)
-        if result.retryable and not start_reaper(state_root):
-            result.warnings.append("cleanup process could not start; a later operation will retry")
         return result.warnings
     except (OSError, ValidationError) as exc:
         return [f"release cleanup deferred: {exc}"]
 
 
 def _reaper_main(state_root: Path) -> int:
-    root = validate_state_root(state_root)
-    fd = _open_lock(safe_child(root, REAPER_LOCK_NAME))
     try:
-        try:
-            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            return 0
-        while root.is_dir():
-            try:
-                with operation_lock(root):
-                    result = reconcile_releases(root)
-                    if not result.retryable:
-                        # Release the singleton before another operation can add work.
-                        os.close(fd)
-                        fd = -1
-                        return 0
-            except OperationBusy:
-                pass
-            except (OSError, ValidationError):
-                return 1
-            time.sleep(REAPER_INTERVAL)
+        _run_cleanup(validate_state_root(state_root), background=True)
         return 0
-    finally:
-        if fd >= 0:
-            os.close(fd)
+    except (OSError, ValidationError):
+        return 1
 
 
 def main(argv: list[str] | None = None) -> int:

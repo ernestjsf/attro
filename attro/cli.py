@@ -14,7 +14,7 @@ from attro import __version__
 from attro.doctor import run_doctor
 from attro.launch import build_exec_env, build_try_env, exec_pi, managed_resource_args, normalize_pi_command, populate_try_agent, refuse_managed_mutation, resolve_pi_binary
 from attro.lock import LAUNCH_LOCK_WAIT_SECONDS, operation_lock
-from attro.retention import filter_launch_retention_warnings, reconcile_and_maybe_reap, release_lease
+from attro.retention import reconcile_and_maybe_reap, release_lease, request_cleanup
 from attro.paths import home, release_dir, validate_state_root
 from attro.prepare import prepare_release
 from attro.state import activate_release, load_state, prepared_manifest, register_release, rollback
@@ -89,14 +89,14 @@ def _emit_retention_result(args: argparse.Namespace, data: object, message: str,
 def cmd_setup(args: argparse.Namespace) -> int:
     checkout = Path(args.repo).expanduser().resolve()
     state_root = validate_state_root(args.root, checkout)
-    with operation_lock(state_root):
+    with operation_lock(state_root, operation=args.subcommand):
         load_state(state_root)
         manifest = prepare_release(checkout, state_root=state_root)
         rid = manifest["releaseId"]
         register_release(state_root, rid, release_dir(rid, state_root))
         if args.activate:
             activate_release(state_root, rid)
-        warnings = reconcile_and_maybe_reap(state_root)
+    warnings = reconcile_and_maybe_reap(state_root)
     _emit_retention_result(args, manifest, f"prepared release {rid}" + (" (active)" if args.activate else ""), warnings)
     return 0
 
@@ -124,17 +124,17 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 def cmd_activate(args: argparse.Namespace) -> int:
     validate_release_id(args.release_id)
-    with operation_lock(args.root):
+    with operation_lock(args.root, operation="activate"):
         activate_release(args.root, args.release_id)
-        warnings = reconcile_and_maybe_reap(args.root)
+    warnings = reconcile_and_maybe_reap(args.root)
     _emit_retention_result(args, {"active": args.release_id}, f"activated {args.release_id}", warnings)
     return 0
 
 
 def cmd_rollback(args: argparse.Namespace) -> int:
-    with operation_lock(args.root):
+    with operation_lock(args.root, operation="rollback"):
         previous = rollback(args.root)
-        warnings = reconcile_and_maybe_reap(args.root)
+    warnings = reconcile_and_maybe_reap(args.root)
     _emit_retention_result(args, {"active": previous}, f"rolled back to {previous}; live ~/.pi data is untouched", warnings)
     return 0
 
@@ -179,14 +179,14 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
         return run(pi_bin, full_command, env)
 
     with ExitStack() as leases:
-        with operation_lock(args.root, wait_timeout=LAUNCH_LOCK_WAIT_SECONDS):
+        with operation_lock(args.root, wait_timeout=LAUNCH_LOCK_WAIT_SECONDS, operation="try" if trial else "launch"):
             state = load_state(args.root)
             release_id, release = resolve(state)
             lease = leases.enter_context(release_lease(release, inheritable=True))
             manifest = prepared_manifest(release, release_id)
             pi_bin = resolve_pi_binary(release, manifest=manifest)
             full_command = [*managed_resource_args(release, manifest=manifest), *command]
-            warnings = filter_launch_retention_warnings(reconcile_and_maybe_reap(args.root))
+            warnings = request_cleanup(args.root)
         for warning in warnings:
             print(f"warning: {warning}", file=sys.stderr)
         if not trial:

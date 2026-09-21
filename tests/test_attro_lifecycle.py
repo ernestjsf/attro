@@ -536,6 +536,45 @@ process.stdin.destroy();
                 self.cli("setup", "--repo", str(self.repo), success=False)
                 self.descriptor[key] = old
 
+    def test_setup_cannot_recreate_checkpointed_release_before_finalization(self):
+        from attro.lock import operation_lock
+        from attro.retention import reconcile_releases
+        from attro.state import activate_release, load_state, register_release, save_state
+
+        manifest = self.setup_release()
+        rid = manifest["releaseId"]
+        release = self.state / "releases" / rid
+        with operation_lock(self.state):
+            state = load_state(self.state)
+            state["active"] = None
+            state["releases"][rid]["retention"] = "retired"
+            save_state(self.state, state)
+        npm_before = self.npm_calls()
+        original = shutil.rmtree
+        checked = False
+
+        def remove(path, *args, **kwargs):
+            nonlocal checked
+            original(path, *args, **kwargs)
+            if path == release:
+                checked = True
+                self.assertTrue(load_state(self.state)["releases"][rid]["deleting"])
+                _, error = self.cli("setup", "--repo", str(self.repo), success=False)
+                self.assertIn("marked deleting and cannot be prepared", error)
+                self.assertFalse(release.exists())
+                self.assertEqual(self.npm_calls(), npm_before)
+                with operation_lock(self.state):
+                    with self.assertRaisesRegex(ValidationError, "marked deleting"):
+                        activate_release(self.state, rid)
+                    with self.assertRaisesRegex(ValidationError, "marked deleting"):
+                        register_release(self.state, rid, release)
+
+        with mock.patch("attro.retention.shutil.rmtree", side_effect=remove):
+            self.assertEqual(reconcile_releases(self.state).warnings, [])
+        self.assertTrue(checked)
+        self.assertNotIn(rid, load_state(self.state)["releases"])
+        self.assertEqual(self.setup_release()["releaseId"], rid)
+
     def test_existing_release_target_is_not_deleted(self):
         a = self.setup_release()
         release = self.state / "releases" / a["releaseId"]

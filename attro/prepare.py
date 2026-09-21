@@ -114,10 +114,13 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
             raise ValidationError("descriptor or sources lock differs from committed snapshot")
         descriptor, sources = committed_descriptor, committed_sources
         rid = compute_release_id(descriptor, sources, checkout_root, head=head)
+        from attro.state import load_state, prepared_manifest
+
+        # The caller's setup lock excludes cleanup commit/finalization, not rmtree.
+        if load_state(state_root)["releases"].get(rid, {}).get("deleting"):
+            raise ValidationError(f"release is marked deleting and cannot be prepared: {rid}")
         final = release_dir(rid, state_root)
         if final.exists():
-            from attro.state import prepared_manifest
-
             existing = prepared_manifest(final, rid)
             if existing["provenance"]["checkoutHead"] != head:
                 raise ValidationError("existing release has different provenance")
