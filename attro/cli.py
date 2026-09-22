@@ -160,6 +160,9 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
         return release_id, release_dir(release_id, args.root)
 
     def run(pi_bin: str, full_command: list[str], env: dict[str, str], lease_fd: int | None = None) -> int:
+        # Core dispatches catalog refresh before resource loading and requires update first.
+        if command == ["update", "--models"]:
+            full_command = command
         if args.dry_run:
             data = {"argv": [pi_bin, *full_command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["ATTRO_RELEASE_ROOT"], "resourceDir": env["ATTRO_RESOURCE_DIR"]}
             emit(args, data, f"would run: {' '.join(data['argv'])}\nPI_CODING_AGENT_DIR={data['agentDir']}\nATTRO_RELEASE_ROOT={data['releaseRoot']}\nATTRO_RESOURCE_DIR={data['resourceDir']}")

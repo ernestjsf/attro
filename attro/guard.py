@@ -23,7 +23,7 @@ BLOCKED_PI_COMMANDS: frozenset[tuple[str, ...]] = frozenset(
 
 def blocked_pi_command(argv: list[str]) -> tuple[str, ...] | None:
     """Return the blocked command prefix if argv starts a refused pi mutation."""
-    if not argv:
+    if not argv or argv == ["update", "--models"]:
         return None
     first = argv[0]
     if first in {"update", "install", "remove", "uninstall", "upgrade"}:

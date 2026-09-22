@@ -611,10 +611,22 @@ process.stdin.destroy();
         wrapper = Path(__file__).resolve().parents[1] / "bin/pi"
         symlink = self.base / "pi"
         symlink.symlink_to(wrapper)
-        for command in ([str(wrapper), "--version"], [str(wrapper), "-p", "hello"], [str(symlink), "--version"]):
+        refresh = json.loads(self.cli("--json", "exec", "--dry-run", "--", "update", "--models")[0])
+        self.assertEqual(refresh["argv"][1:], ["update", "--models"])
+        attro = Path(__file__).resolve().parents[1] / "bin/attro"
+        for command in (
+            [str(wrapper), "--version"],
+            [str(wrapper), "-p", "hello"],
+            [str(symlink), "--version"],
+            [str(attro), "--", "update", "--models"],
+            [str(attro), "exec", "--", "update", "--models"],
+        ):
             result = subprocess.run(command, env={**os.environ, "PIATTRO_HOME": str(self.state)}, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("fixture pi", result.stdout)
+        with mock.patch("attro.cli.exec_pi") as launch:
+            self.cli("exec", "--", "update", "--models")
+        self.assertEqual(launch.call_args.args[1], ["update", "--models"])
         result = subprocess.run([str(wrapper), "update"], env={**os.environ, "PIATTRO_HOME": str(self.state)}, capture_output=True, text=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("refusing managed pi command", result.stderr)

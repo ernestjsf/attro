@@ -18,6 +18,14 @@ class BlockedPiCommandTests(unittest.TestCase):
         self.assertEqual(blocked_pi_command(["install", "pkg"]), ("install",))
         self.assertEqual(blocked_pi_command(["remove", "pkg"]), ("remove",))
 
+    def test_allows_only_exact_model_refresh(self) -> None:
+        self.assertIsNone(blocked_pi_command(["update", "--models"]))
+        for extra in (["--self"], ["--all"], ["--extensions"], ["--extension", "pkg"], ["pkg"], ["--force"]):
+            for command in (["update", "--models", *extra], ["update", *extra, "--models"]):
+                with self.subTest(command=command):
+                    self.assertEqual(blocked_pi_command(command), ("update",))
+        self.assertEqual(blocked_pi_command(["package", "update", "--models"]), ("package", "update"))
+
     def test_blocks_package_subcommands(self) -> None:
         self.assertEqual(blocked_pi_command(["package", "install", "x"]), ("package", "install"))
         self.assertEqual(blocked_pi_command(["package", "remove", "x"]), ("package", "remove"))

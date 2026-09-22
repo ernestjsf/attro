@@ -205,6 +205,12 @@ redirect sessions or load additional extensions.
 
 The wrapper refuses leading `update`, `install`, `remove`, `uninstall`,
 `upgrade`, and `package install|remove|uninstall|update|upgrade` commands. Use
-`attro update --repo PATH` and `attro activate RELEASE_ID` instead. This is
-an accidental-mutation guard, not a comprehensive restriction on interactive Pi
+`attro update --repo PATH` and `attro activate RELEASE_ID` instead.
+
+The exact command `attro -- update --models` (or
+`attro exec -- update --models`) is allowed: it refreshes provider model catalogs
+in the shared profile without updating release code or packages. Additional
+arguments are not allowed by this exception.
+
+This is an accidental-mutation guard, not a comprehensive restriction on interactive Pi
 commands, flags, extensions, or direct execution of the underlying binary.
