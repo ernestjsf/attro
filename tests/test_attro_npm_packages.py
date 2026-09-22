@@ -83,7 +83,7 @@ class DescriptorNpmTests(unittest.TestCase):
                 ("pi-btw", "0.4.1"),
                 ("pi-ask-user", "0.14.0"),
                 ("pi-web-access", "0.27.0"),
-                ("pi-cursor-sdk", "0.3.6"),
+                ("pi-cursor-sdk", "0.3.10"),
             ],
         )
 

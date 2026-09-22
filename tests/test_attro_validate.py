@@ -48,7 +48,7 @@ class DescriptorValidationTests(unittest.TestCase):
     def test_accepts_repo_descriptor(self) -> None:
         data = validate_descriptor(ROOT / "attro.json")
         self.assertEqual(data["distribution"], "attro")
-        self.assertEqual(data["core"]["version"], "0.85.0")
+        self.assertEqual(data["core"]["version"], "0.87.1")
         self.assertEqual(data["core"]["engines"]["node"], ">=22.19.0")
 
     def test_rejects_missing_core_version(self) -> None:
@@ -89,16 +89,16 @@ class SourcesLockValidationTests(unittest.TestCase):
         manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
         descriptor = validate_descriptor(ROOT / "attro.json")
         core = next(entry for entry in manifest["submodules"] if entry["path"] == CORE_SOURCE_SUBMODULE)
-        self.assertEqual(core["baseCommit"], "107d79f11072bbc8a3a757ed7fd69596bee7d68c")
+        self.assertEqual(core["baseCommit"], "f07218c4d4bbc12bef056a7058c3dd49dfe41abe")
         self.assertEqual(core["forkRootCommit"], "36b02b695383ad89bc3a22b73633be3fa27be3c1")
         self.assertEqual(core["provenance"], "docs/core-provenance.md")
         comparison = core["forkComparison"]
-        self.assertEqual(comparison["commonPathCount"], 1658)
-        self.assertEqual(comparison["identicalPathCount"], 1588)
-        self.assertEqual(comparison["forkTreePathCount"], 1688)
-        self.assertEqual(comparison["differentPathCount"], 70)
-        self.assertEqual(comparison["forkOnlyPathCount"], 30)
-        self.assertEqual(comparison["archiveOnlyPathCount"], 40)
+        self.assertEqual(comparison["commonPathCount"], 1861)
+        self.assertEqual(comparison["identicalPathCount"], 1763)
+        self.assertEqual(comparison["forkTreePathCount"], 1948)
+        self.assertEqual(comparison["differentPathCount"], 98)
+        self.assertEqual(comparison["forkOnlyPathCount"], 87)
+        self.assertEqual(comparison["archiveOnlyPathCount"], 42)
         validate_shipped_sources_lock(manifest)
         validate_core_source_archive_alignment(core, descriptor)
         self.assertTrue((ROOT / "docs/core-provenance.md").is_file())

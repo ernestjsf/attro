@@ -85,7 +85,7 @@ If you prefer manual steps or are developing the manager itself, see
 Attro **0.2.0** ships the maintained distribution recipe, not a maintainer's
 personal Pi setup:
 
-- **Pi core** built from the pinned `plugins/attro-core` source tree
+- **Pi 0.87.1 core** built from the pinned `plugins/attro-core` source tree
 - **First-party UI** in attro-core: native composer, activity, dock, and selected
   transcript rendering and commands adopted from Zentui and CC extensions
 - **Three customized plugin forks** (Lens, rpiv todo, subagents)

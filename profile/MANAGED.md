@@ -51,7 +51,7 @@ ordinary per-working-directory sessions in that directory.
 Attro **never copies or symlinks** live OAuth tokens, auth files, sessions,
 trust decisions, agent definitions, model routing, skills, prompts, or history
 from `~/.pi/agent`. Authenticate separately with `/login` after install. OAuth
-must be authenticated in the shared profile: Pi 0.85.0's per-path OAuth locks
+must be authenticated in the shared profile: Pi's per-path OAuth locks
 make sharing aliased token files unsafe. Agent file symlinks and hardlinks are
 refused. At runtime Pi may still load personal config/skills and trusted-project
 `AGENTS.md` / `.pi` resources according to upstream discovery rules. Attro does
@@ -99,7 +99,7 @@ only under `~/.attro/agent`.
 
 **Source core (`pi/`):** preparation exports the pinned `plugins/attro-core`
 commit, runs `npm ci` against its committed lock, applies the hash-pinned
-upstream **0.85.0** model-data archive, and runs the offline monorepo build.
+upstream **0.87.1** model-data archive, and runs the offline monorepo build.
 The retained CLI is `pi/packages/coding-agent/dist/bundle/cli.js`. Core and TUI
 packages are built together from the same monorepo tree. Preparation requires
 network access for locked dependencies and the pinned model-data download;

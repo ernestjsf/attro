@@ -1,17 +1,38 @@
 # Attro core source provenance (`plugins/attro-core`)
 
-Canonical record for Pi **0.85.0** source-core preparation. The attro-core
+Canonical record for Pi **0.87.1** source-core preparation. The attro-core
 submodule has no `QUATTRO.md`; this document replaces that role for the root
 recipe. Counts and diffs below are **snapshots at the recorded fork pin** and
 are not invariant across future pins.
+
+## Pi 0.87.1 integration
+
+Core commit `65885dbf60293ae5b2982bb12f8bbc1e78c125ea` upgrades the prior
+Attro fork `e7c1886b8b0831629699e7f10337f8380ac65a8d`. The final recipe pins
+`cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27`, which also includes the approved
+Light/Balanced/Deep GPT-6 defaults, and the matching model-data archive below. See
+[verification](verification.md#pi-0871-local-candidate) for tested behavior,
+review corrections, and platform limits.
+
+The integration uses the verified 0.85.0 and 0.87.1 source archives as the
+upstream delta, preserving Attro fork changes without rewriting sanitized Git
+history. Generated provider data comes from the new archive, not manual edits.
+The accompanying `pi-cursor-sdk` pin is **0.3.10**, which understands Pi's new
+transcript-only provider context; `@cursor/sdk` remains **1.0.27** with the
+existing attribution-off patch. The user explicitly approved upstream's
+`cacheWarming: "streaming"` default, including additional cost-aware provider
+requests during active runs. No live profile settings are changed. Independent
+review identified warming continuing during cancellation unwind; the candidate
+now cancels it synchronously on stop, interruption, and disposal, with scheduled
+and in-flight regression coverage.
 
 ## Pins and identities
 
 | Role | Git commit | Notes |
 | --- | --- | --- |
-| **AUDITED SNAPSHOT** (`forkComparison.pin`) | `4cf75e855d51d24cdb6a533bfca4374285566a18` | Frozen commit for archive diff counts below; **not** automatically the current `sources.lock.json` submodule pin after core updates. |
+| **AUDITED SNAPSHOT** (`forkComparison.pin`) | `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27` | Frozen commit for archive diff counts below; **not** automatically the current `sources.lock.json` submodule pin after core updates. |
 | **Current recipe pin** (`sources.lock.json` `pin`) | (see lock file) | Reviewed Attro fork tree built during preparation (`ernestjsf/attro-core`); may advance when the recipe gitlink updates. |
-| **Upstream base** (`baseCommit`) | `107d79f11072bbc8a3a757ed7fd69596bee7d68c` | Genuine upstream Pi **0.85.0** release commit (may not exist in the fork clone). |
+| **Upstream base** (`baseCommit`) | `f07218c4d4bbc12bef056a7058c3dd49dfe41abe` | Genuine upstream Pi **0.87.1** release commit (may not exist in the fork clone). |
 | **Sanitized fork root** (`forkRootCommit`) | `36b02b695383ad89bc3a22b73633be3fa27be3c1` | Local fork history root after sanitization; **not** the upstream base. |
 
 Upstream release tarball (matches `attro.json` `core.source.modelSnapshot` and
@@ -19,33 +40,33 @@ Upstream release tarball (matches `attro.json` `core.source.modelSnapshot` and
 
 | Field | Value |
 | --- | --- |
-| URL | `https://github.com/earendil-works/pi/releases/download/v0.85.0/pi-0.85.0-source.tar.gz` |
-| SHA-256 | `b4dd5d4db4cd2832389da6445485bbca9db9c6d83bb7504d67975af5c5fe8307` |
-| Commit | `107d79f11072bbc8a3a757ed7fd69596bee7d68c` |
-| Tree | `f5103239060686ea2983e18906857b3df54428f5` |
+| URL | `https://github.com/earendil-works/pi/releases/download/v0.87.1/pi-0.87.1-source.tar.gz` |
+| SHA-256 | `793949d8d9e56629346e4bb9a6bf5fc17952ef746a1bf4f3185f8e960e806fcf` |
+| Commit | `f07218c4d4bbc12bef056a7058c3dd49dfe41abe` |
+| Tree | `7053e72909a45c2e400f0506c4aa98e53b26f429` |
 
 Validation uses the **recorded URL and hash** (and descriptor alignment), not
 local presence of the upstream git object.
 
-## Fork vs upstream archive diff (pin `4cf75e8`)
+## Fork vs upstream archive diff (pin `cce2c9d`)
 
-Compared **`git archive`** export at pin `4cf75e855d51d24cdb6a533bfca4374285566a18`
-against the extracted upstream **0.85.0** release tarball using the **comparison
+Compared **`git archive`** export at pin `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27`
+against the extracted upstream **0.87.1** release tarball using the **comparison
 scope** below (recorded in `sources.lock.json` `forkComparison`; method
 `git-archive-pinned-commit-vs-release-archive`):
 
 | Metric | Count |
 | --- | ---: |
-| Common (fork ∩ archive) | 1658 |
-| Identical among common paths | 1588 |
-| Content-different among common paths | 70 |
-| Fork-only paths | 30 |
-| Archive-only paths | 40 |
+| Common (fork ∩ archive) | 1861 |
+| Identical among common paths | 1763 |
+| Content-different among common paths | 98 |
+| Fork-only paths | 87 |
+| Archive-only paths | 42 |
 
-Fork paths in this comparison scope: **1688** (1658 common + 30 fork-only).
-`1588 + 70 = 1658` common paths.
+Fork paths in this comparison scope: **1948** (1861 common + 87 fork-only).
+`1763 + 98 = 1861` common paths.
 
-All **40** archive-only paths are **generated provider model data** under
+All **42** archive-only paths are **generated provider model data** under
 `packages/ai/src/providers/data`. Those paths **are included in archive-only
 totals** (not dropped from the comparison). Preparation still applies the
 hash-pinned tarball for model data; the fork pin carries Attro-specific source
@@ -68,14 +89,14 @@ omitted.
 
 ## Change classification (fork pin vs upstream archive)
 
-Rough grouping of the **70** content-different common paths and **30** fork-only paths
+Rough grouping of the **98** content-different common paths and **87** fork-only paths
 (review detail lives in fork history; categories guide release notes):
 
 | Layer | Examples / themes |
 | --- | --- |
 | **Foundation** | Agent harness and TUI: cancellation semantics, layout/shell integration, shared runtime invariants. |
 | **Application** | Interactive product surface: editor behavior, banner/branding hooks, dock sections, profile/consent flows, steering and managed-resource argv. |
-| **Temporary compatibility** | `pi-cursor-sdk@0.3.6` loader / npm peer resolution shims until supported upstream loading makes the compatibility shim unnecessary (descriptor npm pin, not submodule). |
+| **Temporary compatibility** | `pi-cursor-sdk@0.3.10` loader / npm peer resolution shims until supported upstream loading makes the compatibility shim unnecessary (descriptor npm pin, not submodule). |
 
 ## Reproducible verification (no history rewrite)
 
@@ -100,24 +121,24 @@ Replace `/tmp/attrocmp` with any empty disposable directory.
 cd /Users/ernestjusuf/projects/pi-customizations
 
 CMP=/tmp/attrocmp
-FORK_PIN=4cf75e855d51d24cdb6a533bfca4374285566a18
-URL='https://github.com/earendil-works/pi/releases/download/v0.85.0/pi-0.85.0-source.tar.gz'
-EXPECTED_SHA=b4dd5d4db4cd2832389da6445485bbca9db9c6d83bb7504d67975af5c5fe8307
+FORK_PIN=cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27
+URL='https://github.com/earendil-works/pi/releases/download/v0.87.1/pi-0.87.1-source.tar.gz'
+EXPECTED_SHA=793949d8d9e56629346e4bb9a6bf5fc17952ef746a1bf4f3185f8e960e806fcf
 
 rm -rf "$CMP"
 mkdir -p "$CMP"
 
-curl -fL -o "$CMP/pi-0.85.0-source.tar.gz" "$URL"
-ACTUAL_SHA=$(shasum -a 256 "$CMP/pi-0.85.0-source.tar.gz" | awk '{print $1}')
+curl -fL -o "$CMP/pi-0.87.1-source.tar.gz" "$URL"
+ACTUAL_SHA=$(shasum -a 256 "$CMP/pi-0.87.1-source.tar.gz" | awk '{print $1}')
 test "$ACTUAL_SHA" = "$EXPECTED_SHA"
 
 mkdir "$CMP/archive" "$CMP/fork"
-tar -xzf "$CMP/pi-0.85.0-source.tar.gz" -C "$CMP/archive"
+tar -xzf "$CMP/pi-0.87.1-source.tar.gz" -C "$CMP/archive"
 git -C plugins/attro-core archive "$FORK_PIN" | tar -x -C "$CMP/fork"
 
 # Upstream tarball unpacks to pi-<version>/; fall back to archive root if layout differs.
-if [ -f "$CMP/archive/pi-0.85.0/package.json" ]; then
-  ARCH_ROOT="$CMP/archive/pi-0.85.0"
+if [ -f "$CMP/archive/pi-0.87.1/package.json" ]; then
+  ARCH_ROOT="$CMP/archive/pi-0.87.1"
 else
   ARCH_ROOT="$CMP/archive"
 fi
@@ -167,18 +188,18 @@ print(f"archiveOnlyPathCount={arch_only}")
 PY
 ```
 
-Expected output lines at pin `4cf75e8` with this scope:
+Expected output lines at pin `cce2c9d` with this scope:
 
 ```text
-forkTreePathCount=1688
-commonPathCount=1658
-identicalPathCount=1588
-differentPathCount=70
-forkOnlyPathCount=30
-archiveOnlyPathCount=40
+forkTreePathCount=1948
+commonPathCount=1861
+identicalPathCount=1763
+differentPathCount=98
+forkOnlyPathCount=87
+archiveOnlyPathCount=42
 ```
 
-If output differs, check archive top-level layout (`pi-0.85.0/`), the pinned
+If output differs, check archive top-level layout (`pi-0.87.1/`), the pinned
 `git archive` commit, and that only the five exclusions above were applied.
 
 ## Related recipe files

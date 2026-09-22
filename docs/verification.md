@@ -6,6 +6,66 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Pi 0.87.1 local candidate
+
+Tested on macOS arm64: root baseline
+`79e4c6676ee48d0b428e907e8344736719fb7ed5`, core baseline
+`e7c1886b8b0831629699e7f10337f8380ac65a8d`, plus the 0.87.1 integration,
+Cursor adapter update, and model-refresh launcher fix. The tested core is now
+committed as `65885dbf60293ae5b2982bb12f8bbc1e78c125ea`; committing did not
+change its tested contents. The subsequently approved effort-profile defaults
+are committed in final core pin `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27`.
+`npm run check` (Node 22.23.2) and full isolated `./test.sh` (Node 26.7.0) passed
+again for that pin. The new built-in Light/Balanced/Deep presets use GPT-6 via
+Codex; existing personal catalogs are neither overwritten nor migrated.
+Source archive identity and recipe pins are recorded in
+[core provenance](core-provenance.md#pi-0871-integration).
+
+- Core `npm ci --ignore-scripts --no-audit --no-fund`: passed on Node **22.23.2**.
+  No dependency lifecycle scripts ran. Upstream's example-only Gondolin Node
+  requirement and eval-only autoevals package-manager requirement emitted engine
+  warnings. Undici **8.10.2** release notes were reviewed; proxy/HTTP tests passed.
+- Core `npm run check`: passed, including formatting, dependency declarations,
+  pinned versions, import/entry graphs, shrinkwrap/install-lock checks, types,
+  and browser smoke.
+- Core `npm run build:offline`: passed on Node **22.23.2** with an isolated HOME
+  and no provider credentials. Generated provider data validated against the
+  verified 0.87.1 archive. Built CLI `--version` returned **0.87.1**.
+- Core `./test.sh`: passed on Node **26.7.0**. The runner removes credentials and
+  isolates HOME, config, and temporary files; live-provider suites were skipped.
+  Coding-agent reported **2,703 passed / 50 skipped**. TUI separately passed
+  **994 / one skipped** on Node 22.23.2.
+- Node **22.23.2** full-suite limitation: Chord's 100,000-argument append test
+  exceeds its call stack. The same test failed in pristine 0.85.0 source with
+  the current test dependencies, and passed on Node 26.5.0 and 26.7.0. Imported
+  Chord code was not changed to hide this pre-existing runtime limit.
+- Root `python3 -m unittest discover -s tests -p 'test_*.py' -v`: **237 run,
+  one skipped**. The launcher exception accepts only exact `update --models`;
+  mixed core/package flags remain refused. Guard and child-argv regressions were
+  observed red before the fix and green afterward.
+- Isolated built-SDK resource loading registered all **eight external extensions**
+  and the Cursor provider without errors. This verifies loading, not authenticated
+  provider turns or nested-agent execution. The two installed Cursor SDK bundle
+  hashes still match the existing **1.0.27** attribution-off patch's input hashes.
+- Native managed-style TUI startup rendered in isolated tmux at **100 and 40
+  columns**; keyboard opening/closing of `/settings` and `/quit` worked. No
+  provider prompt was sent. An initial temporary profile fixture omitted its
+  required `cycle` field; the expected fail-closed dialog appeared, and the
+  fixture was corrected without changing profile validation.
+- Independent Astra review found cache warming surviving cancellation until
+  settlement. The correction cancels scheduled and in-flight warming immediately,
+  ignores late completions, and allows deliberate later requests to restart it.
+  Both new public-session regressions failed before the fix; **32 focused tests**
+  then passed. Narrow re-review cleared the finding with no new blockers.
+- Root and core `git diff --check`: passed. No commits, pushes, live profile
+  changes, or activation were performed.
+
+The user subsequently authorized local commits, installation, and activation.
+The recipe now advances its core pin and matching archive fields together to
+0.87.1. The checks above precede managed preparation/activation and do not alone
+certify a retained release. Authenticated turns, full managed-plugin session
+lifecycle, Linux/Windows, and fresh-machine installation remain unverified.
+
 ## Fork maintenance cutover (local)
 
 Tested recipe **`8c10f9240a11780c9c656289548e36fe5f4b79c9`**, core

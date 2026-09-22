@@ -16,11 +16,11 @@
       "path": "plugins/attro-core",
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
-      "upstream": "https://github.com/earendil-works/pi-mono.git",
-      "pin": "e7c1886b8b0831629699e7f10337f8380ac65a8d",
-      "baseCommit": "107d79f11072bbc8a3a757ed7fd69596bee7d68c",
+      "upstream": "https://github.com/earendil-works/pi.git",
+      "pin": "cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27",
+      "baseCommit": "f07218c4d4bbc12bef056a7058c3dd49dfe41abe",
       "forkRootCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
-      "baseVersion": "0.85.0",
+      "baseVersion": "0.87.1",
       "packagePath": ".",
       "sourceEntryFiles": [
         "package.json",
@@ -34,23 +34,23 @@
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
       "sourceArchive": {
-        "url": "https://github.com/earendil-works/pi/releases/download/v0.85.0/pi-0.85.0-source.tar.gz",
-        "sha256": "b4dd5d4db4cd2832389da6445485bbca9db9c6d83bb7504d67975af5c5fe8307",
-        "commit": "107d79f11072bbc8a3a757ed7fd69596bee7d68c",
-        "tree": "f5103239060686ea2983e18906857b3df54428f5"
+        "url": "https://github.com/earendil-works/pi/releases/download/v0.87.1/pi-0.87.1-source.tar.gz",
+        "sha256": "793949d8d9e56629346e4bb9a6bf5fc17952ef746a1bf4f3185f8e960e806fcf",
+        "commit": "f07218c4d4bbc12bef056a7058c3dd49dfe41abe",
+        "tree": "7053e72909a45c2e400f0506c4aa98e53b26f429"
       },
       "forkComparison": {
-        "pin": "4cf75e855d51d24cdb6a533bfca4374285566a18",
+        "pin": "cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27",
         "method": "git-archive-pinned-commit-vs-release-archive",
-        "forkTreePathCount": 1688,
-        "commonPathCount": 1658,
-        "identicalPathCount": 1588,
-        "differentPathCount": 70,
-        "forkOnlyPathCount": 30,
-        "archiveOnlyPathCount": 40,
-        "archiveOnlyNote": "All 40 archive-only paths are generated provider model data under packages/ai/src/providers/data."
+        "forkTreePathCount": 1948,
+        "commonPathCount": 1861,
+        "identicalPathCount": 1763,
+        "differentPathCount": 98,
+        "forkOnlyPathCount": 87,
+        "archiveOnlyPathCount": 42,
+        "archiveOnlyNote": "All 42 archive-only paths are generated provider model data under packages/ai/src/providers/data."
       },
-      "testReport": "First-party transcript and managed features: npm run check passed on Node 22.23.2; 20 focused suites, 199 tests passed after formatting. Actual CLI synthetic-provider renders at 40 and 80 columns verified without CC/Zentui plugins or provider credentials, including tool/thinking expansion. Write-sidecar and reference-boundary Astra reviews cleared corrections. Native Zentui phase previously passed 103 focused tests. Combined clean recipe preparation remains a separate gate.",
+      "testReport": "Pi 0.87.1 integration: npm run check and build:offline passed on Node 22.23.2; full isolated ./test.sh passed on Node 26.7.0 (2703 coding-agent tests passed, 50 skipped). Check and full tests passed again after the approved Light/Balanced/Deep GPT-6 default-profile update; existing personal catalogs retain precedence. Native TUI inspected at 100/40 columns and all eight external plugins loaded. Astra cleared the cache-warmer cancellation correction after red-to-green scheduled/in-flight regressions. Node 22 retains the reproduced upstream 0.85 large-append stack limit. See docs/verification.md for scope and remaining platform/authenticated-provider limits.",
       "provenance": "docs/core-provenance.md"
     },
     {
