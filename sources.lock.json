@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi.git",
-      "pin": "cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27",
+      "pin": "4d78416951005f8bc8f0e628d8cef7675d26b576",
       "baseCommit": "f07218c4d4bbc12bef056a7058c3dd49dfe41abe",
       "forkRootCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "0.87.1",
@@ -50,7 +50,7 @@
         "archiveOnlyPathCount": 42,
         "archiveOnlyNote": "All 42 archive-only paths are generated provider model data under packages/ai/src/providers/data."
       },
-      "testReport": "Pi 0.87.1 integration: npm run check and build:offline passed on Node 22.23.2; full isolated ./test.sh passed on Node 26.7.0 (2703 coding-agent tests passed, 50 skipped). Check and full tests passed again after the approved Light/Balanced/Deep GPT-6 default-profile update; existing personal catalogs retain precedence. Native TUI inspected at 100/40 columns and all eight external plugins loaded. Astra cleared the cache-warmer cancellation correction after red-to-green scheduled/in-flight regressions. Node 22 retains the reproduced upstream 0.85 large-append stack limit. See docs/verification.md for scope and remaining platform/authenticated-provider limits.",
+      "testReport": "Codex Fast: npm run check/pre-commit checks and 67 mocked provider tests passed; post-hook tier accounting, unsupported-tier rejection, and pre-transport abort regressions covered. Independent Astra review cleared the exact GPT-6 pricing change; live Fast entitlement/latency remain untested. Earlier Pi 0.87.1 integration: npm run check and build:offline passed on Node 22.23.2; full isolated ./test.sh passed on Node 26.7.0 (2703 coding-agent tests passed, 50 skipped). Check and full tests passed again after the approved Light/Balanced/Deep GPT-6 default-profile update; existing personal catalogs retain precedence. Native TUI inspected at 100/40 columns and all eight external plugins loaded. Astra cleared the cache-warmer cancellation correction after red-to-green scheduled/in-flight regressions. Node 22 retains the reproduced upstream 0.85 large-append stack limit. See docs/verification.md for scope and remaining platform/authenticated-provider limits.",
       "provenance": "docs/core-provenance.md"
     },
     {
@@ -107,7 +107,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "4711a8e968bc5c09768e5dbf7bee423ac9157f2a",
+      "pin": "a07563a8f386882a11ff82c9e2c3b315841f7168",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -119,7 +119,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "Panel glyph adjustment: node subagents.test.cjs reported ALL PASS on Node 22.23.2. Earlier resource optimization: 421 subagent and 30 concurrency checks passed on Node 26.7. Real RPC delayed-start readiness, saved-session resume, generation/permission guards, pending-message races, and cooperative helper cleanup covered. Native-dock benchmark: 853 records, 40 idle ticks, zero registry reads. Independent sensitive review cleared corrections; real-provider memory drainage not measured.",
+      "testReport": "Agent-definition-only Codex Fast: 450 subagent assertions and 30 concurrency checks passed on Node 26.7.0. Standard defaults, unsupported overrides, parent-speed isolation, warm/cold resume, and 42/120-column Fast request rendering covered. Independent Astra review has no outstanding findings. Earlier panel glyph adjustment: node subagents.test.cjs reported ALL PASS on Node 22.23.2. Earlier resource optimization: 421 subagent and 30 concurrency checks passed on Node 26.7. Real RPC delayed-start readiness, saved-session resume, generation/permission guards, pending-message races, and cooperative helper cleanup covered. Native-dock benchmark: 853 records, 40 idle ticks, zero registry reads. Independent sensitive review cleared corrections; real-provider memory drainage not measured.",
       "provenance": "QUATTRO.md"
     }
   ],

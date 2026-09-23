@@ -8,9 +8,11 @@ are not invariant across future pins.
 ## Pi 0.87.1 integration
 
 Core commit `65885dbf60293ae5b2982bb12f8bbc1e78c125ea` upgrades the prior
-Attro fork `e7c1886b8b0831629699e7f10337f8380ac65a8d`. The final recipe pins
+Attro fork `e7c1886b8b0831629699e7f10337f8380ac65a8d`. The integration recipe pinned
 `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27`, which also includes the approved
-Light/Balanced/Deep GPT-6 defaults, and the matching model-data archive below. See
+Light/Balanced/Deep GPT-6 defaults, and the matching model-data archive below.
+Later scoped core changes advance the current pin in `sources.lock.json`; the
+audited comparison snapshot below remains unchanged. See
 [verification](verification.md#pi-0871-local-candidate) for tested behavior,
 review corrections, and platform limits.
 
