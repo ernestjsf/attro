@@ -1,0 +1,60 @@
+name: Public preview installation
+
+on:
+  push:
+    tags:
+      - 'v*-preview.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published immutable preview tag to install anonymously
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  tagged-bootstrap:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.3'
+          cache: ''
+      - name: Install the public tag without checkout credentials
+        shell: bash
+        env:
+          PREVIEW_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if [[ ! "$PREVIEW_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-preview\.[0-9]+$ ]]; then
+            echo 'Expected a published vX.Y.Z-preview.N tag' >&2
+            exit 1
+          fi
+          TEST_HOME=$(mktemp -d "$RUNNER_TEMP/attro-public-home.XXXXXX")
+          env -i HOME="$TEST_HOME" PATH="$PATH" \
+            ATTRO_HOME="$TEST_HOME/.attro" PREVIEW_TAG="$PREVIEW_TAG" \
+            GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_TERMINAL_PROMPT=0 \
+            PI_TELEMETRY=0 PI_OFFLINE=1 \
+            bash --noprofile --norc -eu -o pipefail <<'SH'
+          cd "$HOME"
+          curl --fail --silent --show-error --location \
+            "https://raw.githubusercontent.com/ernestjsf/attro/$PREVIEW_TAG/install.sh" \
+            --output install.sh
+          sh install.sh
+          SOURCE="$HOME/.local/share/attro"
+          test "$(git -C "$SOURCE" rev-parse HEAD)" = \
+            "$(git -C "$SOURCE" rev-parse "refs/tags/$PREVIEW_TAG^{commit}")"
+          cd "$SOURCE"
+          python3 scripts/verify.py
+          "$HOME/.local/bin/attro" --version
+          "$HOME/.local/bin/attro" exec -- --version
+          "$HOME/.local/bin/attro" exec -- --help
+          "$HOME/.local/bin/attro" doctor --repo "$SOURCE"
+          test ! -e "$ATTRO_HOME/agent/auth.json"
+          SH

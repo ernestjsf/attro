@@ -42,14 +42,24 @@ not describe a failed lookup as "up to date".
 - `.github/workflows/check-updates.yml` runs discovery weekly or manually and
   uploads the report for review. It uses read-only repository permissions and
   does not need fork checkout credentials for the default upstream-only check.
-- `.github/workflows/ci.yml` runs offline lifecycle/discovery tests on macOS and
-  Linux, plus a separate recursive-checkout install smoke job on both platforms.
+- `.github/workflows/ci.yml` runs root-only offline lifecycle/discovery tests on
+  macOS and Linux without fetching private submodules. A separate install smoke
+  job retains recursive checkout on both platforms; do not skip it or treat
+  root-only tests as proof that the distribution can be installed.
   The smoke job verifies pins, builds a release using `./install` in an isolated
   profile, and checks CLI version/help and doctor without provider credentials.
   It requires accessible fork pins. It does not certify authenticated provider
   use, combined interactive TUI behavior, or Windows/WSL integration.
 
-Both workflows use pinned action commits. No privileged `pull_request_target`
+- `.github/workflows/preview-install.yml` checks a published `vX.Y.Z-preview.N`
+  tag on macOS and Linux, on tag push or manual dispatch. It downloads the actual
+  tagged bootstrap without a checkout token, clears ambient credentials and Git
+  configuration, installs into a fresh home, verifies the checked-out tag/pins,
+  and checks version/help/doctor. It never publishes or promotes a release. Until
+  the publication gates clear and a tag exists, this delivery check cannot pass.
+  It does not exercise authenticated provider turns or WSL2.
+
+All workflows use pinned action commits. No privileged `pull_request_target`
 job executes contributor code. No deployment or cross-repository write token is
 configured by these files.
 
