@@ -6,6 +6,78 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## First-four performance candidate (2026-09-26)
+
+Tested source **`e2d71639a950bb35e093fc140b9bf032083d1faa`**, with core
+`cd81d9ad`, Lens `fbf7aa3e`, subagents `f2d78013`, and unchanged RPIV `1a1d7818`.
+A clean local-object clone prepared **`attro-0.2.0-35cda96e2569`** in disposable
+HOME/state on macOS arm64, Node **26.7.0**, Python **3.14.6**. Neither the live
+release nor personal configuration was activated or rewritten; commits remain
+local. This record does not certify publication or authenticated provider use.
+
+- Clean-clone `python3 scripts/verify.py` and `git diff --check`: **passed**.
+  `python3 -m unittest discover -s tests -p 'test_*.py' -v`: **239 run, one skipped**.
+  The original checkout retains the unrelated pre-existing core changelog edit;
+  that edit was excluded from commits and the clean verification clone.
+- Core required `npm run check` and **75 focused RPC/session tests** passed.
+  Faux-provider wire captures reproduced both oversized lifecycle aggregates;
+  opt-in child projection reduced the observed `turn_end` / `agent_end` records
+  from about 1.2 MB each to **19 / 38 bytes**, without truncating tool results.
+- Subagents: **483 assertions and 30 concurrency checks passed**. Independent
+  sensitive reviews cleared transport settlement, retained process ownership,
+  cancellation, and warm-retirement protections. Concurrency remains four;
+  the warm-idle default is now 30 seconds, with explicit overrides preserved.
+- Lens build, strict lint, offline distribution build, changelog checks, and
+  **five compiled MCP smoke tests** passed. The full suite passed **8,872 tests,
+  49 skipped** across **727 passing / 11 skipped files**. Baseline platform,
+  mock-asset, state-count and async-fixture failures were repaired separately.
+  Red-first and mutation checks cover cold-index publication races; independent
+  sensitive review cleared the optimistic source/snapshot publication fence.
+- RPIV: **380 focused tests across 29 files**, type and non-writing format
+  checks passed. The packaged todo/config/i18n files match their pinned source;
+  the external closure is locked `typebox@1.3.6`. Artifact mutation/symlink
+  checks and the new preparation branch regression passed; provenance/path
+  review found no blockers.
+- Actual candidate preparation and post-startup `doctor` passed. The updated
+  manager also validated the retained Cursor-bearing control release. New
+  releases omit Cursor, but historical manifests and personal data remain intact.
+- Compiled CLI **100×30 PTY** startup and `/quit` exited **0** without forced
+  cleanup. All seven managed plugins loaded. Synthetic-provider RPC checks
+  exercised todo dependencies/state transitions, saved-session replay, German
+  localization, default/compact event shapes, and real managed children.
+  Final Node-26.7 probes completed **one and four children**, retaining the pinned
+  binary, resource envelope, child markers and restricted tool lists. A real
+  requested TypeScript `documentSymbol` returned `greet`; the initial empty
+  result was traced to the fixture's missing discoverable TypeScript install.
+  The earlier todo/replay/two-child probes used Node **26.5.0** and are separate
+  evidence. All fixture-owned parent/child PIDs were gone after cleanup.
+
+Five interleaved, credential-free control/candidate pairs per mode used the same
+Node 26.7 runtime. The control was prepared from `c8ccf8c` and the candidate from
+`e2d7163`. Network-denied direct-CLI `--help` medians were **2.452 → 1.937 s**;
+RPC `get_state` readiness was **2.543 → 1.886 s**. Help peak RSS medians were
+**468.4 → 449.9 MiB**. These are not model first-token or full managed-launch
+measurements. Read-only manager validation separately became **0.200 → 0.367 s**
+(median of five pairs), reflecting the added 1,420-file RPIV integrity inventory.
+That cost is not hidden in the direct-CLI improvement claim.
+
+Allocated release size after the probes was **2,288,796 → 1,462,344 KiB**
+(about **2.18 → 1.39 GiB**); RPIV alone was **792,256 → 6,572 KiB**. Allocation
+is not compressed download size or uniquely reclaimable physical space.
+Five faux-child retention comparisons at simulated 31-second idle age retired
+four children under the new window versus none under 120 seconds, trading
+roughly **210 ms median cold continuation overhead** for lower residency in that
+fixture. These figures are not live-provider or full-tree RAM guarantees.
+
+The semantic probe's first exploratory run unexpectedly made an npm registry
+request. The final positive LSP run disabled installs and used npm offline mode;
+its npm logs show no HTTP fetch, but it did not have an OS network firewall.
+Only the startup benchmarks and PTY probes claim OS-level network denial.
+No live provider API calls or credential copies were part of these probes.
+Linux/WSL2, another machine, authenticated tasks, and live activation remain
+unverified. The candidate is prepared and locally verified, not installed as
+this user's active release or published.
+
 ## Public-readiness baseline (2026-09-26)
 
 Historical sections below describe their recorded revisions, not current
