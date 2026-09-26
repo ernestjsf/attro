@@ -18,18 +18,28 @@ tag or release is available yet.
 - Immutable per-release code with a shared user profile seeded once from
   UI/package defaults. Existing personal credentials, history, skills, and
   routing are not copied from the original Pi profile.
-- Four pinned source forks (core, Lens, rpiv todo, subagents), five descriptor
+- Four pinned source forks (core, Lens, rpiv todo, subagents), four descriptor
   npm packages, committed dependency locks, and source/provenance verification.
+- Todo-only RPIV runtime packaging retains configuration and localization support
+  without installing unrelated workspaces or development dependencies.
+- Light child sessions defer Lens indexing and startup scans until requested.
+  Subagents use targeted registry reads and a 30-second warm-idle default;
+  explicit retention overrides and active concurrency are unchanged.
 - Managed resource routing for sessions and subagents; lease-aware cleanup of
   idle superseded releases. The active release and one staged candidate are kept.
-- Reviewed, hash-checked Cursor SDK attribution-default patching during
-  preparation; native UI replaces the former standalone Zentui/CC recipe inputs.
+- New releases omit Cursor SDK support and attribution patching. Retained
+  Cursor-bearing releases remain validated; personal provider data is preserved.
+  Native UI replaces the former standalone Zentui/CC recipe inputs.
 
 ### Fixed
 
 - First-run effort-profile errors explain login/model setup without assuming a
   personal profile file exists. Explicit continuation remains required.
 - Managed session exit hints use the installed `attro` launcher instead of `pi`.
+- Child markers activate Lens's lightweight mode. Compact child RPC lifecycle
+  events avoid repeating oversized aggregates, with bounded failure reporting.
+- Cold symbol-index publication rejects intervening source and snapshot changes
+  rather than exposing a superseded build as ready.
 
 ### Known limits
 
