@@ -14,7 +14,8 @@ divergence.
 ## Consumer update (shared profile)
 
 After `./install` or an equivalent manual setup, updating Attro prepares a new
-release from an explicit trusted checkout and switches the active pointer. The
+release from an explicit trusted checkout. A separate `activate` command (or
+explicit `update --activate`) switches the active pointer. The
 shared profile at `~/.attro/agent` **persists** across update and rollback:
 
 ```sh
@@ -38,8 +39,8 @@ has already been pruned. Legacy per-release user data is preserved. See the
    migration work. Existing `~/...ui-backups` are retained.
 2. Fetch an `upstream` remote inside the relevant submodule.
 3. Review the upstream range and merge the intended changes into that submodule's
-   `main` branch. Keep the private `origin` URL and do not publish source from
-   this root.
+   `main` branch. Keep its canonical `origin` URL. Publication requires the
+   [history and privacy gates](publication.md), not merely a successful merge.
 4. Run the source package's locked checks. Use `npm ci --ignore-scripts` first
    when dependencies are absent. For Lens, run `npm run build:dist`, download core
    grammars, and run `npm run check:grammars`; development tests require `npm run
@@ -53,9 +54,10 @@ has already been pruned. Legacy per-release user data is preserved. See the
 6. Run `python3 scripts/verify.py` (and `--runtime` after generated preparation
    for file-presence only), inspect `git diff --check`, and commit the root change with a logical
    conventional message.
-7. Push the reviewed source branches to their approved private mirrors as needed,
-   then push the root private fork only after Lead review. Never force-push or
-   reset dirty submodules.
+7. Push reviewed source branches to their approved mirrors first, then update
+   the public root only after verifying every intended public pin is accessible.
+   Do not expose private fork history before its publication clearance. Never
+   force-push or reset dirty submodules.
 
 A fresh clone should add upstream remotes using the commands in setup.md; those
 remotes are clone-local and intentionally not represented in `.gitmodules`.

@@ -8,19 +8,24 @@ and the distribution profile. Core is built from the maintained `attro-core`
 fork; installed releases are not edited in place.
 
 **Preview release:** Attro **0.2.0** is a source-built distribution, not a
-certified stable release. There is no automatic stable update feed. See
-[verification evidence](docs/verification.md) for tested platforms and remaining
-limits, and [publication gates](docs/publication.md) for history sanitization.
+certified stable release. There is no automatic stable update feed. The root
+repository is public, but the required fork repositories are not yet all public;
+**anonymous installation is not available yet**. See [publication gates](docs/publication.md)
+for the release blockers and [verification evidence](docs/verification.md) for
+what has actually been tested.
 
 ## Install
 
 Requires **Git, Python 3.10+, Node 22.19.0+, and npm** on PATH, plus `curl`
-for the command below. Supported environments are **macOS, Linux, and Windows
-through WSL2**. Native Windows/PowerShell installation is not supported.
+for the command below. Target environments are **macOS and Linux**; Windows
+users need **WSL2**, which still requires separate integration verification.
+Native Windows/PowerShell installation is not supported.
 Install prerequisites using your preferred package/version manager first; the
 installer does not use `sudo` or install system dependencies.
 
-Once the `v0.2.0-preview.1` tag is published:
+**Not yet available:** the following command is reserved for
+`v0.2.0-preview.1`. Do not run it until that tag and all pinned forks have been
+published and its clean installation checks have passed:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ernestjsf/attro/v0.2.0-preview.1/install.sh | sh
@@ -41,8 +46,10 @@ Linux CI is not a separate verification of Windows/WSL integration.
 
 ### Install from a trusted checkout
 
-Alternatively, start with a clean, **recursive** clone. Review its sources before
-executing dependency installation or builds.
+Contributors with access to every required fork can start with a clean,
+**recursive** clone. This becomes an anonymous installation option only after
+the publication gates clear. Review its sources before executing dependency
+installation or builds.
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git
@@ -76,6 +83,13 @@ live login, session history, OAuth tokens, trust state, agent definitions,
 model routing, skills, prompts, or other personal configuration** from
 `~/.pi/agent`. Later activations, updates, and rollbacks preserve whatever you
 establish under the shared profile. See [managed state](profile/MANAGED.md).
+
+For provider setup, the first task, updates, uninstall, and troubleshooting, see
+[Using Attro](docs/using-attro.md). Model access is separate from this MIT-licensed
+software and may incur subscription or API charges. Built-in effort presets use
+specific Codex routes; other providers can be selected without those presets.
+Tools run with your user permissions, not in a built-in sandbox; read
+[SECURITY.md](SECURITY.md).
 
 If you prefer manual steps or are developing the manager itself, see
 [setup](docs/setup.md).
@@ -224,6 +238,15 @@ remain authoritative ([third-party inventory](THIRD_PARTY_NOTICES.md)).
 Legacy upstream npm releases of `@earendil-works/pi-coding-agent` remain
 readable for comparison; Attro **0.2.0** builds core from the pinned
 `plugins/attro-core` source tree instead of installing that npm package directly.
+
+## Contributing and support
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for repository ownership and checks,
+[CHANGELOG.md](CHANGELOG.md) for preview changes, and the
+[issue tracker](https://github.com/ernestjsf/attro/issues) for non-sensitive bugs
+and feature requests. Report vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md). Preview support is best-effort; there is no stable
+compatibility or support-window promise yet.
 
 ## Developer checks
 

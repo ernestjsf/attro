@@ -1,6 +1,8 @@
 # Setup and manual migration
 
 For the isolated Attro manager, start with the [main README](../README.md).
+For provider setup, billing expectations, updates, uninstall, and troubleshooting,
+see [Using Attro](using-attro.md).
 This page covers consumer install, developer source preparation, and the legacy
 workbench live-migration reference. Managed setup builds its own copies; do not
 perform the live migration below merely to try a managed release.
@@ -11,8 +13,10 @@ packages, or bypass guarded settings writes.
 
 ## Consumer install (Attro 0.2.0)
 
-Requires Python 3.10+, Git, npm, and Node 22.19.0+ on macOS, Linux, or
-Windows through WSL2. Native Windows is not supported. For the tagged one-command
+Public installation is pending: the root is public, but required forks are
+still private. The commands below currently require access to those forks.
+Requires Python 3.10+, Git, npm, and Node 22.19.0+ on macOS or Linux;
+Windows through WSL2 remains a separate, unverified integration target. Native Windows is not supported. For the tagged one-command
 bootstrap and WSL instructions, see [Install](../README.md#install).
 The manual equivalent is:
 
@@ -148,7 +152,7 @@ patches can compete with native rendering. See [transcript UI](transcript-ui.md)
 Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` monorepo
 instead of installing `@earendil-works/pi-coding-agent` from npm. Preparation
 exports the pinned commit, runs `npm ci`, downloads the hash-pinned upstream
-**0.85.0** model-data archive, and runs the offline build. Network access is
+**0.87.1** model-data archive, and runs the offline build. Network access is
 required for locked dependencies and the model-data asset. The built CLI is
 `packages/coding-agent/dist/bundle/cli.js`. Core and TUI are built together from
 the same tree. Retained releases under `releases/<id>/pi/` are larger than

@@ -20,6 +20,34 @@ visibility. Revoke/rotate any genuine credentials; history removal alone cannot
 invalidate them. The final scan, publication, and install evidence must be
 recorded before advertising a tag. No stable consumer update feed is enabled.
 
+## Readiness checkpoint (2026-09-26)
+
+Live GitHub metadata confirms that `ernestjsf/attro` is already **public**;
+`attro-core`, `attro-lens`, `attro-rpiv`, and `attro-subagents` remain **private**.
+There are no published Attro tags or releases, and the planned preview installer
+URL returns HTTP 404. The latest distribution CI run failed during recursive
+checkout, before tests or installation could execute.
+
+The September 17 sanitation work is historical evidence, not final clearance.
+Read-only anonymous checks still retrieved original root commits identified by
+that audit as affected by the rewrite. This establishes retained-object
+accessibility, not a finding that genuine credentials are present. The documented
+GitHub Support cleanup remains unresolved. Lens/rpiv retained PR references and
+the historical Actions logs/artifacts also need clearance before their private
+repositories can be exposed. Keep exact affected-object identifiers and any
+sensitive findings in the private audit packet, not public issues.
+
+The current local candidate descends from public `main`; its five unpublished
+root commits passed a redacted Gitleaks delta scan. That limited result does not
+replace a fresh all-ref scan of the root and forks or a retained-data audit.
+Do not publish additional source, change fork visibility, or advertise a release
+until those gates clear. Local preparation, tests, and readiness documentation
+can continue without exposing private data.
+
+For the ordered source/CI/tag/bootstrap release procedure, see
+[Releasing an Attro preview](releasing.md). The website must continue to describe
+installation as unavailable until actual public delivery is verified.
+
 ## Current source topology
 
 The root checkout is `pi-customizations`, with a `main` branch and GitHub
@@ -133,5 +161,7 @@ CC, web-access, and ask-user are no longer submodules of the current recipe:
 | `ernestjsf/pi-subagents-quattro` | `ernestjsf/attro-subagents` |
 | _(new private fork)_ | `ernestjsf/attro-core` |
 
-The attro-core fork tracks upstream `earendil-works/pi-mono` at Pi **0.85.0**
-for source-built core preparation.
+The attro-core recipe now integrates Pi **0.87.1** using its hash-pinned source
+archive. See [core provenance](core-provenance.md) for the archive identity and
+fork comparison; the lock file, not this historical URL table, identifies the
+current source pin.

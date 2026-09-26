@@ -117,18 +117,14 @@ Model-data application during preparation is implemented in `attro/core_source.p
 
 ### Exact commands (from repository root)
 
-Replace `/tmp/attrocmp` with any empty disposable directory.
+Run from your reviewed Attro checkout. Create a fresh comparison directory;
+keep it until you have inspected the results.
 
 ```bash
-cd /Users/ernestjusuf/projects/pi-customizations
-
-CMP=/tmp/attrocmp
+CMP=$(mktemp -d "${TMPDIR:-/tmp}/attrocmp.XXXXXX")
 FORK_PIN=cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27
 URL='https://github.com/earendil-works/pi/releases/download/v0.87.1/pi-0.87.1-source.tar.gz'
 EXPECTED_SHA=793949d8d9e56629346e4bb9a6bf5fc17952ef746a1bf4f3185f8e960e806fcf
-
-rm -rf "$CMP"
-mkdir -p "$CMP"
 
 curl -fL -o "$CMP/pi-0.87.1-source.tar.gz" "$URL"
 ACTUAL_SHA=$(shasum -a 256 "$CMP/pi-0.87.1-source.tar.gz" | awk '{print $1}')
