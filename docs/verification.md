@@ -94,7 +94,40 @@ On Node **26.7.0**, with an isolated HOME/agent directory and no credentials:
   No provider prompt was sent and no effort-profile file was created.
 
 These results cover the committed source correction, not a published installer.
-Updated managed-release integration is a separate check.
+
+### Updated managed release on Node 22
+
+A clean recursive **local-object** clone of root
+**`0a1575c185cf417da4f6dd871368efdede3e63a0`**, including core `63067e5`, passed
+`python3 scripts/verify.py`. Its source remained clean after testing. On the same
+macOS arm64 host, the official checksummed **Node 22.22.3 / npm 10.9.8** runtime
+prepared release **`attro-0.2.0-ac2feafc4f20`** through the actual manager's
+`update --repo <clean-source>` command. The prepared provenance confirms those
+build versions and root revision. This closes the local Node-22 build gap for
+that version, not the exact 22.19.0 minimum floor.
+
+In an explicit credential-free environment and disposable managed root:
+
+1. Started a real PTY session on baseline release `attro-0.2.0-cdff6862ba8d` and
+   explicitly continued without a profile; kept it running during preparation.
+2. Prepared and activated the updated release. The old running session's code
+   remained registered; candidate `doctor --repo <clean-source>` was healthy
+   with no issues or warnings.
+3. Started the updated release in another **100×30 PTY**. Verified the rendered
+   login/model/profile guidance and `attro --session` exit hint; `/quit` exited
+   **0**. No extension module-load errors were found.
+4. Verified settings, empty auth, and a synthetic profile continuity marker
+   remained byte-identical across activation. `rollback` returned to the retained
+   baseline release while its session was still running, and those bytes remained
+   unchanged. The baseline session then also exited **0**, without forced cleanup.
+5. Audited the disposable profile: auth remained `{}` and session files contained
+   **zero conversation messages**. No provider prompt or live activation occurred.
+
+These are real local build, activation, concurrent-session retention, and
+retained-code rollback checks—not a guarantee of rollback after pruning, a data
+migration test, a provider login, or anonymous delivery. No production storage
+or concurrency implementation changed. Public macOS/Linux bootstrap, Linux/WSL2,
+authenticated/model-driven tasks, and publication clearance remain unverified.
 
 ## Pi 0.87.1 local candidate
 

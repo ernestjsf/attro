@@ -86,7 +86,7 @@ the references yourself. Attro does not rewrite personal files for you.
 
 Each `releases/<id>/` contains:
 
-```
+```text
 pi/          source-built Pi monorepo from pinned plugins/attro-core (see below)
 plugins/     committed plugin trees, with dependencies/build artifacts
 config/      allowlisted plugin configs and pristine managed settings
