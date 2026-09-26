@@ -103,7 +103,7 @@ personal Pi setup:
 - **First-party UI** in attro-core: native composer, activity, dock, and selected
   transcript rendering and commands adopted from Zentui and CC extensions
 - **Three customized plugin forks** (Lens, rpiv todo, subagents)
-- **Five descriptor npm packages** (`pi-caffeinate`, `pi-btw`, `pi-cursor-sdk`,
+- **Four descriptor npm packages** (`pi-caffeinate`, `pi-btw`,
   `pi-web-access`, `pi-ask-user`)
 - **Shared display defaults** in `config/` (`claude-code-style.json` for native
   transcript preferences, and `rpiv-todo.json`)
@@ -196,19 +196,14 @@ and PID when available. Never manually delete releases while sessions still use 
 optional disposable fork-merge assessment, and the remaining release-PR lane.
 Discovery reports are **not** an automatic consumer release feed.
 
-### Cursor attribution
+### Cursor availability
 
-New releases disable Cursor SDK's default commit and PR attribution through the
-versioned `sdkPatches` entry in `attro.json`. Preparation patches only staged
-`@cursor/sdk@1.0.27` bundles, checks their original and resulting SHA-256 hashes,
-and records patch provenance that is verified when the release is used. An
-unrecognized SDK version or bundle fails preparation rather than being patched
-blindly; SDK upgrades require a reviewed patch specification.
-
-This changes attribution defaults, not explicit overrides or admin controls.
-It does not rewrite existing commits, change original Pi, or modify retained
-releases. Prepare and activate a new release to adopt it, then start a fresh
-session. Cursor Cloud attribution is not covered.
+New releases do not include `pi-cursor-sdk` or its SDK attribution patch. Attro
+continues to validate patch provenance when launching already prepared
+Cursor-bearing releases; it does not rewrite them or remove user configuration,
+credentials, or sessions. A personal model selection that requires the removed
+provider will not work in a new release until the user selects an available
+provider. Attro does not silently reroute it.
 
 ## Structure
 

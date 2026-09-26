@@ -300,6 +300,20 @@ install_deps()
         validate_public_npm_lock(REPO_ROOT / "runtime/npm/package-lock.json")
         validate_public_npm_lock(REPO_ROOT / "runtime/rpiv-todo/package-lock.json")
 
+    def test_shipped_npm_lock_matches_cursor_free_recipe(self):
+        descriptor = validate_descriptor(REPO_ROOT / "attro.json")
+        package = json.loads((REPO_ROOT / "runtime/npm/package.json").read_text())
+        lock = json.loads((REPO_ROOT / "runtime/npm/package-lock.json").read_text())
+        expected = {entry["package"]: entry["version"] for entry in descriptor["npmPackages"]}
+        self.assertEqual(package["dependencies"], expected)
+        self.assertEqual(lock["packages"][""]["dependencies"], expected)
+        self.assertFalse(any(path == "node_modules/pi-cursor-sdk" or path.startswith("node_modules/@cursor/sdk") for path in lock["packages"]))
+        self.assertFalse(any(
+            "@cursor/sdk" in record.get(key, {})
+            for record in lock["packages"].values()
+            for key in ("dependencies", "optionalDependencies", "peerDependencies")
+        ))
+
     def test_committed_lock_uses_npm_ci(self):
         output, _ = self.cli("--json", "setup", "--repo", str(self.repo), "--activate")
         manifest = json.loads(output)

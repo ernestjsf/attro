@@ -73,8 +73,10 @@ class RenderProfileNpmTests(unittest.TestCase):
 
 
 class DescriptorNpmTests(unittest.TestCase):
-    def test_repo_descriptor_includes_five_live_packages(self) -> None:
+    def test_repo_descriptor_includes_four_live_packages_without_sdk_patch(self) -> None:
+        self.assertNotIn("sdkPatches", json.loads((ROOT / "attro.json").read_text()))
         data = validate_descriptor(ROOT / "attro.json")
+        self.assertEqual(data["sdkPatches"], [])
         packages = [(entry["package"], entry["version"]) for entry in data["npmPackages"]]
         self.assertEqual(
             packages,
@@ -83,7 +85,6 @@ class DescriptorNpmTests(unittest.TestCase):
                 ("pi-btw", "0.4.1"),
                 ("pi-ask-user", "0.14.0"),
                 ("pi-web-access", "0.27.0"),
-                ("pi-cursor-sdk", "0.3.10"),
             ],
         )
 

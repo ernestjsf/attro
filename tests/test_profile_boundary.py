@@ -31,7 +31,6 @@ EXPECTED_PACKAGES = [
     "{{NPM:pi-ask-user}}",
     "{{PLUGIN_PI_LENS}}",
     "{{NPM:pi-web-access}}",
-    "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}",
 ]
@@ -89,6 +88,8 @@ class ProfileBoundaryTests(unittest.TestCase):
         for key in PERSONAL_SETTINGS_KEYS:
             self.assertNotIn(key, rendered, msg=key)
         package_paths = rendered["packages"]
+        self.assertEqual(len(package_paths), len(EXPECTED_PACKAGES))
+        self.assertFalse(any("pi-cursor-sdk" in path for path in package_paths))
         self.assertFalse(any(path.endswith("/profile/resources") for path in package_paths))
 
     def test_seed_agent_from_ui_only_release(self) -> None:

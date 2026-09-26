@@ -17,7 +17,6 @@
     "{{NPM:pi-ask-user}}",
     "{{PLUGIN_PI_LENS}}",
     "{{NPM:pi-web-access}}",
-    "{{NPM:pi-cursor-sdk}}",
     "{{PLUGIN_PI_SUBAGENTS}}",
     "{{PLUGIN_RPIV_TODO}}"
   ],

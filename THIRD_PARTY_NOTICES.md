@@ -59,9 +59,10 @@ retaining the applicable licenses and notices in their own environment.
 ## Runtime and dependency notices
 
 The attro-core monorepo and the inspected optional npm plugins (`pi-caffeinate`,
-`pi-btw`, `pi-web-access`, `pi-ask-user`, and `pi-cursor-sdk`) declare MIT in
-their respective package metadata. Installed dependency license files must still
-be retained.
+`pi-btw`, `pi-web-access`, and `pi-ask-user`) declare MIT in their respective
+package metadata. New releases do not include `pi-cursor-sdk`; retained releases
+keep their original notices. Installed dependency license files must still be
+retained.
 
 **`pi-web-access@0.27.0` curator UI:** when a user opens the stock upstream
 curator page in a browser, the page loads web fonts from Google (`fonts.googleapis.com`

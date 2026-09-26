@@ -33,7 +33,7 @@ from attro.cursor_sdk_attribution_patch import (  # noqa: E402
     sha256_file_bytes,
 )
 from attro.state import load_state  # noqa: E402
-from attro.validate import ValidationError, sha256_file, validate_descriptor  # noqa: E402
+from attro.validate import ValidationError, sha256_file  # noqa: E402
 
 REAL_NODE = shutil.which("node")
 REAL_SDK_ROOT = Path.home() / ".pi/agent/npm/node_modules/@cursor/sdk"
@@ -101,9 +101,8 @@ def _install_synthetic_layout(
 
 
 class CursorSdkAttributionPatchTests(unittest.TestCase):
-    def test_descriptor_accepts_known_patch_id(self) -> None:
-        data = validate_descriptor(ROOT / "attro.json")
-        self.assertEqual(data["sdkPatches"], [PATCH_ID])
+    def test_legacy_known_patch_id_remains_supported(self) -> None:
+        self.assertEqual(normalize_sdk_patches([PATCH_ID]), [PATCH_ID])
 
     def test_unknown_patch_id_rejected(self) -> None:
         with self.assertRaisesRegex(ValidationError, "unknown sdk patch"):

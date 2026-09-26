@@ -71,7 +71,7 @@ Attro ships the maintained core recipe, not a maintainer's personal Pi setup:
 | --- | --- |
 | Source-built Pi core from `plugins/attro-core` | Personal instructions and agent definitions |
 | Three customized plugin forks (Lens, rpiv todo, subagents) | Model/provider routing and reasoning preferences |
-| Five descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-cursor-sdk`, `pi-web-access`, `pi-ask-user`) | Personal skills, prompts, and standalone user extensions |
+| Four descriptor npm packages (`pi-caffeinate`, `pi-btw`, `pi-web-access`, `pi-ask-user`) | Personal skills, prompts, and standalone user extensions |
 | Shared display defaults in `config/` | Quattro custom themes, personal plugin preferences, and policy extensions |
 | UI/package defaults in `profile/settings.json` | OAuth tokens, sessions, trust state, or live `~/.pi/agent` copies |
 
@@ -95,7 +95,7 @@ selected for a public profile:
 
 | Live resource | Distribution treatment |
 | --- | --- |
-| `pi-caffeinate`, `pi-btw`, `pi-cursor-sdk` | Exact npm pins in `attro.json`; never rely on an existing global install. New Attro releases opt into `sdkPatches` to stage a versioned `@cursor/sdk` attribution-default patch after `npm ci`, record provenance, and validate patched bundle digests before publication. |
+| `pi-caffeinate`, `pi-btw` | Exact npm pins in `attro.json`; never rely on an existing global install. New releases omit `pi-cursor-sdk` and its SDK patch. Retained Cursor-bearing release manifests still undergo patch-provenance validation. |
 | Standalone personal extensions (for example turn-status, auto-session-name, safety-guard, pi-automode) | Not bundled; users install or copy into their own agent directory. |
 | Optional host tools (`bb`, `herdr`) and externally installed skills | Not bundled; users install separately and retain their own notices. |
 | Agent definitions, personal `AGENTS.md`, custom skills/prompts | User-owned under `~/.attro/agent` or trusted-project paths; not seeded from the repository recipe. |
