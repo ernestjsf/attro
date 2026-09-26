@@ -1,0 +1,27 @@
+name: Feature proposal
+description: Propose a focused improvement to Attro.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues first. Describe the problem before the implementation; larger changes should be discussed before coding.
+        Do not include secrets or private code. Security-sensitive reports must follow the [security policy](https://github.com/ernestjsf/attro/blob/main/SECURITY.md), not this form.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to do, and what limitation prevents it? Use a concrete, non-sensitive example.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest useful change and what successful behavior would look like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs (optional)
+      description: Existing workarounds, related issues, or compatibility/security concerns without vulnerability details.

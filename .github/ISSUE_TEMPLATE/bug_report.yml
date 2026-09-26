@@ -1,0 +1,42 @@
+name: Bug report or setup problem
+description: Report a reproducible Attro problem or ask a focused setup question.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security vulnerabilities here. Follow the [security policy](https://github.com/ernestjsf/attro/blob/main/SECURITY.md) to request a private channel.
+        The root is public, but the four required source forks are currently private; anonymous recursive installation cannot complete.
+        Remove secrets, private code, personal paths, and account details. Full logs or session exports are not required.
+  - type: input
+    id: revision
+    attributes:
+      label: Attro revision or managed release ID
+      description: Provide a commit or release ID if available; otherwise say how you obtained the checkout.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS/version, architecture, Node and Python versions; terminal and WSL2 details if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce or setup question
+      description: Include exact commands and a minimal example using synthetic data. For a question, explain what you tried and where you are blocked.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+      description: Describe what should happen and what happened instead. A short redacted error excerpt is enough.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Relevant context (optional)
+      description: Last working revision, relevant custom extensions, or a small redacted screenshot. Do not attach auth files, environment dumps, or full transcripts.
