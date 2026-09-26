@@ -7,6 +7,7 @@
   },
   "profile": "profile/settings.json",
   "sourcesLock": "sources.lock.json",
+  "rpivTodoRuntime": "runtime/rpiv-todo",
   "stateSchemaVersion": 1,
   "manifestSchemaVersion": 1,
   "supportedPlatforms": ["darwin", "linux"],

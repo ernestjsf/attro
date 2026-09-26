@@ -1,0 +1,7 @@
+{
+  "name": "attro-rpiv-todo-runtime",
+  "private": true,
+  "dependencies": {
+    "typebox": "1.3.6"
+  }
+}

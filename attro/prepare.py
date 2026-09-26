@@ -129,14 +129,22 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
         stage.mkdir()
         (stage / "plugins").mkdir()
         dependency_locks = []
+        rpiv_runtime = None
         core_entry = None
         for entry in sources["submodules"]:
             if entry["path"] == CORE_SOURCE_SUBMODULE:
                 core_entry = entry
                 continue
             dst = safe_child(stage, entry["path"])
-            export_tracked_tree(safe_child(checkout_root, entry["path"]), dst, entry["pin"])
-            lock = entry.get("dependencyLock")
+            if entry["path"] == "plugins/rpiv-mono" and descriptor.get("rpivTodoRuntime"):
+                from attro.rpiv_runtime import prepare_rpiv_runtime
+
+                source = workspace / "rpiv-source"
+                export_tracked_tree(safe_child(checkout_root, entry["path"]), source, entry["pin"])
+                rpiv_runtime = prepare_rpiv_runtime(source, dst, snapshot)
+            else:
+                export_tracked_tree(safe_child(checkout_root, entry["path"]), dst, entry["pin"])
+            lock = entry.get("dependencyLock") if entry["path"] != "plugins/rpiv-mono" or rpiv_runtime is None else None
             if lock:
                 lock_path = safe_child(dst, lock)
                 if not lock_path.is_file():
@@ -152,6 +160,8 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
             for name in entry["runtimeEntryFiles"]:
                 if not safe_child(dst, name).is_file():
                     raise ValidationError(f"runtime file missing after staging: {entry['path']}/{name}")
+        if descriptor.get("rpivTodoRuntime") and rpiv_runtime is None:
+            raise ValidationError("todo runtime recipe requires plugins/rpiv-mono")
         config_dir = stage / "config"
         config_dir.mkdir()
         for config in sources["configs"]:
@@ -225,6 +235,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                 "core": core,
                 "npmPackages": npm,
                 "pluginDependencyLocks": dependency_locks,
+                **({"rpivTodoRuntime": rpiv_runtime} if rpiv_runtime else {}),
                 "dependencyResolution": (
                     "Core, npm packages, and plugins use committed dependency locks."
                     if runtime_locks

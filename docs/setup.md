@@ -185,10 +185,14 @@ npm run build
 npm test -- tests/tools/render-compact.test.ts tests/clients/widget-state.test.ts
 ```
 
-Other plugin runtimes are direct TypeScript entrypoints as declared in
-`sources.lock.json`. The rpiv runtime package is only
-`plugins/rpiv-mono/packages/rpiv-todo`; inspect each source package's own entry
-paths before using another package.
+Other plugin runtimes use the entrypoints declared in `sources.lock.json`.
+With `rpivTodoRuntime` enabled, preparation stages only the npm `files` manifests
+for `rpiv-todo`, `rpiv-config`, and `rpiv-i18n` at the existing todo resource path,
+plus the nine todo locales and the locked `typebox` dependency from
+`runtime/rpiv-todo/`. The source lock and file digests are retained in the release
+provenance; host Pi peers resolve through the core extension loader, not a second
+host installation. Older manifests without this recipe continue using the full
+RPIV tree. This does not change the manual, non-managed package path below.
 
 After preparation, the optional runtime-file presence check is explicit and still
 read-only:

@@ -228,6 +228,11 @@ def validate_descriptor(path: Path) -> dict[str, Any]:
     from attro.cursor_sdk_attribution_patch import normalize_sdk_patches
 
     data["sdkPatches"] = normalize_sdk_patches(data.get("sdkPatches"))
+    if "rpivTodoRuntime" in data:
+        from attro.rpiv_runtime import LOCK_SOURCE
+
+        if data["rpivTodoRuntime"] != LOCK_SOURCE:
+            raise ValidationError(f"rpivTodoRuntime must be {LOCK_SOURCE}")
     runtime_locks = data.get("runtimeLocks")
     if runtime_locks is not None and not isinstance(runtime_locks, dict):
         raise ValidationError("runtimeLocks must be an object")

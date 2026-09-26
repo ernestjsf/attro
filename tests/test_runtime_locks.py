@@ -12,10 +12,13 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 from attro.cli import main
-from attro.validate import ValidationError, sha256_file, validate_descriptor, validate_public_npm_lock
+from attro.rpiv_runtime import DEPENDENCIES, EXTERNAL, PACK, RECIPE
+from attro.state import prepared_manifest
+from attro.validate import ValidationError, run_command, sha256_file, validate_descriptor, validate_public_npm_lock
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -203,14 +206,99 @@ install_deps()
             self.assertNotEqual(result, 0, stdout.getvalue())
         return stdout.getvalue(), stderr.getvalue()
 
+    def setup_todo_recipe(self):
+        plugin = self.repo / "plugins/rpiv-mono"
+        for name in ("rpiv-todo", "rpiv-config", "rpiv-i18n"):
+            package = plugin / "packages" / name
+            package.mkdir(parents=True, exist_ok=True)
+            (package / "package.json").write_text(json.dumps({
+                "name": f"@juicesharp/{name}", "version": "2.9.0", "dependencies": DEPENDENCIES[name],
+            }))
+        (plugin / "LICENSE").write_text("fixture license\n")
+        (plugin / "package-lock.json").write_text('{"lockfileVersion":3,"packages":{}}\n')
+        self.git("add", "-A", cwd=plugin)
+        self.git("commit", "-m", "recipe fixture", cwd=plugin)
+        self.lock["submodules"][0]["pin"] = self.git("rev-parse", "HEAD", cwd=plugin)
+        self.lock["submodules"][0]["dependencyLock"] = "package-lock.json"
+        self.descriptor["rpivTodoRuntime"] = "runtime/rpiv-todo"
+        lock_root = self.repo / "runtime/rpiv-todo"
+        lock_root.mkdir(parents=True)
+        (lock_root / "package.json").write_text(json.dumps({
+            "name": "attro-rpiv-todo-runtime", "private": True, "dependencies": EXTERNAL,
+        }))
+        (lock_root / "package-lock.json").write_text(json.dumps({
+            "lockfileVersion": 3, "packages": {
+                "": {"dependencies": EXTERNAL},
+                "node_modules/typebox": {
+                    "version": EXTERNAL["typebox"], "integrity": "sha512-fixture",
+                    "resolved": "https://registry.npmjs.org/typebox/-/typebox-1.3.6.tgz",
+                },
+            },
+        }))
+        self.commit_inputs()
+
+    def prepare_todo_recipe(self):
+        self.setup_todo_recipe()
+        calls = []
+
+        def fixture_command(command, cwd, **kwargs):
+            calls.append((command, cwd))
+            if command == PACK:
+                files = [{"path": "package.json", "size": (cwd / "package.json").stat().st_size}]
+                if cwd.name == "rpiv-todo":
+                    files.append({"path": "index.ts", "size": (cwd / "index.ts").stat().st_size})
+                return SimpleNamespace(stdout=json.dumps([{
+                    "name": f"@juicesharp/{cwd.name}", "version": "2.9.0", "files": files,
+                }]))
+            result = run_command(command, cwd, **kwargs)
+            (cwd / "node_modules/.package-lock.json").write_text("{}")
+            return result
+
+        with mock.patch("attro.rpiv_runtime.run_command", side_effect=fixture_command):
+            output, _ = self.cli("--json", "setup", "--repo", str(self.repo))
+        return json.loads(output), calls
+
+    def test_todo_recipe_dispatch_and_artifact_validation(self):
+        manifest, calls = self.prepare_todo_recipe()
+        release = self.state / "releases" / manifest["releaseId"]
+        rpiv = release / "plugins/rpiv-mono"
+        record = manifest["provenance"]["rpivTodoRuntime"]
+        self.assertEqual(record["recipe"], RECIPE)
+        self.assertEqual(record["lockSource"], "runtime/rpiv-todo")
+        self.assertIn("packages/rpiv-todo/index.ts", record["files"])
+        self.assertNotIn("packages/rpiv-config/package.json", record["files"])
+        self.assertIn("node_modules/@juicesharp/rpiv-config/package.json", record["files"])
+        self.assertFalse((rpiv / "packages/rpiv-config").exists())
+        self.assertEqual([cmd for cmd, _ in calls].count(PACK), 3)
+        self.assertEqual([cwd.name for cmd, cwd in calls if cmd[:2] == ["npm", "ci"]], ["rpiv-mono"])
+        self.assertEqual(self.npm_calls().count("npm ci --ignore-scripts --no-audit --no-fund"), 2)
+        self.assertIn("npm ci --ignore-scripts --no-audit --no-fund --omit=dev --legacy-peer-deps", self.npm_calls())
+        prepared_manifest(release)
+
+        payload = rpiv / "packages/rpiv-todo/index.ts"
+        original = payload.read_bytes()
+        payload.write_text("tampered\n")
+        with self.assertRaisesRegex(ValidationError, "inventory/digest mismatch"):
+            prepared_manifest(release)
+        payload.write_bytes(original)
+        self.assertEqual(prepared_manifest(release)["releaseId"], manifest["releaseId"])
+
+        helper = rpiv / "node_modules/@juicesharp/rpiv-config/package.json"
+        helper.unlink()
+        helper.symlink_to(rpiv / "LICENSE")
+        with self.assertRaisesRegex(ValidationError, "refusing symlink"):
+            prepared_manifest(release)
+
     def test_descriptor_accepts_runtime_locks(self):
         data = validate_descriptor(REPO_ROOT / "attro.json")
         self.assertEqual(data["core"]["installMethod"], "source")
         self.assertEqual(data["runtimeLocks"], {"npm": "runtime/npm"})
+        self.assertEqual(data["rpivTodoRuntime"], "runtime/rpiv-todo")
 
     def test_shipped_runtime_locks_are_public(self):
         validate_public_npm_lock(REPO_ROOT / "runtime/core/package-lock.json")
         validate_public_npm_lock(REPO_ROOT / "runtime/npm/package-lock.json")
+        validate_public_npm_lock(REPO_ROOT / "runtime/rpiv-todo/package-lock.json")
 
     def test_committed_lock_uses_npm_ci(self):
         output, _ = self.cli("--json", "setup", "--repo", str(self.repo), "--activate")
@@ -225,6 +313,8 @@ install_deps()
         self.assertEqual(core["lockSha256"], self.core_lock_sha)
         self.assertEqual(npm["lockSha256"], self.npm_lock_sha)
         self.assertIn("committed dependency locks", manifest["provenance"]["dependencyResolution"])
+        self.assertNotIn("rpivTodoRuntime", manifest["provenance"])
+        self.assertTrue((self.state / "releases" / manifest["releaseId"] / "plugins/rpiv-mono/packages/rpiv-todo/index.ts").is_file())
 
     def test_package_json_mismatch_fails_before_activation(self):
         self.write_runtime_locks(core_deps={"@earendil-works/pi-coding-agent": "0.84.0"})
