@@ -25,6 +25,12 @@ tag or release is available yet.
 - Reviewed, hash-checked Cursor SDK attribution-default patching during
   preparation; native UI replaces the former standalone Zentui/CC recipe inputs.
 
+### Fixed
+
+- First-run effort-profile errors explain login/model setup without assuming a
+  personal profile file exists. Explicit continuation remains required.
+- Managed session exit hints use the installed `attro` launcher instead of `pi`.
+
 ### Known limits
 
 - The root is public, but all four required source forks remain private.

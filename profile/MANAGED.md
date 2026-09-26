@@ -164,13 +164,18 @@ Exec and try prepend managed resource argv derived from the active release's
 prepared settings. The manager also exports a validated JSON envelope in
 `ATTRO_MANAGED_RESOURCE_ARGV` (alias: `PIATTRO_MANAGED_RESOURCE_ARGV`) for downstream consumers.
 
-**Verification gate (pending):** subagent child processes must inherit the same
-pinned parent-release managed resource argv so children launched while release A
-is active do not silently lose managed plugins or custom tools after release B
-is activated. The intended design pins parent-release resource args at spawn
-time and validates paths against the parent release root. This boundary is
-**not yet fully implemented or verified**; treat subagent resource parity as
-pending until the spawn seam fix and its regression tests pass.
+Subagent child processes inherit the pinned parent-release managed resource
+argv and executable. Spawn validation rejects missing/malformed envelopes and
+paths escaping the parent release, rather than silently falling back to another
+installed Pi. Activating another release does not replace the parent's captured
+resource arguments.
+
+The current pinned subagent suite passed **456 checks** against a clean locally
+built core, including managed envelope validation and recursive resource
+inheritance. This establishes the tested spawn boundary, not authenticated
+model-driven child tasks or all-platform parity. See the
+[readiness verification](../docs/verification.md#public-readiness-baseline-2026-09-26)
+for exact revisions, test-host setup, and remaining limits.
 
 ## Legacy v0.1 releases
 
