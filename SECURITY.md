@@ -5,17 +5,13 @@
 Do not disclose vulnerabilities, exploit details, credentials, or sensitive
 logs in public issues, pull requests, or discussions.
 
-GitHub private vulnerability reporting is currently **not enabled** for this
-repository. To request a private channel, open an
-[issue](https://github.com/ernestjsf/attro/issues/new) titled
-**Private security contact request**, with only: “Please provide a private
-reporting channel.” Do not include the affected component, reproduction,
-attachments, or other vulnerability details. Wait for a maintainer to arrange a
-private channel before sharing the report. This contact request is public; it
-is not the vulnerability report itself.
+Use [GitHub private vulnerability reporting](https://github.com/ernestjsf/attro/security/advisories/new)
+for this repository. Reporting is enabled; sign in to GitHub to submit a private
+report rather than opening a public issue. If that channel is unavailable,
+request a private contact channel without posting vulnerability details.
 
-Once a private channel is agreed, include the affected Attro revision or managed
-release ID, impact, minimal reproduction, and relevant environment. Use
+Include the affected Attro revision or managed release ID, impact, minimal
+reproduction, and relevant environment. Use
 synthetic data and redact secrets. If a credential has been exposed, revoke or
 rotate it with its issuer; deleting an issue or Git history does not invalidate it.
 
