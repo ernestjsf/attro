@@ -6,6 +6,66 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Pi 1.0 native candidate source verification (2026-10-03)
+
+Source pins: core `f9d1dd5b`, Lens `fb827854`, subagents `c17a2e93`, unchanged
+RPIV `1a1d7818`. The candidate is maintained in an isolated checkout; the
+original checkout's unrelated edits were preserved. Local commits only; this
+is not a public release or cross-platform certification.
+
+- Core Pi 1.0 integration passed `npm run check`, `npm run build:offline`,
+  isolated `./test.sh` (coding-agent **2,955 passed / 50 skipped**, AI **1,259
+  passed / 859 skipped**, remaining package suites passed), and **241** focused
+  UI/profile/RPC tests. Network-denied terminal checks at 100 and 40 columns
+  retained Attro's composer, branding, settings, and native MCP menu.
+- Subsequent native MCP storage/approval changes passed focused store, refresh,
+  command, and session tests, required checks/hooks, and offline builds. A real
+  macOS keychain probe used only a synthetic service/account and local OAuth
+  fixture; **38 operations** passed and the synthetic credential was removed.
+  No adapter credentials were imported or inspected.
+- Independent sensitive review found brief storage-lock contention and stale
+  lease takeover risks. The correction uses non-expiring owner-marked mutexes
+  for managed storage and refresh, with bounded contention waits and explicit
+  offline crash recovery. **118** focused tests passed, including independent
+  processes, token rotation, SIGSTOP/SIGCONT, crashed holders, cancellation,
+  and replacement-owner protection. Scoped Astra re-review cleared both
+  findings. Pending-confirmation config replacement and mixed protected /
+  unprotected resource enumeration also have direct behavioral coverage.
+- Lens native deferred discovery passed build, strict lint, distribution and
+  packaging checks, **310** focused tests, and the release suite: **8,860
+  passed / 47 skipped**. The existing BOM drift fixture follows Pi 1.0's helper
+  location; the six situational tools no longer use a custom activation tool.
+- Combined subagents passed **524** checks plus **30** concurrency checks.
+  This includes native capability snapshots/RPC and the independently reviewed
+  Agents overview change (source `50f3d6f`, integrated as `9ffb1030`). Its real
+  PTY probe at 100/40 columns retained the latest visible progress while
+  reducing 40 progressing updates to five terminal frames in the recorded run.
+- Pi 1.0 review also found that nesting `check_subagents` could retain the
+  caller's concurrency permit and lose persisted delivery acknowledgement.
+  Native `model-only` exposure fixes both without changing scheduler/delivery
+  storage. A public registration regression failed before the fix and passed
+  afterward; scoped sensitive re-review confirmed native callable exclusion.
+- Root shell forwarding now preserves `mcp` as the first core argument rather
+  than prepending session resource flags. Three invocation subcases failed
+  before the correction. The full root suite passed: **241 run / one skipped**;
+  primary LSP found no errors in the affected root/subagent files.
+
+Environment: macOS arm64, Node **26.7.0**, npm **11.19.0**, Python **3.14.6**.
+Component evidence is retained in local integration/security handoff logs.
+Source-pin validation and prepared-artifact smoke tests must use the final
+recipe and record its manifest/release identity before activation. Source tests
+are not evidence that a later prepared artifact has been tested.
+
+Known limits: native MCP needs fresh user sign-in, retains per-call approval,
+and has no MCP app windows. Provider routes and effort-profile choices remain
+unchanged. Keychain crash recovery requires all relevant processes to be
+verified stopped; prolonged post-rotation unavailability can require sign-in.
+Linux keychains, standalone Bun, and authenticated remote MCP workflows are not
+certified by these checks. `npm audit` reports three high-severity package
+findings in unchanged Gondolin `0.12.0`, node-forge `1.4.0`, and brace-expansion
+`5.0.9`; those exact versions also occur in the original Pi 0.87.1 fork lock.
+They were identified, not remediated as part of the native MCP dependency change.
+
 ## Pi 1.0 root recipe preparation (2026-10-03)
 
 Tested root baseline `2a0623eb702ba5846b688939c03c156595f39f5d` plus the
