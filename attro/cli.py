@@ -160,8 +160,8 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
         return release_id, release_dir(release_id, args.root)
 
     def run(pi_bin: str, full_command: list[str], env: dict[str, str], lease_fd: int | None = None) -> int:
-        # Core dispatches catalog refresh before resource loading and requires update first.
-        if command == ["update", "--models"]:
+        # Early core subcommands must precede resource flags; MCP shell commands load no extensions.
+        if command == ["update", "--models"] or command[:1] == ["mcp"]:
             full_command = command
         if args.dry_run:
             data = {"argv": [pi_bin, *full_command], "agentDir": env["PI_CODING_AGENT_DIR"], "releaseRoot": env["ATTRO_RELEASE_ROOT"], "resourceDir": env["ATTRO_RESOURCE_DIR"]}

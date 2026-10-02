@@ -613,6 +613,14 @@ process.stdin.destroy();
         symlink.symlink_to(wrapper)
         refresh = json.loads(self.cli("--json", "exec", "--dry-run", "--", "update", "--models")[0])
         self.assertEqual(refresh["argv"][1:], ["update", "--models"])
+        for command in (["mcp", "--help"], ["mcp", "list", "--json"], ["mcp", "login", "linear"]):
+            with self.subTest(command=command):
+                preview = json.loads(self.cli("--json", "exec", "--dry-run", "--", *command)[0])
+                self.assertEqual(preview["argv"][1:], command)
+                with mock.patch("attro.cli.exec_pi") as native_launch:
+                    self.cli("exec", "--", *command)
+                self.assertEqual(native_launch.call_args.args[1], command)
+                self.assertIn("ATTRO_MANAGED_RESOURCE_ARGV", native_launch.call_args.args[2])
         attro = Path(__file__).resolve().parents[1] / "bin/attro"
         for command in (
             [str(wrapper), "--version"],
