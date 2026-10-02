@@ -1,6 +1,6 @@
 # Contributing to Attro
 
-Attro is a source-built **0.2.0 preview**, currently based on Pi **0.87.1**.
+Attro is a source-built **0.2.0 preview**, currently based on Pi **1.0.0**.
 The root repository is public, but its four pinned source forks are currently
 private. A public clone alone cannot complete recursive setup or installation.
 There is no published Attro tag or release yet. See [publication status](docs/publication.md)

@@ -18,9 +18,9 @@
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi.git",
       "pin": "cd81d9adf61a84fcf32879696670383acfb1c26a",
-      "baseCommit": "f07218c4d4bbc12bef056a7058c3dd49dfe41abe",
+      "baseCommit": "a13d35a742c6ef8462812a28fbe1d8c8b7431c32",
       "forkRootCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
-      "baseVersion": "0.87.1",
+      "baseVersion": "1.0.0",
       "packagePath": ".",
       "sourceEntryFiles": [
         "package.json",
@@ -34,10 +34,10 @@
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
       "sourceArchive": {
-        "url": "https://github.com/earendil-works/pi/releases/download/v0.87.1/pi-0.87.1-source.tar.gz",
-        "sha256": "793949d8d9e56629346e4bb9a6bf5fc17952ef746a1bf4f3185f8e960e806fcf",
-        "commit": "f07218c4d4bbc12bef056a7058c3dd49dfe41abe",
-        "tree": "7053e72909a45c2e400f0506c4aa98e53b26f429"
+        "url": "https://github.com/earendil-works/pi/releases/download/v1.0.0/pi-1.0.0-source.tar.gz",
+        "sha256": "89089c82d41759b800124a77e212adaa867caaa9d1269d8012ef0df9bc86b92e",
+        "commit": "a13d35a742c6ef8462812a28fbe1d8c8b7431c32",
+        "tree": "b4fa5608757317f4aaeff8665d8a08d23fedbf97"
       },
       "forkComparison": {
         "pin": "cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27",
@@ -48,9 +48,9 @@
         "differentPathCount": 98,
         "forkOnlyPathCount": 87,
         "archiveOnlyPathCount": 42,
-        "archiveOnlyNote": "All 42 archive-only paths are generated provider model data under packages/ai/src/providers/data."
+        "archiveOnlyNote": "Historical Pi 0.87.1 comparison at the recorded forkComparison.pin, not a comparison against the current sourceArchive. All 42 archive-only paths are generated provider model data under packages/ai/src/providers/data."
       },
-      "testReport": "Compact child RPC: npm run check and 75 focused RPC/session tests passed on Node 26.7.0; faux-provider aggregate records over 1 MiB reproduce the old failure and settle under the opt-in projection. Default RPC remains unchanged. Independent review cleared the protocol change. First-run guidance: npm run check and 51 focused tests passed on Node 26.7.0; managed resume naming regressed red-to-green, credential-free 100-column source PTY rendered setup guidance and exited cleanly with an attro resume hint. Authentication/profile control flow is unchanged. Managed-release integration evidence is recorded separately in docs/verification.md. Idle rendering: npm run check passed on Node 26.7.0; 64 TUI and 70 focused coding-agent tests passed, including unchanged dock updates, folded-thinking cache invalidation, and fullscreen cursor/image preservation. Independent review found no blockers. Combined source-core/subagents isolated idle probe emitted zero frames/bytes over 12 seconds versus 48 frames/1392 bytes from the prior installed release; compiled-release verification remains separate. Codex Fast: npm run check/pre-commit checks and 67 mocked provider tests passed; post-hook tier accounting, unsupported-tier rejection, and pre-transport abort regressions covered. Independent Astra review cleared the exact GPT-6 pricing change; live Fast entitlement/latency remain untested. Earlier Pi 0.87.1 integration: npm run check and build:offline passed on Node 22.23.2; full isolated ./test.sh passed on Node 26.7.0 (2703 coding-agent tests passed, 50 skipped). Check and full tests passed again after the approved Light/Balanced/Deep GPT-6 default-profile update; existing personal catalogs retain precedence. Native TUI inspected at 100/40 columns and all eight external plugins loaded. Astra cleared the cache-warmer cancellation correction after red-to-green scheduled/in-flight regressions. Node 22 retains the reproduced upstream 0.85 large-append stack limit. See docs/verification.md for scope and remaining platform/authenticated-provider limits.",
+      "testReport": "Historical pre-Pi-1.0 evidence (not verification of the current upgrade): Compact child RPC: npm run check and 75 focused RPC/session tests passed on Node 26.7.0; faux-provider aggregate records over 1 MiB reproduce the old failure and settle under the opt-in projection. Default RPC remains unchanged. Independent review cleared the protocol change. First-run guidance: npm run check and 51 focused tests passed on Node 26.7.0; managed resume naming regressed red-to-green, credential-free 100-column source PTY rendered setup guidance and exited cleanly with an attro resume hint. Authentication/profile control flow is unchanged. Managed-release integration evidence is recorded separately in docs/verification.md. Idle rendering: npm run check passed on Node 26.7.0; 64 TUI and 70 focused coding-agent tests passed, including unchanged dock updates, folded-thinking cache invalidation, and fullscreen cursor/image preservation. Independent review found no blockers. Combined source-core/subagents isolated idle probe emitted zero frames/bytes over 12 seconds versus 48 frames/1392 bytes from the prior installed release; compiled-release verification remains separate. Codex Fast: npm run check/pre-commit checks and 67 mocked provider tests passed; post-hook tier accounting, unsupported-tier rejection, and pre-transport abort regressions covered. Independent Astra review cleared the exact GPT-6 pricing change; live Fast entitlement/latency remain untested. Earlier Pi 0.87.1 integration: npm run check and build:offline passed on Node 22.23.2; full isolated ./test.sh passed on Node 26.7.0 (2703 coding-agent tests passed, 50 skipped). Check and full tests passed again after the approved Light/Balanced/Deep GPT-6 default-profile update; existing personal catalogs retain precedence. Native TUI inspected at 100/40 columns and all eight external plugins loaded. Astra cleared the cache-warmer cancellation correction after red-to-green scheduled/in-flight regressions. Node 22 retains the reproduced upstream 0.85 large-append stack limit. See docs/verification.md for scope and remaining platform/authenticated-provider limits.",
       "provenance": "docs/core-provenance.md"
     },
     {

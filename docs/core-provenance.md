@@ -1,11 +1,48 @@
 # Attro core source provenance (`plugins/attro-core`)
 
-Canonical record for Pi **0.87.1** source-core preparation. The attro-core
+Canonical record for Pi **1.0.0** source-core preparation. The attro-core
 submodule has no `QUATTRO.md`; this document replaces that role for the root
-recipe. Counts and diffs below are **snapshots at the recorded fork pin** and
-are not invariant across future pins.
+recipe. Counts and diffs below are **historical snapshots at the recorded fork
+pin and upstream archive**, not measurements of the current Pi 1.0 candidate.
+
+## Pi 1.0.0 archive and preparation
+
+The current recipe uses the official Pi **1.0.0** source release:
+
+| Field | Value |
+| --- | --- |
+| URL | `https://github.com/earendil-works/pi/releases/download/v1.0.0/pi-1.0.0-source.tar.gz` |
+| SHA-256 | `89089c82d41759b800124a77e212adaa867caaa9d1269d8012ef0df9bc86b92e` |
+| Commit | `a13d35a742c6ef8462812a28fbe1d8c8b7431c32` |
+| Tree | `b4fa5608757317f4aaeff8665d8a08d23fedbf97` |
+
+The archive hash matches the release's `SHA256SUMS` and GitHub asset digest.
+The commit comes from the [upstream v1.0.0 tag ref](https://api.github.com/repos/earendil-works/pi/git/ref/tags/v1.0.0);
+its tree is recorded in the [Git commit metadata](https://api.github.com/repos/earendil-works/pi/git/commits/a13d35a742c6ef8462812a28fbe1d8c8b7431c32),
+not inferred from a generated-data archive or the sanitized fork history.
+The maintained fork pin and gitlink are separate build inputs; see
+`sources.lock.json` for the selected commit. The sanitized fork root remains
+`36b02b695383ad89bc3a22b73633be3fa27be3c1`.
+
+The archive contains **42 provider JSON files plus `.manifest.json`**. Pi 1.0
+uses model-data schema **6** for typed chat/image/classifier model identities.
+Its manifest envelope still records `structureHash` and exact per-file SHA-256
+hashes. Attro explicitly accepts integer schemas **3** and **6**, retaining older
+pinned preparation while rejecting unknown schemas. Archive URL/hash, traversal,
+file-type, duplicate, and size limits are unchanged. The exported core's
+`packages/ai/scripts/check-model-data.ts` then validates the precise schema,
+provider catalog, structure hash, and model values before `build:offline`.
+
+Pi 1.0 adds codemode/MCP workspaces and a bundled codemode worker. The existing
+workspace discovery and runtime hashing include their `src` and `dist` trees;
+preparation still uses the committed npm v3 lock and disables install scripts.
+QuickJS WASM is supplied by the locked `quickjs-wasi` dependency. A successful
+source build is not proof that codemode, native MCP, plugins, or the combined
+Attro UI work in the final managed release; those remain integration gates.
 
 ## Pi 0.87.1 integration
+
+Historical evidence; this section does not verify the Pi 1.0 candidate.
 
 Core commit `65885dbf60293ae5b2982bb12f8bbc1e78c125ea` upgrades the prior
 Attro fork `e7c1886b8b0831629699e7f10337f8380ac65a8d`. The integration recipe pinned
@@ -28,17 +65,17 @@ review identified warming continuing during cancellation unwind; the candidate
 now cancels it synchronously on stop, interruption, and disposal, with scheduled
 and in-flight regression coverage.
 
-## Pins and identities
+## Historical Pi 0.87.1 pins and identities
 
 | Role | Git commit | Notes |
 | --- | --- | --- |
 | **AUDITED SNAPSHOT** (`forkComparison.pin`) | `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27` | Frozen commit for archive diff counts below; **not** automatically the current `sources.lock.json` submodule pin after core updates. |
-| **Current recipe pin** (`sources.lock.json` `pin`) | (see lock file) | Reviewed Attro fork tree built during preparation (`ernestjsf/attro-core`); may advance when the recipe gitlink updates. |
+| **Historical integration pin** | `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27` | Reviewed Attro 0.87.1 integration tree; current recipe pins are separate. |
 | **Upstream base** (`baseCommit`) | `f07218c4d4bbc12bef056a7058c3dd49dfe41abe` | Genuine upstream Pi **0.87.1** release commit (may not exist in the fork clone). |
 | **Sanitized fork root** (`forkRootCommit`) | `36b02b695383ad89bc3a22b73633be3fa27be3c1` | Local fork history root after sanitization; **not** the upstream base. |
 
-Upstream release tarball (matches `attro.json` `core.source.modelSnapshot` and
-`sources.lock.json` `sourceArchive`):
+Historical upstream release tarball (used for `forkComparison` below, **not**
+the current `attro.json` model snapshot or `sources.lock.json` `sourceArchive`):
 
 | Field | Value |
 | --- | --- |
@@ -50,7 +87,7 @@ Upstream release tarball (matches `attro.json` `core.source.modelSnapshot` and
 Validation uses the **recorded URL and hash** (and descriptor alignment), not
 local presence of the upstream git object.
 
-## Fork vs upstream archive diff (pin `cce2c9d`)
+## Historical fork vs upstream archive diff (pin `cce2c9d`)
 
 Compared **`git archive`** export at pin `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27`
 against the extracted upstream **0.87.1** release tarball using the **comparison
@@ -114,6 +151,8 @@ Safe maintainer workflow to re-check tarball and diff claims:
 
 Model-data application during preparation is implemented in `attro/core_source.py`
 (`apply_model_snapshot`); it enforces the same URL and SHA-256 as the descriptor.
+The commands below reproduce the **historical 0.87.1 comparison**, not the current
+1.0.0 source recipe.
 
 ### Exact commands (from repository root)
 

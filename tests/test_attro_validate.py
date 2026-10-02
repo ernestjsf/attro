@@ -48,7 +48,7 @@ class DescriptorValidationTests(unittest.TestCase):
     def test_accepts_repo_descriptor(self) -> None:
         data = validate_descriptor(ROOT / "attro.json")
         self.assertEqual(data["distribution"], "attro")
-        self.assertEqual(data["core"]["version"], "0.87.1")
+        self.assertEqual(data["core"]["version"], "1.0.0")
         self.assertEqual(data["core"]["engines"]["node"], ">=22.19.0")
 
     def test_rejects_missing_core_version(self) -> None:
@@ -89,7 +89,7 @@ class SourcesLockValidationTests(unittest.TestCase):
         manifest = json.loads((ROOT / "sources.lock.json").read_text(encoding="utf-8"))
         descriptor = validate_descriptor(ROOT / "attro.json")
         core = next(entry for entry in manifest["submodules"] if entry["path"] == CORE_SOURCE_SUBMODULE)
-        self.assertEqual(core["baseCommit"], "f07218c4d4bbc12bef056a7058c3dd49dfe41abe")
+        self.assertEqual(core["baseCommit"], "a13d35a742c6ef8462812a28fbe1d8c8b7431c32")
         self.assertEqual(core["forkRootCommit"], "36b02b695383ad89bc3a22b73633be3fa27be3c1")
         self.assertEqual(core["provenance"], "docs/core-provenance.md")
         comparison = core["forkComparison"]

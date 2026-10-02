@@ -6,6 +6,48 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Pi 1.0 root recipe preparation (2026-10-03)
+
+Tested root baseline `2a0623eb702ba5846b688939c03c156595f39f5d` plus the
+Pi 1.0 recipe/schema/profile diff on macOS arm64, Python **3.14.6**, Node
+**26.7.0**, npm **11.19.0**. This is preparation-layer evidence, not final
+Attro fork/plugin integration or live activation.
+
+- `python3 -m unittest discover -s tests -p 'test_*.py' -v`: **241 run,
+  one skipped**, with process-local `GIT_AUTHOR_NAME=Fixture`,
+  `GIT_AUTHOR_EMAIL=fixture@example.invalid`, `GIT_COMMITTER_NAME=Fixture`, and
+  `GIT_COMMITTER_EMAIL=fixture@example.invalid`. Without that fixture identity,
+  the first run failed only the merge-check test because the host has no Git
+  committer identity. No Git configuration was changed.
+- Schema-6 acceptance was observed failing before the extractor change.
+  Coverage retains schema 3, rejects unknown/malformed schemas and incorrect
+  archive/per-file hashes, and exercises schema-6 traversal, links, duplicates,
+  nested entries, and expansion/per-file limits without writing a target.
+- After extending existing profile assertions,
+  `python3 -m unittest discover -s tests -p 'test_profile_boundary.py' -v`:
+  **12 passed**. Fresh seeding keeps additive native tools in `on` mode;
+  subsequent initialization preserves personal tools, codemode mode, and theme.
+- A disposable copy of the verified **upstream** 1.0.0 archive passed the root
+  workspace/lock validator, `npm ci --ignore-scripts --no-audit --no-fund`, the
+  updated `apply_model_snapshot`, `node packages/ai/scripts/check-model-data.ts`,
+  and `npm run build:offline`. Build HOME and npm config were isolated; install
+  scripts were disabled. The committed lock bytes did not change. The build
+  used the local hash-verified archive, not live catalog hydration; dependency
+  installation used the network. The build was not OS-network-sandboxed.
+- Post-build workspace/symlink and runtime validation passed (**3,654 hashed
+  source/runtime files**); the compiled CLI returned **1.0.0**. A credential-free
+  `CodemodeSandbox` probe using the emitted bundled codemode worker and locked
+  QuickJS WASM completed a synthetic tool call and returned **42**.
+- `git diff --check`: passed. `python3 scripts/verify.py` remains **pending**:
+  the parallel core/Lens migration was not yet pinned and clean at this check.
+
+The unchanged source-build recipe accommodates the new workspaces and worker
+paths. Final fork pins, independent review, clean managed preparation, native
+MCP/tool discovery, full plugin/UI smoke checks, and actual activation remain
+separate gates. No live settings, launchers, original checkout, or release state
+were changed by these checks. An old manager can read the unchanged schema-1
+release manifest, but its schema-3-only extractor cannot prepare this new recipe.
+
 ## First-four performance candidate (2026-09-26)
 
 Tested source **`e2d71639a950bb35e093fc140b9bf032083d1faa`**, with core

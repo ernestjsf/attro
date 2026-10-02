@@ -161,7 +161,7 @@ CC, web-access, and ask-user are no longer submodules of the current recipe:
 | `ernestjsf/pi-subagents-quattro` | `ernestjsf/attro-subagents` |
 | _(new private fork)_ | `ernestjsf/attro-core` |
 
-The attro-core recipe now integrates Pi **0.87.1** using its hash-pinned source
+The attro-core recipe now integrates Pi **1.0.0** using its hash-pinned source
 archive. See [core provenance](core-provenance.md) for the archive identity and
 fork comparison; the lock file, not this historical URL table, identifies the
 current source pin.
