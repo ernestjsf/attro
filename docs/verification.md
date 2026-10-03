@@ -8,7 +8,7 @@ verified locally**, not certified for publication.
 
 ## Pi 1.0 native candidate source verification (2026-10-03)
 
-Source pins: core `f9d1dd5b`, Lens `fb827854`, subagents `c17a2e93`, unchanged
+Source pins: core `05fc7f08`, Lens `fb827854`, subagents `c17a2e93`, unchanged
 RPIV `1a1d7818`. The candidate is maintained in an isolated checkout; the
 original checkout's unrelated edits were preserved. Local commits only; this
 is not a public release or cross-platform certification.
@@ -45,6 +45,19 @@ is not a public release or cross-platform certification.
   Native `model-only` exposure fixes both without changing scheduler/delivery
   storage. A public registration regression failed before the fix and passed
   afterward; scoped sensitive re-review confirmed native callable exclusion.
+- The first prepared artifact exposed a genuine SDK resume regression: implicit
+  startup defaults prevented restoring tools loaded by native discovery. The
+  correction restores the transcript loadout while preserving explicit tool
+  ceilings. Public SDK/JSONL regressions failed before the fix; **175** focused
+  tests and a final **62-test** MCP rerun passed, with check/offline build and
+  scoped sensitive review clear. One local commit helper improperly disabled
+  hooks; the tracked `.husky/pre-commit` was subsequently run successfully on
+  the exact committed tree, without source/index changes or history rewriting.
+- The first artifact's supposed missing Diagnostics title was a fixture error:
+  the native utility intentionally renders `pi-lens · ✓ clean`. Actual accepted
+  registration and artifact rendering proved that native behavior. The corrected
+  release probe checks the utility summary and its separate details action;
+  no Lens production change was made to satisfy the incorrect title assertion.
 - Root shell forwarding now preserves `mcp` as the first core argument rather
   than prepending session resource flags. Three invocation subcases failed
   before the correction. The full root suite passed: **241 run / one skipped**;
