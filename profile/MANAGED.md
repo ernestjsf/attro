@@ -43,8 +43,9 @@ escaping a reserved management word (for example `attro -- doctor`).
 On first activation of a shared-profile release, Attro initializes
 `~/.attro/agent` once from reviewed **UI and package defaults** in
 `profile/settings.json` and the prepared release config (plugin wiring and the
-shared UI files copied from `config/`). Theme selection uses upstream Pi defaults
-on fresh profiles until you add personal theme files. Subsequent activations, updates,
+shared UI files copied from `config/`). Without an explicit theme selection,
+managed core uses Obsidian on dark terminals and the light theme on light terminals.
+No theme setting is seeded or overwritten. Subsequent activations, updates,
 and rollbacks **preserve** preferences, provider login, session history, and
 ordinary per-working-directory sessions in that directory.
 
@@ -110,7 +111,7 @@ Plugin paths retain their source layout, including
 `plugins/rpiv-mono/packages/rpiv-todo`. Allowlisted plugin configs from
 `config/` are flattened by basename into release `config/`. New Attro releases
 do not copy Quattro theme files from `themes/` or pass `--theme` flags; upstream
-Pi built-in themes and personal theme files under `~/.attro/agent` remain
+Pi built-in themes, Attro's built-in Obsidian theme, and personal theme files under `~/.attro/agent` remain
 available at runtime. Managed resource paths in prepared `config/settings.json`
 are absolute paths inside the release; launch prepends them as Pi CLI flags (`-e`).
 

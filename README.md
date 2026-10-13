@@ -100,8 +100,9 @@ Attro **0.2.0** ships the maintained distribution recipe, not a maintainer's
 personal Pi setup:
 
 - **Pi 0.87.1 core** built from the pinned `plugins/attro-core` source tree
-- **First-party UI** in attro-core: native composer, activity, dock, and selected
-  transcript rendering and commands adopted from Zentui and CC extensions
+- **First-party UI** in attro-core: [Obsidian styling](docs/obsidian-ui.md), native
+  composer, activity, dock, and selected transcript rendering and commands
+  adopted from Zentui and CC extensions
 - **Three customized plugin forks** (Lens, rpiv todo, subagents)
 - **Four descriptor npm packages** (`pi-caffeinate`, `pi-btw`,
   `pi-web-access`, `pi-ask-user`)
@@ -121,9 +122,10 @@ Attro **0.2.0** uses one canonical user profile at `~/.attro/agent`
 (override with `ATTRO_HOME`; legacy `~/.piattro` is reused when `~/.attro` is
 absent). It is initialized **once** on first activation from reviewed UI and
 package defaults in `profile/settings.json` plus the prepared release config
-(plugin wiring and the two shared UI config files under `config/`). Theme
-selection uses upstream Pi defaults on fresh profiles; copy personal theme files
-into `~/.attro/agent` or choose a theme interactively. The root checkout still
+(plugin wiring and the two shared UI config files under `config/`). Managed Attro
+uses its built-in Obsidian dark fallback when no theme is selected, retaining the
+light-terminal fallback. Copy personal theme files into `~/.attro/agent` or
+choose a theme interactively; explicit selections are preserved. The root checkout still
 exports `themes/quattro-*.json` through `package.json` for originalPi use, but
 new Attro releases do not copy them or pass `--theme` flags.
 Later activations, updates, and rollbacks **preserve** your preferences and

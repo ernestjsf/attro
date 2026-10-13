@@ -34,11 +34,13 @@ session initialization. Project trust still gates drafting, and submission stays
 disabled until initialization finishes. Loading and metadata updates do not
 replace the editor or transfer its draft, cursor, or undo state.
 
-The composer uses the active theme, unboxed separator lines, model/thinking
-labels, context gauge, session name, and activity. Working, retry and compaction
-share the composer activity location. A utility row below the sections shows the
-compact directory and Git status. Core's footer data provider supplies cached
-Git status without replacing the input. Completed tools and user shell commands
+The composer uses the active theme, a muted frame with an accent focus rail,
+secondary model/thinking labels, context gauge, session name, and activity. A
+reserved activity row avoids vertical jumps between idle and working states;
+short terminals prioritize the draft. Working, retry and compaction share this
+location. Project and Git identity sit in the top frame and the working directory
+in the bottom frame. Core's footer data provider supplies cached Git status
+without replacing the input. Completed tools and user shell commands
 invalidate outstanding Git snapshots; routine streaming redraws do not. Other
 extensions can still explicitly replace the editor.
 
@@ -95,8 +97,9 @@ The input has a faint, muted border and no active cursor while a list is focused
 its normal appearance is restored when focus returns. Draft text and cursor
 position are preserved.
 
-Agents reuse the full responsive dashboard: names/roles/activity, model and
-thinking level, context, cost, tokens and age where width permits. Selection
+Agents use a responsive work-first dashboard: name, assignment, and textual
+state. Model/thinking, context, cost, tokens, and age remain available in details.
+Collapsed section headers are unboxed summaries, with attention still visible. Selection
 tracks the run ID through updates/reordering. `/subagents` shows history inline,
 including dismissed records, without opening a popup or acquiring keyboard focus.
 Explicit per-agent inspection retains transcript viewing and steering.
@@ -151,8 +154,9 @@ keeps `text`; status colors remain reserved for actual tool states. A personal
 theme can map `mdHeading` to its `accent` without changing the renderer or other
 themes. No keyword-matching colorizer or fixed response palette is installed.
 
-Fresh profiles use the upstream theme default; personal Quattro themes remain
-optional. Standalone final-answer/status extensions are not bundled or required.
+Without an explicit theme, managed Attro uses the built-in Obsidian dark fallback
+and retains the light-terminal fallback. Personal themes remain optional. See
+[Obsidian interface](obsidian-ui.md) for appearance and navigation details. Standalone final-answer/status extensions are not bundled or required.
 
 ## Related UI work in plugin forks
 
