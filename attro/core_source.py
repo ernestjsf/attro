@@ -338,7 +338,11 @@ def apply_model_snapshot(url: str, expected_sha256: str, target_dir: Path) -> di
         if manifest_data is None:
             raise ValidationError("snapshot model data missing .manifest.json")
         manifest = json.loads(manifest_data)
-        if not isinstance(manifest, dict) or manifest.get("schemaVersion") != 3:
+        # Schemas 3 (Pi 0.87) and 6 (Pi 1.0) share this envelope. The pinned
+        # source checker below validates the version-specific provider data.
+        if (not isinstance(manifest, dict)
+                or type(manifest.get("schemaVersion")) is not int
+                or manifest["schemaVersion"] not in (3, 6)):
             raise ValidationError("invalid snapshot model data manifest schema")
         structure_hash = manifest.get("structureHash")
         if not isinstance(structure_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", structure_hash):

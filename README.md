@@ -86,8 +86,8 @@ establish under the shared profile. See [managed state](profile/MANAGED.md).
 
 For provider setup, the first task, updates, uninstall, and troubleshooting, see
 [Using Attro](docs/using-attro.md). Model access is separate from this MIT-licensed
-software and may incur subscription or API charges. Built-in effort presets use
-specific Codex routes; other providers can be selected without those presets.
+software and may incur subscription or API charges. Choose your model and
+reasoning level explicitly; named agents use their own definitions.
 Tools run with your user permissions, not in a built-in sandbox; read
 [SECURITY.md](SECURITY.md).
 
@@ -99,7 +99,9 @@ If you prefer manual steps or are developing the manager itself, see
 Attro **0.2.0** ships the maintained distribution recipe, not a maintainer's
 personal Pi setup:
 
-- **Pi 0.87.1 core** built from the pinned `plugins/attro-core` source tree
+- **Pi 1.0.0 core** built from the pinned `plugins/attro-core` source tree
+- **Native codemode and tool search** enabled alongside ordinary tools on fresh
+  profiles (`codemode.mode: "on"`); existing personal settings are preserved
 - **First-party UI** in attro-core: [Obsidian styling](docs/obsidian-ui.md), native
   composer, activity, dock, and selected transcript rendering and commands
   adopted from Zentui and CC extensions

@@ -1,7 +1,7 @@
 # Attro design and release gates
 
 Attro is an opinionated distribution built on a maintained Pi core fork.
-Its release is a recipe: Pi **0.87.1** built from the pinned
+Its release is a recipe: Pi **1.0.0** built from the pinned
 `plugins/attro-core` source tree, the three plugin submodule source pins in
 `sources.lock.json`, upstream npm pins for `pi-web-access` and `pi-ask-user`,
 UI/package defaults, and committed runtime lock inputs for descriptor npm packages. **`attro`** is the everyday launcher and release
@@ -55,7 +55,7 @@ preparation information.
 
 **Source core:** preparation exports the pinned `plugins/attro-core` commit,
 runs `npm ci` against its committed lock, applies the hash-pinned upstream
-**0.87.1** model-data archive, and runs the offline monorepo build. The
+**1.0.0** model-data archive, and runs the offline monorepo build. The
 retained CLI is `packages/coding-agent/dist/bundle/cli.js`. Core and TUI packages
 are built together. Network access is required during preparation. Retained
 `releases/<id>/pi/` trees are larger than legacy npm-core installs. Provenance

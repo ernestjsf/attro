@@ -58,6 +58,11 @@ refused. At runtime Pi may still load personal config/skills and trusted-project
 `AGENTS.md` / `.pi` resources according to upstream discovery rules. Attro does
 not edit `~/.attro/agent` when the repository recipe changes.
 
+Fresh profiles enable native `codemode` and `tool_search` additively, keeping
+ordinary tools available with `codemode.mode: "on"`. Existing shared profiles
+are not rewritten to adopt these defaults. Personal MCP configuration and any
+adapter migration remain user-owned.
+
 Environment routing for exec and try (except trial override):
 
 | Variable | Purpose |
@@ -100,7 +105,7 @@ only under `~/.attro/agent`.
 
 **Source core (`pi/`):** preparation exports the pinned `plugins/attro-core`
 commit, runs `npm ci` against its committed lock, applies the hash-pinned
-upstream **0.87.1** model-data archive, and runs the offline monorepo build.
+upstream **1.0.0** model-data archive, and runs the offline monorepo build.
 The retained CLI is `pi/packages/coding-agent/dist/bundle/cli.js`. Core and TUI
 packages are built together from the same monorepo tree. Preparation requires
 network access for locked dependencies and the pinned model-data download;

@@ -20,7 +20,7 @@ Exact origin URLs and reviewed commits are recorded in `sources.lock.json`.
 | Subagents | `plugins/pi-subagents/LICENSE` |
 
 Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` source tree
-(`ernestjsf/attro-core`, upstream Pi **0.87.1**; see
+(`ernestjsf/attro-core`, upstream Pi **1.0.0**; see
 [archive provenance](docs/core-provenance.md)) rather
 than installing `@earendil-works/pi-coding-agent` from npm during preparation.
 Legacy upstream npm releases of that package remain readable for comparison.
@@ -45,7 +45,7 @@ Additional upstream notices inside those trees remain authoritative:
   recipe defaults: `docs/archive/zentui-display-defaults-retired.json`.
 - Lens coderabbit rules:
   `plugins/pi-lens/rules/ast-grep-rules/coderabbit/LICENSE` (Apache-2.0).
-Source-core preparation downloads the hash-pinned upstream **0.87.1** model-data
+Source-core preparation downloads the hash-pinned upstream **1.0.0** model-data
 archive declared in `attro.json`; that asset carries its own upstream provenance
 and must be retained in audit material for prebuilt releases.
 

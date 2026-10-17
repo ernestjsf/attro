@@ -1,4 +1,8 @@
 {
+  "defaultTools": ["+codemode", "+tool_search"],
+  "codemode": {
+    "mode": "on"
+  },
   "quietStartup": true,
   "hideThinkingBlock": true,
   "editorPaddingX": 0,

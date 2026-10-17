@@ -536,9 +536,9 @@ class SourceBoundaryTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name)
 
-    def snapshot(self, entries=(), *, manifest_files=None, directory=False):
+    def snapshot(self, entries=(), *, manifest_files=None, directory=False, schema_version: object = 3):
         body = b'{"messages":{}}'
-        manifest = {"schemaVersion": 3, "generatedAt": "2026-01-01T00:00:00Z", "structureHash": "a" * 64,
+        manifest = {"schemaVersion": schema_version, "generatedAt": "2026-01-01T00:00:00Z", "structureHash": "a" * 64,
                     "files": {"anthropic.json": hashlib.sha256(body).hexdigest()} if manifest_files is None else manifest_files}
         members = [(".manifest.json", json.dumps(manifest).encode(), tarfile.REGTYPE), ("anthropic.json", body, tarfile.REGTYPE)]
         if directory:
@@ -575,9 +575,20 @@ class SourceBoundaryTests(unittest.TestCase):
         self.assertLessEqual(set(actual), allowed | {"__CF_USER_TEXT_ENCODING"})
 
     def test_snapshot_directory_header_and_hashes(self):
-        result = self.extract(self.snapshot(directory=True))
-        self.assertEqual(result["fileCount"], 2)
-        self.assertEqual(set(p.name for p in (self.base / "data").iterdir()), {".manifest.json", "anthropic.json"})
+        for version in (3, 6):
+            with self.subTest(schema_version=version):
+                target = f"data-{version}"
+                result = self.extract(self.snapshot(directory=True, schema_version=version), target=target)
+                self.assertEqual(result["fileCount"], 2)
+                self.assertEqual(set(p.name for p in (self.base / target).iterdir()), {".manifest.json", "anthropic.json"})
+
+    def test_snapshot_rejects_unsupported_or_malformed_schema(self):
+        for index, version in enumerate((None, True, 3.0, 6.0, "6", 4, 5, 7, [], {})):
+            with self.subTest(schema_version=version):
+                target = f"data-{index}"
+                with self.assertRaisesRegex(ValidationError, "manifest schema"):
+                    self.extract(self.snapshot(schema_version=version), target=target)
+                self.assertFalse((self.base / target).exists())
 
     def test_snapshot_rejects_links_nested_files_duplicates_and_traversal(self):
         for index, (name, kind) in enumerate((("anthropic.json", tarfile.SYMTYPE), ("anthropic.json", tarfile.LNKTYPE),
@@ -585,21 +596,29 @@ class SourceBoundaryTests(unittest.TestCase):
                            ("x.py", tarfile.REGTYPE), ("nested", tarfile.DIRTYPE))):
             with self.subTest(name=name, kind=kind):
                 with self.assertRaises(ValidationError):
-                    self.extract(self.snapshot([(name, b"", kind)]), target=f"data-{index}")
+                    self.extract(self.snapshot([(name, b"", kind)], schema_version=6), target=f"data-{index}")
                 self.assertFalse((self.base / f"data-{index}").exists())
         with self.assertRaises(ValidationError):
-            self.extract(self.snapshot([("anthropic.json", b"{}", tarfile.REGTYPE)] * 2))
+            self.extract(self.snapshot([("anthropic.json", b"{}", tarfile.REGTYPE)] * 2, schema_version=6))
         self.assertFalse((self.base / "data").exists())
 
     def test_snapshot_requires_exact_manifest_file_hashes(self):
-        for files in ({}, {"anthropic.json": "b" * 64}, {"anthropic.json": 1}, {"missing.json": "a" * 64}):
-            with self.subTest(files=files):
-                with self.assertRaises(ValidationError):
-                    self.extract(self.snapshot(manifest_files=files))
-                self.assertFalse((self.base / "data").exists())
+        for version in (3, 6):
+            for files in ({}, {"anthropic.json": "b" * 64}, {"anthropic.json": 1}, {"missing.json": "a" * 64}):
+                with self.subTest(schema_version=version, files=files):
+                    with self.assertRaisesRegex(ValidationError, "file hashes mismatch"):
+                        self.extract(self.snapshot(manifest_files=files, schema_version=version))
+                    self.assertFalse((self.base / "data").exists())
+
+    def test_snapshot_rejects_archive_hash_mismatch_before_writing(self):
+        payload = self.snapshot(schema_version=6)
+        with mock.patch("attro.core_source.urllib.request.urlopen", return_value=io.BytesIO(payload)):
+            with self.assertRaisesRegex(ValidationError, "sha256 mismatch"):
+                apply_model_snapshot(SNAPSHOT_URL, "0" * 64, self.base / "data")
+        self.assertFalse((self.base / "data").exists())
 
     def test_snapshot_expansion_is_bounded(self):
-        payload = self.snapshot()
+        payload = self.snapshot(schema_version=6)
         with mock.patch("attro.core_source.SNAPSHOT_EXPANSION_LIMIT", 1024):
             with self.assertRaisesRegex(ValidationError, "expansion limit"):
                 self.extract(payload)

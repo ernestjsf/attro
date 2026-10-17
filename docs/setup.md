@@ -90,7 +90,7 @@ Submodule remotes are local clone configuration and are not versioned. To add th
 provenance remotes to a fresh clone:
 
 ```sh
-git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi-mono.git
+git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi.git
 git -C plugins/pi-lens remote add upstream https://github.com/apmantza/pi-lens.git
 git -C plugins/rpiv-mono remote add upstream https://github.com/juicesharp/rpiv-mono.git
 git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/pi-subagents.git
@@ -152,7 +152,7 @@ patches can compete with native rendering. See [transcript UI](transcript-ui.md)
 Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` monorepo
 instead of installing `@earendil-works/pi-coding-agent` from npm. Preparation
 exports the pinned commit, runs `npm ci`, downloads the hash-pinned upstream
-**0.87.1** model-data archive, and runs the offline build. Network access is
+**1.0.0** model-data archive, and runs the offline build. Network access is
 required for locked dependencies and the model-data asset. The built CLI is
 `packages/coding-agent/dist/bundle/cli.js`. Core and TUI are built together from
 the same tree. Retained releases under `releases/<id>/pi/` are larger than

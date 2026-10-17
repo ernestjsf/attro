@@ -10,8 +10,10 @@ tag or release is available yet.
 
 ### Added and changed
 
-- Source-built Pi **0.87.1** core from the pinned Attro fork, with native
+- Source-built Pi **1.0.0** core from the pinned Attro fork, with native
   composer, activity/dock, and selected transcript features.
+- Fresh profiles enable native codemode and tool search alongside ordinary tools
+  in `on` mode. Existing profiles and personal MCP adapters are not rewritten.
 - The everyday `attro` launcher and explicit preparation, activation, trial,
   update, status, and rollback commands. Preparation uses a reviewed local
   checkout rather than an automatic consumer update feed.

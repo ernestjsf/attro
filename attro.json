@@ -13,7 +13,7 @@
   "supportedPlatforms": ["darwin", "linux"],
   "core": {
     "package": "@earendil-works/pi-coding-agent",
-    "version": "0.87.1",
+    "version": "1.0.0",
     "installMethod": "source",
     "engines": {
       "node": ">=22.19.0"
@@ -21,8 +21,8 @@
     "source": {
       "path": "plugins/attro-core",
       "modelSnapshot": {
-        "url": "https://github.com/earendil-works/pi/releases/download/v0.87.1/pi-0.87.1-source.tar.gz",
-        "sha256": "793949d8d9e56629346e4bb9a6bf5fc17952ef746a1bf4f3185f8e960e806fcf"
+        "url": "https://github.com/earendil-works/pi/releases/download/v1.0.0/pi-1.0.0-source.tar.gz",
+        "sha256": "89089c82d41759b800124a77e212adaa867caaa9d1269d8012ef0df9bc86b92e"
       }
     }
   },

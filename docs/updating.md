@@ -33,6 +33,55 @@ guaranteed offline rollback copy: prepare the desired recipe again if its code
 has already been pruned. Legacy per-release user data is preserved. See the
 [retention behavior and limitations](../README.md#update-and-rollback).
 
+## Migrating an existing profile to Pi 1.0
+
+Attro retains its composer, dock, compact transcript, Lens,
+Todos, and subagents while adopting Pi's native MCP, codemode, and tool search.
+Preparing a new release does **not** rewrite an existing personal profile.
+Review and back up the following scoped changes before applying them:
+
+- Remove the `pi-mcp-adapter` package registration when switching to native MCP.
+  Keeping it loaded replaces native session `/mcp`; do not run both integrations
+  unintentionally. Its `mcp` proxy and `mcpScript` tool are replaced by native
+  `tool_search` and `codemode`.
+- Add `+codemode` and `+tool_search` to `defaultTools` without discarding existing
+  tool choices. Keep `codemode.mode: "on"` to retain ordinary direct tools.
+- Native MCP reads `<agent-dir>/mcp.json` and trusted-project `.pi/mcp.json`, not
+  the adapter's shared `.mcp.json` discovery paths. Convert only authorized
+  entries. Remove adapter-only `auth: "oauth"` and lifecycle options; native
+  HTTP servers discover OAuth automatically and enabled servers connect in the
+  background. Preserve URLs, arguments, scopes, and approval requirements.
+- Managed Attro keeps native MCP credentials in the OS keychain rather than
+  silently moving them into `mcp-auth.json`. Existing adapter credentials are
+  left untouched, not imported. Use `/mcp login <server>` (or
+  `attro mcp login <server>`) for a fresh native sign-in. Browser/workspace
+  consent remains a user action. See [native MCP](../plugins/attro-core/packages/coding-agent/docs/mcp.md)
+  for credential-store failure and recovery behavior.
+- Preserve `approveTools: true` on servers requiring per-call approval.
+  Native direct, nested, and resource calls honor it; calls without UI fail
+  closed. A same-name project entry replaces the global entry, but an omitted
+  approval policy inherits the global policy. Explicit project policies remain
+  authoritative in trusted projects.
+- Native MCP does not render MCP app windows. Servers such as tldraw can retain
+  tool access without the adapter's interactive app UI; confirm this capability
+  change before removing an adapter on behalf of another user.
+- Effort profiles are retired. Use `/model`, `/thinking`, and named agent
+  definitions; existing personal catalogs remain untouched. Legacy session
+  history still restores its recorded lead settings.
+- Lens's `pi_lens_activate_tools` is retired. Use native discovery for its
+  deferred tools. Call `check_subagents` directly: its `model-only` exposure
+  prevents nested waiting and result-delivery errors.
+
+Do not substitute the new OpenAI ChatGPT login route, model defaults, virtual
+routing, or agent-definition defaults for existing provider choices during migration.
+Update adapter-specific personal skills through their managed sources where
+applicable. Old running sessions keep their leased release; start a new Attro
+session after activation instead of reloading them into mixed resources.
+
+Code rollback does not restore these profile edits or OAuth state. Retain a
+separate recoverable copy of the previous recipe/code and reviewed config
+backups; do not depend on automatic release retention.
+
 ## Review and update workflow (maintainers)
 
 1. Start from a clean root and clean submodules; make a backup before any

@@ -122,6 +122,8 @@ class ProfileBoundaryTests(unittest.TestCase):
             self.assertNotIn("theme", settings)
             self.assertNotIn("packages", settings)
             self.assertNotIn("themes", settings)
+            self.assertEqual(settings["defaultTools"], ["+codemode", "+tool_search"])
+            self.assertEqual(settings["codemode"], {"mode": "on"})
             self.assertFalse((target / "AGENTS.md").exists())
             self.assertFalse((target / "models.json").exists())
             self.assertFalse((target / "subagents.json").exists())
@@ -215,9 +217,11 @@ class ProfileBoundaryTests(unittest.TestCase):
             settings = load_json(agent / "settings.json")
             self.assertNotIn("theme", settings)
             settings["theme"] = "quattro-green"
+            settings["defaultTools"] = ["read"]
+            settings["codemode"] = {"mode": "only"}
             (agent / "settings.json").write_text(json.dumps(settings) + "\n")
             initialize_shared_agent(state_root, release)
-            self.assertEqual(load_json(agent / "settings.json")["theme"], "quattro-green")
+            self.assertEqual(load_json(agent / "settings.json"), settings)
 
 
 if __name__ == "__main__":
