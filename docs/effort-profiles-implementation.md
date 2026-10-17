@@ -1,5 +1,8 @@
 # Effort profiles — implementation and verification
 
+> Historical evidence for the former feature, not the current implementation.
+> Effort profiles have been removed from source; see [Using Attro](using-attro.md).
+
 Implemented in the working tree; not committed, built, installed, or activated.
 Personal configuration and agent definitions were not changed. No live provider
 requests or real credentials were used for verification.
@@ -18,7 +21,8 @@ requests or real credentials were used for verification.
 - Native status and Attro editor metadata include the profile; inspector exposes
   availability, requested/effective thinking, participation and provenance.
 
-User documentation: [Effort profiles](../plugins/attro-core/packages/coding-agent/docs/effort-profiles.md).
+The former effort-profile guide was removed with the feature. Current user
+documentation: [model selection](../plugins/attro-core/packages/coding-agent/docs/models.md).
 
 ## Changed paths
 

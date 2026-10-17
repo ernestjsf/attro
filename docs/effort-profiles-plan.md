@@ -1,5 +1,9 @@
 # User-defined effort profiles — implementation plan
 
+> Historical plan, superseded by the removal of effort profiles. Do not implement
+> this plan. Current routing uses ordinary model/thinking defaults and agent
+> definitions; see [Using Attro](using-attro.md).
+
 ## Status and authorization
 
 Planning handoff only. No implementation, personal configuration changes, commits,

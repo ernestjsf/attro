@@ -11,7 +11,7 @@ tag or release is available yet.
 ### Added and changed
 
 - Source-built Pi **0.87.1** core from the pinned Attro fork, with native
-  composer, activity/dock, selected transcript features, and effort profiles.
+  composer, activity/dock, and selected transcript features.
 - The everyday `attro` launcher and explicit preparation, activation, trial,
   update, status, and rollback commands. Preparation uses a reviewed local
   checkout rather than an automatic consumer update feed.
@@ -33,13 +33,18 @@ tag or release is available yet.
 
 ### Fixed
 
-- First-run effort-profile errors explain login/model setup without assuming a
-  personal profile file exists. Explicit continuation remains required.
 - Managed session exit hints use the installed `attro` launcher instead of `pi`.
 - Child markers activate Lens's lightweight mode. Compact child RPC lifecycle
   events avoid repeating oversized aggregates, with bounded failure reporting.
 - Cold symbol-index publication rejects intervening source and snapshot changes
   rather than exposing a superseded build as ready.
+
+### Removed
+
+- Effort-profile selection, editing, cycling, suggestions, and routing overrides.
+  Use ordinary model/thinking defaults and agent definitions instead. Legacy
+  sessions remain readable without restoring profile routing. Personal settings
+  and catalogs are not automatically migrated or deleted.
 
 ### Known limits
 

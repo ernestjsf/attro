@@ -29,7 +29,7 @@ follow that repository's policies.
 | Area | Owning repository / source |
 | --- | --- |
 | Launcher, installer, release manager, recipe, profile defaults, distribution docs | This repository |
-| Pi core, native Attro UI, effort profiles | `ernestjsf/attro-core` (`plugins/attro-core`) |
+| Pi core, native Attro UI, model and thinking controls | `ernestjsf/attro-core` (`plugins/attro-core`) |
 | Lens | `ernestjsf/attro-lens` (`plugins/pi-lens`) |
 | Todo runtime | `ernestjsf/attro-rpiv` (`plugins/rpiv-mono/packages/rpiv-todo`) |
 | Subagent runtime | `ernestjsf/attro-subagents` (`plugins/pi-subagents`) |

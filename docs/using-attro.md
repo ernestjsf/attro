@@ -27,15 +27,20 @@ can have different billing and limits; a subscription does not necessarily
 include API credits. Attro does not provide an account, free model credits, or a
 guarantee that a particular model is available to your account.
 
-Managed Attro's built-in Light/Balanced/Deep effort presets target GPT-6 through
-the OpenAI Codex provider. They require those exact routes to be available; they
-do not silently fall back to another provider. If startup offers to continue
-without an unavailable profile, choose that option to reach `/login` and
-`/model`. You can use other providers without those presets. `/profile off`
-detaches a profile for the current session; `/profile` lets you edit team routes
-and the startup default. See the maintained core's
-[effort-profile reference](../plugins/attro-core/packages/coding-agent/docs/effort-profiles.md).
-Your existing personal catalog is not replaced during updates.
+Choose the lead model with `/model` and its reasoning level with `/thinking`.
+In either picker, press Ctrl+S to save the selection as a startup default.
+Named subagents use their agent-definition defaults; explicit task overrides
+remain available. See [model selection](../plugins/attro-core/packages/coding-agent/docs/models.md)
+and [subagent configuration](../plugins/pi-subagents/README.md#agent-definitions).
+
+Effort profiles, their selector, and profile suggestions have been removed from
+source. Old session history remains readable, including its recorded lead
+model/thinking, but profile team mappings no longer control routing. Navigating
+to a root or branch without recorded model/thinking keeps the current choices;
+retired profile baselines are not restored. Existing installations retain the feature until a release
+containing this change is prepared and activated. Before switching, transfer
+any desired lead settings to `settings.json` and specialist settings to their
+agent definitions; personal catalogs are not automatically migrated or deleted.
 
 Start with a task that does not request changes:
 
@@ -130,7 +135,7 @@ other applications.
 | Bootstrap refuses an existing directory | Inspect it; do not delete it blindly. Resume a trusted, complete checkout with `./install`, or use a new `ATTRO_SOURCE_DIR`. |
 | Python or Node version error | Check `python3 --version`, `node --version`, and PATH; Python 3.10+ and Node 22.19.0+ are required. |
 | No active release | Finish `./install` from the trusted checkout, or prepare and activate a release explicitly. |
-| Missing model or startup profile | Continue without the unavailable profile, authenticate with `/login`, select `/model`, and configure profile routes for your account. |
+| Missing model | Authenticate with `/login`, select an available `/model`, and save the startup default if desired. |
 | Update did not change the running session | Activate the prepared release and start a new session. Check `attro status`. |
 | Rollback target is unavailable | Idle code may have been pruned; prepare the desired reviewed recipe again. |
 
