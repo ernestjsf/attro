@@ -107,7 +107,7 @@
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
-      "pin": "506b754ae96fc2df1b9ea577c787632f73310ea1",
+      "pin": "d38419bbd1eb281c0445305bbbaedee84fdd1a23",
       "baseCommit": "5a032dc6cf9562e8dbdb5dbbdb8d8444dfff87f5",
       "baseVersion": "0.2.0",
       "packagePath": ".",
@@ -119,7 +119,7 @@
       ],
       "runtimeGenerated": false,
       "dependencyLock": null,
-      "testReport": "2026-10-17 main consolidation: 506 subagents.test.cjs assertions and 30 concurrency.test.cjs checks passed on Node 26.7.0. Preserves current dashboard and direct agent settings alongside native tool inheritance, model-only result collection, and compact RPC. Fixture now uses the Pi 1.0 source resolver; active-limit contention uses a held permit instead of a timing assumption. See docs/verification.md.",
+      "testReport": "2026-10-18 bounded registry reads: 512 subagents.test.cjs assertions and 30 concurrency.test.cjs checks passed on macOS arm64, Node 26.7.0, with red-to-green coverage for progress, wait polling, and delivery references. The 1641-record fixture measured zero history scans during streaming progress and four boundary scans across a 40-poll wait. Independent persistence/concurrency review cleared the change. Focused diagnostics found no blocking errors; unresolved host-peer types limit standalone type checking. No live-provider responsiveness measurement.",
       "provenance": "QUATTRO.md"
     }
   ],
