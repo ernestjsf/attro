@@ -40,9 +40,11 @@ sensitive findings in the private audit packet, not public issues.
 The current local candidate descends from public `main`; its five unpublished
 root commits passed a redacted Gitleaks delta scan. That limited result does not
 replace a fresh all-ref scan of the root and forks or a retained-data audit.
-Do not publish additional source, change fork visibility, or advertise a release
-until those gates clear. Local preparation, tests, and readiness documentation
-can continue without exposing private data.
+The maintainer authorized reviewed `main` updates on 2026-10-18 after fresh
+secret and privacy checks, without changing fork visibility or publishing a
+release. This exception does not clear the historical retained-data audit.
+Keep recovery archives local; do not change fork visibility or advertise a
+release until the remaining gates clear.
 
 For the ordered source/CI/tag/bootstrap release procedure, see
 [Releasing an Attro preview](releasing.md). The website must continue to describe

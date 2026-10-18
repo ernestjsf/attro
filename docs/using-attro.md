@@ -95,7 +95,10 @@ tag with Git only after preserving local work, update its submodules, and rerun
 `./install` there. Do not delete or replace an existing checkout blindly.
 
 Activation preserves the shared profile. Running sessions retain their release;
-start a new session to use new code. Superseded idle releases are automatically
+start a new session to use new code. After updating MCP OAuth logout protection,
+exit older Attro sessions before relying on it: older binaries sharing the same
+credential store do not honor the new logout fences. Activation does not stop
+those sessions or revoke remote OAuth grants. Superseded idle releases are automatically
 pruned. `attro rollback` works only while the previous release is retained; it
 is not a backup and does not undo user data or external changes. If old code is
 already gone, prepare its reviewed source recipe again. See

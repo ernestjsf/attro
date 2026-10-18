@@ -6,6 +6,50 @@ release certification or evidence of Linux/Windows/second-machine compatibility.
 source-core build, and subagent resource-inheritance gates are **partially
 verified locally**, not certified for publication.
 
+## Main synchronization candidate (2026-10-18)
+
+The retained Lens URI refactor is integrated at `f7dcb5d2`, and core
+`9fd36a37` fixes a review-found MCP logout race. Subagents `506b754` and RPIV
+`1a1d7818` are unchanged. Legacy branch comparisons found no other concrete
+missing feature; divergent historical refs and recovery archives remain retained
+rather than being merged wholesale.
+
+Checks on macOS arm64, Node **26.7.0**, npm **11.19.0**, Python **3.14.6**:
+
+- Core logout generation fences prevent pending refreshes and sign-ins from
+  restoring credentials after successful logout. Both original resurrection
+  scenarios failed before the fix. **44 focused tests**, **32 integration
+  tests**, and the strengthened **15-test refresh suite** passed; the counts
+  overlap and are not additive. `npm run check`, `npm run build:offline`, and
+  primary LSP diagnostics passed. Independent authentication/concurrency review
+  cleared the correction. The prior full-suite evidence is reused outside this
+  OAuth seam; no live provider or native-keychain test was performed for the fix.
+- Lens: build, strict lint, distribution build, **82 widget tests**, and final
+  full `npm test` passed (**8,861 passed, 47 skipped**). An initial child-agent
+  environment incorrectly suppressed startup work; the final run cleared
+  inherited child markers. A separate disk-drift fixture failure was reproduced
+  with a fixed clock, then corrected by advancing past the sweep interval;
+  **15 drift tests** passed before the final full run. Runtime drift behavior
+  was not changed.
+- Root: `python3 -m unittest discover -s tests -p 'test_*.py' -v` ran
+  **241 tests, one skipped**. The skip remains the optional real legacy Cursor
+  SDK check. Source/runtime pin verification and whitespace checks passed.
+- Redacted Gitleaks scans of the unpublished root/core/Lens/subagents main
+  histories found no secrets. The public-root added diff contained no detected
+  maintainer home paths or private endpoints. These are scoped delta checks,
+  not historical publication clearance.
+
+The maintainer authorized pushing the reviewed mains while retaining private
+fork visibility and the public-release hold. Dependency update PRs remain
+unmerged: passing current-head checks are unavailable, and GitHub reports a
+billing/spending-limit block for jobs that never started. No billing or visibility
+settings were changed. This record does not claim hosted CI, a public release,
+Linux/WSL validation, or an authenticated provider turn.
+
+Running older binaries do not enforce the new logout fences. Exit older
+Attro/Pi sessions and SDK processes sharing the credential store before relying
+on the protection; installation does not terminate them.
+
 ## Main consolidation (2026-10-17)
 
 The Pi 1.0 migration and the newer main-line work are integrated locally.

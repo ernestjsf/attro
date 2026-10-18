@@ -17,7 +17,7 @@
       "name": "pi-monorepo",
       "origin": "https://github.com/ernestjsf/attro-core.git",
       "upstream": "https://github.com/earendil-works/pi.git",
-      "pin": "5a691b5a3f2b89ad2cfa388e390c7fabecb7da59",
+      "pin": "9fd36a371fe6741bdd6e2f4e9e55f489fd75e0de",
       "baseCommit": "a13d35a742c6ef8462812a28fbe1d8c8b7431c32",
       "forkRootCommit": "36b02b695383ad89bc3a22b73633be3fa27be3c1",
       "baseVersion": "1.0.0",
@@ -50,7 +50,7 @@
         "archiveOnlyPathCount": 42,
         "archiveOnlyNote": "Historical Pi 0.87.1 comparison at the recorded forkComparison.pin, not a comparison against the current sourceArchive. All 42 archive-only paths are generated provider model data under packages/ai/src/providers/data."
       },
-      "testReport": "2026-10-17 main consolidation: npm run check, build:offline, rebuilt coding-agent bundle, and full isolated ./test.sh passed on Node 26.7.0. Coding-agent coverage: 2910 passed, 50 skipped. Preserves Obsidian UI and Pi 1.0 native MCP/discovery while removing effort profiles; legacy-session and virtual-model navigation regressions passed. See docs/verification.md for full scope and limits.",
+      "testReport": "2026-10-18 logout correction: red-first refresh/sign-in regressions, 44 focused tests, 32 integration tests, and the strengthened 15-test refresh suite passed on Node 26.7.0. npm run check, build:offline, primary LSP, and independent authentication/concurrency review passed. Reuses the 2026-10-17 full-suite evidence outside the OAuth seam; older processes must restart to honor logout fences. See docs/verification.md for scope and limits.",
       "provenance": "docs/core-provenance.md"
     },
     {
@@ -58,7 +58,7 @@
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
       "upstream": "https://github.com/apmantza/pi-lens.git",
-      "pin": "7bab9011c9651651f9c58e6750608f687dcedc18",
+      "pin": "f7dcb5d20f66c854cbb6540ec92731d882e4dddb",
       "baseCommit": "6cebeb5dc639531fe0b24b5221f032c5169feb2e",
       "baseVersion": "4.1.0",
       "packagePath": ".",
@@ -74,7 +74,7 @@
       "runtimeBuild": "npm run build:dist && node scripts/download-grammars.js --core --dest grammars && npm run check:grammars",
       "dependencyLock": "package-lock.json",
       "dependencyLockVersion": 3,
-      "testReport": "2026-10-17 main consolidation: npm run build, lint, full npm test (8861 passed, 47 skipped), and build:dist passed on Node 26.7.0. Native discovery is retained. Symlink-aware LSP root ceilings cover existing and new file paths; the real ast-grep fixture resolves physical temporary-directory paths. See docs/verification.md.",
+      "testReport": "2026-10-18 retained URI refactor: build, lint, build:dist, 82 widget tests, and full npm test (8861 passed, 47 skipped) passed on Node 26.7.0. The disk-drift fixture now advances its clock across the sweep interval; deterministic red-to-green coverage and all 15 drift tests passed. Full-suite subprocesses clear inherited child markers. See docs/verification.md.",
       "provenance": "QUATTRO.md"
     },
     {
