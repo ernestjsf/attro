@@ -99,4 +99,4 @@ history, retained-data, or anonymous-install gates.
 local Git commits and in releases prepared before the personal-bundle boundary.
 Do not treat the current checkout as proof that older branches or retained
 releases are safe to publish without a separate sanitized-history decision.
-See [publication gates](docs/publication.md).
+See [publication gates](docs/maintainers/publication.md).

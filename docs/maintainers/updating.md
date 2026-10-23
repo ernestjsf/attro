@@ -2,7 +2,7 @@
 
 This page is the manual maintainer workflow for source pins. For automated
 candidate discovery see [automation](automation.md); for preparing and switching
-managed Attro releases see the [README](../README.md). A consumer update does
+managed Attro releases see the [README](../../README.md). A consumer update does
 not merge upstream branches into these workbench sources.
 
 The root branch is `main`. Submodule gitlinks and `sources.lock.json` are the
@@ -31,7 +31,7 @@ a release supersedes older code, which is automatically pruned when idle. Runnin
 sessions keep their release; pending cleanup retries after they exit. There is no
 guaranteed offline rollback copy: prepare the desired recipe again if its code
 has already been pruned. Legacy per-release user data is preserved. See the
-[retention behavior and limitations](../README.md#update-and-rollback).
+[retention behavior and limitations](../../README.md#update-and-rollback).
 
 ## Migrating an existing profile to Pi 1.0
 
@@ -55,7 +55,7 @@ Review and back up the following scoped changes before applying them:
   silently moving them into `mcp-auth.json`. Existing adapter credentials are
   left untouched, not imported. Use `/mcp login <server>` (or
   `attro mcp login <server>`) for a fresh native sign-in. Browser/workspace
-  consent remains a user action. See [native MCP](../plugins/attro-core/packages/coding-agent/docs/mcp.md)
+  consent remains a user action. See [native MCP](../../plugins/attro-core/packages/coding-agent/docs/mcp.md)
   for credential-store failure and recovery behavior.
 - Preserve `approveTools: true` on servers requiring per-call approval.
   Native direct, nested, and resource calls honor it; calls without UI fail

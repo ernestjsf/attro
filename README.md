@@ -10,8 +10,8 @@ fork; installed releases are not edited in place.
 **Preview release:** Attro **0.2.0** is a source-built distribution, not a
 certified stable release. There is no automatic stable update feed. The root
 repository is public, but the required fork repositories are not yet all public;
-**anonymous installation is not available yet**. See [publication gates](docs/publication.md)
-for the release blockers and [verification evidence](docs/verification.md) for
+**anonymous installation is not available yet**. See [publication gates](docs/maintainers/publication.md)
+for the release blockers and [verification evidence](docs/maintainers/verification.md) for
 what has actually been tested.
 
 ## Install
@@ -102,7 +102,7 @@ personal Pi setup:
 - **Pi 1.0.0 core** built from the pinned `plugins/attro-core` source tree
 - **Native codemode and tool search** enabled alongside ordinary tools on fresh
   profiles (`codemode.mode: "on"`); existing personal settings are preserved
-- **First-party UI** in attro-core: [Obsidian styling](docs/obsidian-ui.md), native
+- **First-party UI** in attro-core: [Obsidian styling](docs/design/obsidian-ui.md), native
   composer, activity, dock, and selected transcript rendering and commands
   adopted from Zentui and CC extensions
 - **Three customized plugin forks** (Lens, rpiv todo, subagents)
@@ -196,7 +196,7 @@ pending cleanup if the cleanup process was stopped. If another management operat
 holds the operations lock, launch waits briefly, then reports its recorded operation
 and PID when available. Never manually delete releases while sessions still use them.
 
-[Update automation](docs/automation.md) explains scheduled candidate discovery,
+[Update automation](docs/maintainers/automation.md) explains scheduled candidate discovery,
 optional disposable fork-merge assessment, and the remaining release-PR lane.
 Discovery reports are **not** an automatic consumer release feed.
 
@@ -226,7 +226,7 @@ themes/                 Quattro theme sources for originalPi; not bundled in new
 scripts/                source verification and upstream update discovery
 tests/                  isolated runtime, installer, and discovery regression tests
 .github/workflows/      macOS/Linux tests, real install smoke checks, and update reports
-docs/                   setup, maintenance, design, and publication gates
+docs/                   user docs (setup, using-attro); maintainers/, design/, archive/, research/ subfolders
 ```
 
 The legacy root npm manifest remains private and exports themes only. Install the
@@ -260,5 +260,5 @@ The source verifier requires clean, pinned submodules. `--runtime` additionally
 checks listed generated-file presence after the documented Lens and attro-core
 preparation; it does not certify dependency compatibility, source-core build
 success, or the combined interactive UI. Unit tests use isolated fixtures and
-do not install or alter the live Pi setup. See [verification evidence](docs/verification.md)
+do not install or alter the live Pi setup. See [verification evidence](docs/maintainers/verification.md)
 for exact local results and remaining validation gates.

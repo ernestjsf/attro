@@ -180,7 +180,7 @@ The current pinned subagent suite passed **456 checks** against a clean locally
 built core, including managed envelope validation and recursive resource
 inheritance. This establishes the tested spawn boundary, not authenticated
 model-driven child tasks or all-platform parity. See the
-[readiness verification](../docs/verification.md#public-readiness-baseline-2026-09-26)
+[readiness verification](../docs/maintainers/verification.md#public-readiness-baseline-2026-09-26)
 for exact revisions, test-host setup, and remaining limits.
 
 ## Legacy v0.1 releases

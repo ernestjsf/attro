@@ -414,7 +414,7 @@ are committed in final core pin `cce2c9d6fe2b7b9e3e58f7cef77e2aa73b5c6e27`.
 again for that pin. The new built-in Light/Balanced/Deep presets use GPT-6 via
 Codex; existing personal catalogs are neither overwritten nor migrated.
 Source archive identity and recipe pins are recorded in
-[core provenance](core-provenance.md#pi-0871-integration).
+[core provenance](../core-provenance.md#pi-0871-integration).
 
 - Core `npm ci --ignore-scripts --no-audit --no-fund`: passed on Node **22.23.2**.
   No dependency lifecycle scripts ran. Upstream's example-only Gondolin Node

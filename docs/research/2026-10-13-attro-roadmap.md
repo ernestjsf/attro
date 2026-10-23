@@ -25,7 +25,7 @@ Nothing was installed, activated, published, committed, or changed in product/co
 
 This is an audit of the current repository, selected installed-release documentation/metadata, and official external documentation. Three read-only research passes covered native UX, distribution/reliability, and the coding-agent landscape. The lead checked package registry metadata and public GitHub availability and synthesized the recommendations.
 
-Other work was changing the checkout during research. In particular, the new [Obsidian interface direction](../obsidian-ui.md) appeared before delivery. Treat its graphite/ice-cyan palette, static wordmark, explicit failure labels, and assignment-first agent summaries as ongoing work—not missing features to rebuild. The backlog below targets interaction and verification; reproduce each item against the eventual integrated candidate before implementing it.
+Other work was changing the checkout during research. In particular, the new [Obsidian interface direction](../design/obsidian-ui.md) appeared before delivery. Treat its graphite/ice-cyan palette, static wordmark, explicit failure labels, and assignment-first agent summaries as ongoing work—not missing features to rebuild. The backlog below targets interaction and verification; reproduce each item against the eventual integrated candidate before implementing it.
 
 ### Evidence labels
 
@@ -54,7 +54,7 @@ Installed evidence came from the release's `manifest.json`, `pi/packages/coding-
 
 | Capability | Where it exists | Roadmap treatment |
 | --- | --- | --- |
-| Native composer, primary activity, compact transcript, rich diffs, thinking disclosure | Current core source and [transcript design](../transcript-ui.md) | Improve existing ownership. Do not add Zentui/CC renderers alongside it. |
+| Native composer, primary activity, compact transcript, rich diffs, thinking disclosure | Current core source and [transcript design](../design/transcript-ui.md) | Improve existing ownership. Do not add Zentui/CC renderers alongside it. |
 | Todos and recursive subagents, responsive dock, details/steering/cancellation | Managed RPIV/subagent forks and native core dock | Improve coordination visibility and verified lifecycle behavior; no second task engine. |
 | LSP navigation, diagnostics, structural/security checks, project/symbol reports | Managed Lens fork | Surface freshness, scope, and actionable results; no duplicate LSP/MCP code-search stack by default. |
 | Web research, content fetching, source checking | Managed web-access package and available tools | Keep one research route; add specialized docs only for a demonstrated gap. |
@@ -195,7 +195,7 @@ Paths below use **C = `plugins/attro-core/packages/coding-agent/src/modes/intera
 | --- | --- | --- | --- |
 | **UX01 / P1** | Keep a queued-message count/action visible under vertical pressure | `C/chat-viewport.ts:68–94` can trim pending-message rows to zero; `components/queued-messages.ts:27–65` owns the fuller preview | At 80×24 and 60×16, queued/applying/stopped remain distinguishable. Smallest fix: count in the composer, not a new queue pane. |
 | **UX02 / P1** | Define attention precedence | `components/primary-activity.ts:103–148,219–258`; queue/dock state exists separately | Exercise retry + child failure + queued input + stop. Show the blocking action without claiming idle/success; retain background state. |
-| **UX03 / P1** | Publish a discoverable focus/shortcut map | `components/dock-sections.ts:182–210`; [current dock controls](../transcript-ui.md) | Hints derive from configured bindings; repeated focus shortcut returns to the draft; modal and editor bindings do not collide. Prefer contextual hints over more shortcuts. |
+| **UX03 / P1** | Publish a discoverable focus/shortcut map | `components/dock-sections.ts:182–210`; [current dock controls](../design/transcript-ui.md) | Hints derive from configured bindings; repeated focus shortcut returns to the draft; modal and editor bindings do not collide. Prefer contextual hints over more shortcuts. |
 | **UX04 / P1** | Validate constrained-height list access | `C/chat-viewport.ts:74–109`; `components/dock-sections.ts:358–423` | Expanded lists have useful rows where possible; details remain reachable by commands when not. Preserve draft/caret/undo across resize. |
 | **UX05 / P1** | Strengthen non-color focus/attention cues | `components/attro-editor.ts:45–47,109–111`; dock selected-row styles | Theme and monochrome checks distinguish focused editor, selected item and failure. Text/glyph plus styling; do not rely on faintness alone. |
 | **UX06 / P1** | Verify IME, Unicode and paste across focus changes | `C/interactive-mode.ts:665–668`; editor resizing at `chat-viewport.ts:95–118` | CJK composition follows caret; emoji/combining characters wrap correctly; multiline/bracketed paste survives dock navigation. Fix only reproduced failures. |
@@ -418,7 +418,7 @@ Collect local evidence by default. Product telemetry would be a separate privacy
 - npm registry `latest` metadata for Plannotator, Context7 Pi, permission-system, pi-memory and Playwright CLI. Listed versions are a **dated observation**, not a promise that they remain latest.
 - Official maintainer documentation for proposed integrations and competing-agent patterns; skills.sh and GitHub adoption signals for the optional React skill.
 - Artifact checks: a Python local-link/XML/whitespace validator passed (25 local links); `git diff --check` passed. Chrome rendered the 1760×4450 SVG; inspection of its 165 text elements found no canvas/card text overflow, and a full-page screenshot was visually reviewed.
-- `lens_diagnostics(mode="all")`: no blocking errors; one Marksman warning incorrectly reports the Lens README link missing. Direct filesystem and local-link validation confirm `plugins/pi-lens/README.md` exists. This is an artifact diagnostic, not a product-wide check.
+- `lens_diagnostics(mode="all")`: no blocking errors; one Marksman warning incorrectly reports the Lens README link missing. Direct filesystem and local-link validation confirm `plugins/attro-lens/README.md` exists. This is an artifact diagnostic, not a product-wide check.
 
 ### Not established
 
@@ -438,11 +438,11 @@ External sources accessed 12–13 October 2026. Maintainer READMEs describe inte
 ### Local evidence
 
 - **L1:** [Recipe](../../attro.json), [source lock](../../sources.lock.json), [root README](../../README.md), [contributor checks](../../CONTRIBUTING.md).
-- **L2:** [Native transcript ownership and controls](../transcript-ui.md), [dock design/evidence](../dock-plan.md), [native parity](../zentui-native-parity.md).
-- **L3:** [Using Attro](../using-attro.md), [retired effort plan](../effort-profiles-plan.md), [historical effort implementation](../effort-profiles-implementation.md).
-- **L4:** [Publication gates](../publication.md), [release procedure](../releasing.md), [recorded verification](../verification.md), [update automation](../automation.md).
+- **L2:** [Native transcript ownership and controls](../design/transcript-ui.md), [dock design/evidence](../archive/dock-plan.md), [native parity](../archive/zentui-native-parity.md).
+- **L3:** [Using Attro](../using-attro.md), [retired effort plan](../archive/effort-profiles-plan.md), [historical effort implementation](../archive/effort-profiles-implementation.md).
+- **L4:** [Publication gates](../maintainers/publication.md), [release procedure](../maintainers/releasing.md), [recorded verification](../maintainers/verification.md), [update automation](../maintainers/automation.md).
 - **L5:** [Security](../../SECURITY.md), [managed profile/recovery](../../profile/MANAGED.md), [initial settings](../../profile/settings.json).
-- **L6:** [Subagents](../../plugins/pi-subagents/README.md), [Lens](../../plugins/pi-lens/README.md), [RPIV](../../plugins/rpiv-mono/README.md).
+- **L6:** [Subagents](../../plugins/attro-subagents/README.md), [Lens](../../plugins/attro-lens/README.md), [RPIV](../../plugins/attro-rpiv/README.md).
 - **L7:** Installed artifact `~/.attro/releases/attro-0.2.0-c93e3582ecdc/manifest.json`; `pi/packages/coding-agent/package.json`; docs `mcp.md`, `sessions.md`, `security.md`, `containerization.md`, `packages.md`, `skills.md`, `configuration.md`. Local-only evidence; not assumed to be the current root gitlink.
 - **L8:** Anonymous availability endpoints: [root](https://api.github.com/repos/ernestjsf/attro), [tags](https://api.github.com/repos/ernestjsf/attro/tags), [releases](https://api.github.com/repos/ernestjsf/attro/releases). Fork endpoints used the same `/repos/ernestjsf/attro-{core,lens,rpiv,subagents}` pattern.
 

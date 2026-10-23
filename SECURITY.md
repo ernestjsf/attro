@@ -51,4 +51,4 @@ Use a separately configured container, VM, or other OS isolation when needed,
 with minimal file mounts, restricted networking, and narrowly scoped credentials.
 Keep backups and review changes before applying them elsewhere. Treat session
 logs and exported transcripts as sensitive. See [managed-state details](profile/MANAGED.md)
-and [verification limits](docs/verification.md).
+and [verification limits](docs/maintainers/verification.md).

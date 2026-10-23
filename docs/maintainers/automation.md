@@ -85,4 +85,4 @@ an update merely because it merges cleanly or its unit tests pass.
 Until a public stable feed exists, `attro update --repo /trusted/checkout`
 prepares that explicit local recipe; it does not fetch the newest upstream
 versions. Shared-profile state at `~/.attro/agent` persists across consumer
-updates. See [publication gates](publication.md) and [design](attro-design.md).
+updates. See [publication gates](publication.md) and [design](../design/attro-design.md).

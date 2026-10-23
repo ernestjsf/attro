@@ -15,7 +15,7 @@ existing `~/.attro/agent/zentui.json` files are **never deleted** by Attro
 updates or rollbacks.
 
 The last reviewed recipe defaults are archived at
-[docs/archive/zentui-display-defaults-retired.json](archive/zentui-display-defaults-retired.json)
+[docs/archive/zentui-display-defaults-retired.json](zentui-display-defaults-retired.json)
 (SHA-256 `7ef5d08bda4d072a0a912c45b9c8966e7c31b7a9e8df8c646019af01f866f1a7`
 when copied from the former `config/zentui.json` pin).
 
@@ -43,4 +43,4 @@ surfaces in attro-core only; each port carries a full MIT header:
 - `plugins/attro-core/packages/coding-agent/src/modes/interactive/components/labeled-user-message-render.ts`
 - `plugins/attro-core/packages/coding-agent/src/modes/interactive/components/user-message-osc.ts`
 
-See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
+See [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md).

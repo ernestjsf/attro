@@ -83,7 +83,7 @@ If an existing clone was not recursive, use `git submodule update --init --recur
 The four submodule origins are the maintained Attro mirrors (three plugin forks
 plus `plugins/attro-core`); `pi-web-access` and `pi-ask-user` are pinned from
 public npm instead. Zentui is native in attro-core (see
-[zentui-native-parity](zentui-native-parity.md)). The subagents origin is specifically
+[zentui-native-parity](archive/zentui-native-parity.md)). The subagents origin is specifically
 `ernestjsf/attro-subagents`, not the unrelated `ernestjsf/pi-subagents`.
 
 Submodule remotes are local clone configuration and are not versioned. To add the
@@ -135,7 +135,7 @@ from upstream and is not fetched at install time.
 Attro no longer ships `pi-zentui` as a recipe submodule or profile package.
 Native attro-core owns the former Zentui surfaces. New releases do **not**
 seed `zentui.json`; existing `~/.attro/agent/zentui.json` files are preserved.
-See [zentui-native-parity](zentui-native-parity.md).
+See [zentui-native-parity](archive/zentui-native-parity.md).
 
 ### Retired CC submodule
 
@@ -145,7 +145,7 @@ references, and Markdown enhancements are first-party Attro code. The legacy
 supported settings and use `/reload`. The former `/ccstyle` configuration panel
 is not bundled. Existing user files and sessions are not migrated or rewritten.
 Do not additionally load the retired CC package in managed Attro: its prototype
-patches can compete with native rendering. See [transcript UI](transcript-ui.md).
+patches can compete with native rendering. See [transcript UI](design/transcript-ui.md).
 
 ## attro-core and Lens preparation
 
@@ -238,6 +238,6 @@ color `#0e1713`), but new Attro releases do not copy them into release
 `config/` or pass `--theme` flags. Fresh Attro profiles use upstream Pi theme
 defaults until you add personal theme files under `~/.attro/agent`.
 
-See [transcript UI](transcript-ui.md) for the active display ownership and reload
+See [transcript UI](design/transcript-ui.md) for the active display ownership and reload
 instructions. Changes inside a registered local source tree require `/reload`
 (or a restart) to load; theme file edits hot-reload separately.

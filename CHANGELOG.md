@@ -63,5 +63,5 @@ tag or release is available yet.
 - Full publication, runtime, and dependency-audit gates remain distinct from
   source checks and offline fixture tests.
 
-See [verification evidence](docs/verification.md), [publication status](docs/publication.md),
+See [verification evidence](docs/maintainers/verification.md), [publication status](docs/maintainers/publication.md),
 [managed state](profile/MANAGED.md), and the [security policy](SECURITY.md).

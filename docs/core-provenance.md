@@ -50,7 +50,7 @@ Attro fork `e7c1886b8b0831629699e7f10337f8380ac65a8d`. The integration recipe pi
 Light/Balanced/Deep GPT-6 defaults, and the matching model-data archive below.
 Later scoped core changes advance the current pin in `sources.lock.json`; the
 audited comparison snapshot below remains unchanged. See
-[verification](verification.md#pi-0871-local-candidate) for tested behavior,
+[verification](maintainers/verification.md#pi-0871-local-candidate) for tested behavior,
 review corrections, and platform limits.
 
 The integration uses the verified 0.85.0 and 0.87.1 source archives as the
@@ -243,4 +243,4 @@ If output differs, check archive top-level layout (`pi-0.87.1/`), the pinned
 
 - `attro.json` — `core.source.modelSnapshot` (URL + SHA-256)
 - `sources.lock.json` — fork `pin`, `baseCommit`, `forkRootCommit`, `sourceArchive`, `forkComparison`
-- `docs/attro-design.md` — release boundaries and source-core build gate
+- `docs/design/attro-design.md` — release boundaries and source-core build gate

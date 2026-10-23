@@ -47,7 +47,7 @@ the shared profile; they do not rewrite it with new repository defaults.
 `sources.lock.json` remains the canonical source inventory (attro-core plus three
 plugin forks, with upstream npm provenance for retired visual forks). Zentui UI
 surfaces and selected CC transcript rendering and commands belong to attro-core;
-see `docs/zentui-native-parity.md` and `docs/transcript-ui.md`. `attro.json`
+see `docs/archive/zentui-native-parity.md` and `docs/design/transcript-ui.md`. `attro.json`
 adds the distribution version (**0.2.0**), core
 install method (**source**), profile path, and compatibility requirements.
 Installed metadata records source identity, `agentMode: shared-v1`, and
@@ -154,7 +154,7 @@ implicit fetch-and-execute from an unreviewed remote.
 - [ ] Verify source-core build and retained-release launch on a clean checkout.
 - [x] Verify failed preparation/interrupted pointer replacement, concurrent
       operations, and retained-release rollback/schema refusal in isolated
-      lifecycle tests (see [evidence](verification.md); v0.1-era evidence;
+      lifecycle tests (see [evidence](../maintainers/verification.md); v0.1-era evidence;
       shared-v1, installer, and launcher gates partially pending).
 - [x] Review storage/activation and release-automation permission boundaries
       independently (Fable review found no blocking safety defects in v0.1 scope).

@@ -115,7 +115,7 @@ an expanded dock does not prove a particular result row is visible.
 The `setDockSection`, `toggleDockSection`, `navigateDockSection`, and
 `isDockSectionExpanded` contract is
 in `plugins/attro-core/packages/coding-agent/docs/tui.md`. The implementation plan
-and verification boundary are in [dock-plan.md](dock-plan.md).
+and verification boundary are in [dock-plan.md](../archive/dock-plan.md).
 
 Autocomplete retains its native behavior. Queued steering and follow-ups appear
 above the input in a matching frame. Progress ownership does not change their
@@ -173,7 +173,7 @@ bar. Spawn, delivery, and execution behavior are unchanged.
   `packages/coding-agent/src/attro-features/` within that core tree.
 - Historical Zentui display defaults are archived in
   `docs/archive/zentui-display-defaults-retired.json`; see
-  [zentui-native-parity.md](zentui-native-parity.md).
+  [zentui-native-parity.md](../archive/zentui-native-parity.md).
 - `config/claude-code-style.json` remains the reviewed native transcript default;
   keeping the legacy filename avoids rewriting existing user preferences.
 - `config/rpiv-todo.json` is the reviewed rpiv todo display default.
