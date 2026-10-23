@@ -31,7 +31,7 @@ Choose the lead model with `/model` and its reasoning level with `/thinking`.
 In either picker, press Ctrl+S to save the selection as a startup default.
 Named subagents use their agent-definition defaults; explicit task overrides
 remain available. See [model selection](../plugins/attro-core/packages/coding-agent/docs/models.md)
-and [subagent configuration](../plugins/pi-subagents/README.md#agent-definitions).
+and [subagent configuration](../plugins/attro-subagents/README.md#agent-definitions).
 
 Effort profiles, their selector, and profile suggestions have been removed from
 source. Old session history remains readable, including its recorded lead

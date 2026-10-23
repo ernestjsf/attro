@@ -163,7 +163,7 @@ class RenderProfileTests(unittest.TestCase):
             rendered = render_profile(profile, release_root, checkout, descriptor={"npmPackages": []})
             payload = json.loads(rendered)
             self.assertTrue(payload["packages"][0].startswith(str(release_root.resolve())))
-            self.assertIn("/plugins/pi-lens", payload["packages"][0])
+            self.assertIn("/plugins/attro-lens", payload["packages"][0])
             self.assertIn("/config/quattro-green.json", payload["themes"][0])
 
 

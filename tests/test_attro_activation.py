@@ -22,12 +22,12 @@ def _write_release(root: Path, release_id: str, *, marker: str, legacy: bool = F
     agent_dir.mkdir(parents=True)
     for name in ("config", "plugins", "npm"):
         (release_path / name).mkdir()
-    (release_path / "plugins/pi-lens").mkdir()
+    (release_path / "plugins/attro-lens").mkdir()
     (release_path / "profile/agent").mkdir(parents=True)
     (release_path / "profile/resources").mkdir()
     settings = {
         "theme": "quattro-green",
-        "packages": [str(release_path / "plugins/pi-lens")],
+        "packages": [str(release_path / "plugins/attro-lens")],
         "marker": marker,
     }
     (release_path / "config/settings.json").write_text(json.dumps(settings))

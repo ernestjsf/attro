@@ -33,7 +33,7 @@ class LifecycleTests(unittest.TestCase):
         self.git("init")
         self.git("config", "user.name", "Fixture")
         self.git("config", "user.email", "fixture@example.invalid")
-        plugin = self.repo / "plugins/rpiv-mono"
+        plugin = self.repo / "plugins/attro-rpiv"
         plugin.mkdir(parents=True)
         self.git("init", cwd=plugin)
         self.git("config", "user.name", "Fixture", cwd=plugin)
@@ -64,7 +64,7 @@ class LifecycleTests(unittest.TestCase):
         theme.write_text('{}\n')
         self.lock = {
             "schemaVersion": 1, "branch": "quattro",
-            "submodules": [{"path": "plugins/rpiv-mono", "origin": "https://example.invalid/rpiv.git", "pin": pin,
+            "submodules": [{"path": "plugins/attro-rpiv", "origin": "https://example.invalid/rpiv.git", "pin": pin,
                             "packagePath": "packages/rpiv-todo", "runtimeGenerated": False,
                             "sourceEntryFiles": ["packages/rpiv-todo/index.ts"], "runtimeEntryFiles": ["packages/rpiv-todo/index.ts"], "dependencyLock": None}],
             "configs": [{"path": "themes/quattro-green.json", "sha256": sha256_file(theme)}],
@@ -155,7 +155,7 @@ install_deps()
         self.git("commit", "-m", "inputs")
 
     def configure_locked_plugin(self):
-        plugin = self.repo / "plugins/rpiv-mono"
+        plugin = self.repo / "plugins/attro-rpiv"
         lock_path = plugin / "package-lock.json"
         lock_path.write_text(json.dumps({"lockfileVersion": 3, "packages": {}}))
         self.git("add", ".", cwd=plugin)
@@ -163,16 +163,16 @@ install_deps()
         pin = self.git("rev-parse", "HEAD", cwd=plugin)
         entry = self.lock["submodules"][0]
         entry.update({"pin": pin, "dependencyLock": "package-lock.json", "dependencyLockVersion": 3})
-        self.git("add", "plugins/rpiv-mono")
+        self.git("add", "plugins/attro-rpiv")
         self.commit_inputs()
         return sha256_file(lock_path)
 
     def configure_lens_plugin(self):
         import shutil
-        rpiv = self.repo / "plugins/rpiv-mono"
+        rpiv = self.repo / "plugins/attro-rpiv"
         if rpiv.exists():
             shutil.rmtree(rpiv)
-        lens = self.repo / "plugins/pi-lens"
+        lens = self.repo / "plugins/attro-lens"
         lens.mkdir(parents=True)
         self.git("init", cwd=lens)
         self.git("config", "user.name", "Fixture", cwd=lens)
@@ -192,7 +192,7 @@ install_deps()
         self.git("commit", "-m", "lens plugin", cwd=lens)
         pin = self.git("rev-parse", "HEAD", cwd=lens)
         self.lock["submodules"][0] = {
-            "path": "plugins/pi-lens", "origin": "https://example.invalid/pi-lens.git", "pin": pin,
+            "path": "plugins/attro-lens", "origin": "https://example.invalid/pi-lens.git", "pin": pin,
             "packagePath": ".", "runtimeGenerated": True,
             "sourceEntryFiles": ["index.ts", "tools/render-compact.ts"],
             "runtimeEntryFiles": ["dist/index.js", "grammars/tree-sitter-typescript.wasm"],
@@ -200,7 +200,7 @@ install_deps()
         }
         profile = self.repo / "profile/settings.json"
         profile.write_text(json.dumps({"packages": ["{{PLUGIN_PI_LENS}}"], "themes": ["{{THEME_QUATTRO_GREEN}}"]}))
-        self.git("add", "plugins/pi-lens", "profile/settings.json")
+        self.git("add", "plugins/attro-lens", "profile/settings.json")
         self.commit_inputs()
         return lens
 
@@ -228,10 +228,10 @@ install_deps()
         release_a = self.state / "releases" / a["releaseId"]
         settings_before = (release_a / "config/settings.json").read_bytes()
         settings = json.loads(settings_before)
-        self.assertEqual(settings["packages"], [str(release_a / "plugins/rpiv-mono/packages/rpiv-todo"), str(release_a / "npm/node_modules/fixture-addon")])
+        self.assertEqual(settings["packages"], [str(release_a / "plugins/attro-rpiv/packages/rpiv-todo"), str(release_a / "npm/node_modules/fixture-addon")])
         for value in settings["packages"] + settings["themes"]:
             self.assertTrue(Path(value).exists(), value)
-        self.assertFalse((release_a / "plugins/rpiv-mono/ignored.txt").exists())
+        self.assertFalse((release_a / "plugins/attro-rpiv/ignored.txt").exists())
         for record in [a["provenance"]["core"], *a["provenance"]["npmPackages"]]:
             for key in ("installRoot", "lockFile", "piBinary"):
                 if key in record:
@@ -312,7 +312,7 @@ install_deps()
         self.assertEqual(launch_a["agentDir"], str(agent))
         self.assertEqual(launch_a["resourceDir"], str(release_a / "profile/resources"))
         self.assertEqual(launch_a["argv"][-3:], ["--model", "explicit", "-c"])
-        self.assertEqual(launch_a["argv"][1:5], ["-e", str(release_a / "npm/node_modules/fixture-addon"), "-e", str(release_a / "plugins/rpiv-mono/packages/rpiv-todo")])
+        self.assertEqual(launch_a["argv"][1:5], ["-e", str(release_a / "npm/node_modules/fixture-addon"), "-e", str(release_a / "plugins/attro-rpiv/packages/rpiv-todo")])
         self.assertEqual(launch_a["argv"].count(str(release_a / "npm/node_modules/fixture-addon")), 1)
         self.assertIn(str(release_a / "profile/resources"), launch_a["argv"])
         for flag in ("--no-extensions", "--no-skills", "--no-prompt-templates", "--no-themes", "--session-dir", "--approve"):
@@ -755,9 +755,9 @@ process.stdin.destroy();
         self.assertEqual(len(locks), 1)
         record = locks[0]
         self.assertEqual(record["sha256"], digest)
-        self.assertTrue(record["path"].endswith("plugins/rpiv-mono/package-lock.json"))
+        self.assertTrue(record["path"].endswith("plugins/attro-rpiv/package-lock.json"))
         release_root = self.state / "releases" / release["releaseId"]
-        lock_file = release_root / "plugins/rpiv-mono/package-lock.json"
+        lock_file = release_root / "plugins/attro-rpiv/package-lock.json"
         self.assertTrue(lock_file.is_file())
         self.assertEqual(sha256_file(lock_file), digest)
 
@@ -792,8 +792,8 @@ process.stdin.destroy();
         output, _ = self.cli("--json", "setup", "--repo", str(self.repo), "--activate")
         release = json.loads(output)
         release_root = self.state / "releases" / release["releaseId"]
-        dist = release_root / "plugins/pi-lens/dist/index.js"
-        gram = release_root / "plugins/pi-lens/grammars/tree-sitter-typescript.wasm"
+        dist = release_root / "plugins/attro-lens/dist/index.js"
+        gram = release_root / "plugins/attro-lens/grammars/tree-sitter-typescript.wasm"
         self.assertTrue(dist.is_file(), dist)
         self.assertTrue(gram.is_file(), gram)
         self.assertFalse((lens / "dist/index.js").exists())

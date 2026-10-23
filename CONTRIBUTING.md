@@ -30,9 +30,9 @@ follow that repository's policies.
 | --- | --- |
 | Launcher, installer, release manager, recipe, profile defaults, distribution docs | This repository |
 | Pi core, native Attro UI, model and thinking controls | `ernestjsf/attro-core` (`plugins/attro-core`) |
-| Lens | `ernestjsf/attro-lens` (`plugins/pi-lens`) |
-| Todo runtime | `ernestjsf/attro-rpiv` (`plugins/rpiv-mono/packages/rpiv-todo`) |
-| Subagent runtime | `ernestjsf/attro-subagents` (`plugins/pi-subagents`) |
+| Lens | `ernestjsf/attro-lens` (`plugins/attro-lens`) |
+| Todo runtime | `ernestjsf/attro-rpiv` (`plugins/attro-rpiv/packages/rpiv-todo`) |
+| Subagent runtime | `ernestjsf/attro-subagents` (`plugins/attro-subagents`) |
 | Descriptor npm packages | Upstream packages pinned by `attro.json` and `runtime/npm` |
 
 Fork changes belong in the owning fork, followed by a root change updating the

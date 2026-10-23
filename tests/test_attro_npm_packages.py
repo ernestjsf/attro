@@ -66,10 +66,10 @@ class RenderProfileNpmTests(unittest.TestCase):
                 {"package": "pi-btw", "version": "0.4.1"},
             ]
         }
-        rendered = render_profile('{"packages":["/plugins/pi-lens"]}', release_root, Path("/checkout"), descriptor)
+        rendered = render_profile('{"packages":["/plugins/attro-lens"]}', release_root, Path("/checkout"), descriptor)
         payload = json.loads(rendered)
         expected = str(npm_package_install_dir(release_root, "pi-btw").resolve())
-        self.assertEqual(payload["packages"], ["/plugins/pi-lens", expected])
+        self.assertEqual(payload["packages"], ["/plugins/attro-lens", expected])
 
 
 class DescriptorNpmTests(unittest.TestCase):

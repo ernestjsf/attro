@@ -132,7 +132,10 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
     if "rpivTodoRuntime" in provenance:
         from attro.rpiv_runtime import validate_rpiv_runtime
 
-        validate_rpiv_runtime(safe_child(path, "plugins/rpiv-mono"), provenance["rpivTodoRuntime"])
+        rpiv = next((entry for entry in sources["submodules"] if entry.get("name") == "rpiv-mono"), None)
+        if rpiv is None:
+            raise ValidationError("manifest lacks rpiv-mono source entry")
+        validate_rpiv_runtime(safe_child(path, rpiv["path"]), provenance["rpivTodoRuntime"])
     for config in sources["configs"]:
         target = safe_child(path, "config", Path(config["path"]).name)
         if not target.is_file() or sha256_file(target) != config["sha256"]:

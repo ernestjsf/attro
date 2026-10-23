@@ -21,12 +21,13 @@ CORE_CHECK_MODEL_DATA = ["node", "packages/ai/scripts/check-model-data.ts"]
 CORE_SOURCE_SUBMODULE = "plugins/attro-core"
 CORE_MODEL_DATA_REL = "packages/ai/src/providers/data"
 CORE_CLI_REL = "packages/coding-agent/dist/bundle/cli.js"
-RUNTIME_GENERATED_SUBMODULES = frozenset({"plugins/pi-lens", "plugins/attro-core"})
+# plugins/pi-lens is the retired path; old prepared releases still carry it in their manifest.
+RUNTIME_GENERATED_SUBMODULES = frozenset({"plugins/attro-lens", "plugins/pi-lens", "plugins/attro-core"})
 
 PLUGIN_PATHS = {
-    "pi-lens": "plugins/pi-lens",
-    "rpiv-todo": "plugins/rpiv-mono/packages/rpiv-todo",
-    "pi-subagents": "plugins/pi-subagents",
+    "pi-lens": "plugins/attro-lens",
+    "rpiv-todo": "plugins/attro-rpiv/packages/rpiv-todo",
+    "pi-subagents": "plugins/attro-subagents",
 }
 
 PROFILE_PLACEHOLDERS = {

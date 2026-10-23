@@ -52,7 +52,7 @@ class SourceCoreTests(unittest.TestCase):
         self.addCleanup(download.stop)
         self.core = self.repo / CORE_SOURCE_SUBMODULE
         self._init_core_submodule()
-        plugin = self.repo / "plugins/rpiv-mono"
+        plugin = self.repo / "plugins/attro-rpiv"
         plugin.mkdir(parents=True)
         self.git("init", cwd=plugin)
         self.git("config", "user.name", "Fixture", cwd=plugin)
@@ -138,7 +138,7 @@ class SourceCoreTests(unittest.TestCase):
                     "provenance": "docs/core-provenance.md",
                 },
                 {
-                    "path": "plugins/rpiv-mono",
+                    "path": "plugins/attro-rpiv",
                     "origin": "https://example.invalid/rpiv.git",
                     "pin": self.plugin_pin,
                     "packagePath": "packages/rpiv-todo",

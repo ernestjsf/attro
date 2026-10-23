@@ -52,7 +52,7 @@ installation as unavailable until actual public delivery is verified.
 
 ## Current source topology
 
-The root checkout is `pi-customizations`, with a `main` branch and GitHub
+The root checkout is `attro`, with a `main` branch and GitHub
 remote `https://github.com/ernestjsf/attro.git`. Its **four submodule**
 URLs point to the maintained Attro fork mirrors (attro-core plus three plugin
 forks). `pi-web-access` and `pi-ask-user` are pinned from public npm instead. The canonical public URLs remain the existing `ernestjsf/attro*` names.

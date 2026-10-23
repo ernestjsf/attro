@@ -16,6 +16,7 @@ from attro.git_export import export_tracked_tree
 from attro.npm_packages import npm_dependencies_from_entries, npm_spec
 from attro.paths import release_dir, releases_dir, safe_child, staging_dir, validate_state_root
 from attro.profile import validate_profile_tree, validate_resource_package
+from attro.rpiv_runtime import RPIV_PATH
 from attro.validate import ValidationError, check_node, compute_release_id, fsync_dir, git, load_json, render_profile, run_command, sha256_file, validate_checkout, validate_descriptor, validate_public_npm_lock, validate_runtime_lock_package, write_json_atomic
 
 
@@ -136,7 +137,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                 core_entry = entry
                 continue
             dst = safe_child(stage, entry["path"])
-            if entry["path"] == "plugins/rpiv-mono" and descriptor.get("rpivTodoRuntime"):
+            if entry["path"] == RPIV_PATH and descriptor.get("rpivTodoRuntime"):
                 from attro.rpiv_runtime import prepare_rpiv_runtime
 
                 source = workspace / "rpiv-source"
@@ -144,7 +145,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                 rpiv_runtime = prepare_rpiv_runtime(source, dst, snapshot)
             else:
                 export_tracked_tree(safe_child(checkout_root, entry["path"]), dst, entry["pin"])
-            lock = entry.get("dependencyLock") if entry["path"] != "plugins/rpiv-mono" or rpiv_runtime is None else None
+            lock = entry.get("dependencyLock") if entry["path"] != RPIV_PATH or rpiv_runtime is None else None
             if lock:
                 lock_path = safe_child(dst, lock)
                 if not lock_path.is_file():
@@ -161,7 +162,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                 if not safe_child(dst, name).is_file():
                     raise ValidationError(f"runtime file missing after staging: {entry['path']}/{name}")
         if descriptor.get("rpivTodoRuntime") and rpiv_runtime is None:
-            raise ValidationError("todo runtime recipe requires plugins/rpiv-mono")
+            raise ValidationError(f"todo runtime recipe requires {RPIV_PATH}")
         config_dir = stage / "config"
         config_dir.mkdir()
         for config in sources["configs"]:

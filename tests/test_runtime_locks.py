@@ -34,7 +34,7 @@ class RuntimeLockTests(unittest.TestCase):
         self.git("init")
         self.git("config", "user.name", "Fixture")
         self.git("config", "user.email", "fixture@example.invalid")
-        plugin = self.repo / "plugins/rpiv-mono"
+        plugin = self.repo / "plugins/attro-rpiv"
         plugin.mkdir(parents=True)
         self.git("init", cwd=plugin)
         self.git("config", "user.name", "Fixture", cwd=plugin)
@@ -71,7 +71,8 @@ class RuntimeLockTests(unittest.TestCase):
             "branch": "quattro",
             "submodules": [
                 {
-                    "path": "plugins/rpiv-mono",
+                    "path": "plugins/attro-rpiv",
+                    "name": "rpiv-mono",
                     "origin": "https://example.invalid/rpiv.git",
                     "pin": pin,
                     "packagePath": "packages/rpiv-todo",
@@ -207,7 +208,7 @@ install_deps()
         return stdout.getvalue(), stderr.getvalue()
 
     def setup_todo_recipe(self):
-        plugin = self.repo / "plugins/rpiv-mono"
+        plugin = self.repo / "plugins/attro-rpiv"
         for name in ("rpiv-todo", "rpiv-config", "rpiv-i18n"):
             package = plugin / "packages" / name
             package.mkdir(parents=True, exist_ok=True)
@@ -261,7 +262,7 @@ install_deps()
     def test_todo_recipe_dispatch_and_artifact_validation(self):
         manifest, calls = self.prepare_todo_recipe()
         release = self.state / "releases" / manifest["releaseId"]
-        rpiv = release / "plugins/rpiv-mono"
+        rpiv = release / "plugins/attro-rpiv"
         record = manifest["provenance"]["rpivTodoRuntime"]
         self.assertEqual(record["recipe"], RECIPE)
         self.assertEqual(record["lockSource"], "runtime/rpiv-todo")
@@ -270,7 +271,7 @@ install_deps()
         self.assertIn("node_modules/@juicesharp/rpiv-config/package.json", record["files"])
         self.assertFalse((rpiv / "packages/rpiv-config").exists())
         self.assertEqual([cmd for cmd, _ in calls].count(PACK), 3)
-        self.assertEqual([cwd.name for cmd, cwd in calls if cmd[:2] == ["npm", "ci"]], ["rpiv-mono"])
+        self.assertEqual([cwd.name for cmd, cwd in calls if cmd[:2] == ["npm", "ci"]], ["attro-rpiv"])
         self.assertEqual(self.npm_calls().count("npm ci --ignore-scripts --no-audit --no-fund"), 2)
         self.assertIn("npm ci --ignore-scripts --no-audit --no-fund --omit=dev --legacy-peer-deps", self.npm_calls())
         prepared_manifest(release)
@@ -287,6 +288,25 @@ install_deps()
         helper.unlink()
         helper.symlink_to(rpiv / "LICENSE")
         with self.assertRaisesRegex(ValidationError, "refusing symlink"):
+            prepared_manifest(release)
+
+    def test_prepared_release_with_retired_rpiv_path_still_validates(self):
+        manifest, _ = self.prepare_todo_recipe()
+        release = self.state / "releases" / manifest["releaseId"]
+        (release / "plugins/attro-rpiv").rename(release / "plugins/rpiv-mono")
+        settings = release / "config/settings.json"
+        settings.write_text(settings.read_text().replace("plugins/attro-rpiv", "plugins/rpiv-mono"))
+        legacy = json.loads((release / "manifest.json").read_text())
+        legacy["settingsSha256"] = sha256_file(settings)
+        for entry in legacy["provenance"]["sources"]["submodules"]:
+            if entry.get("name") == "rpiv-mono":
+                entry["path"] = "plugins/rpiv-mono"
+        (release / "manifest.json").write_text(json.dumps(legacy))
+        self.assertEqual(prepared_manifest(release)["releaseId"], manifest["releaseId"])
+        data = json.loads((release / "manifest.json").read_text())
+        data["provenance"]["sources"]["submodules"] = [e for e in data["provenance"]["sources"]["submodules"] if e.get("name") != "rpiv-mono"]
+        (release / "manifest.json").write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValidationError, "lacks rpiv-mono source entry"):
             prepared_manifest(release)
 
     def test_descriptor_accepts_runtime_locks(self):
@@ -328,7 +348,7 @@ install_deps()
         self.assertEqual(npm["lockSha256"], self.npm_lock_sha)
         self.assertIn("committed dependency locks", manifest["provenance"]["dependencyResolution"])
         self.assertNotIn("rpivTodoRuntime", manifest["provenance"])
-        self.assertTrue((self.state / "releases" / manifest["releaseId"] / "plugins/rpiv-mono/packages/rpiv-todo/index.ts").is_file())
+        self.assertTrue((self.state / "releases" / manifest["releaseId"] / "plugins/attro-rpiv/packages/rpiv-todo/index.ts").is_file())
 
     def test_package_json_mismatch_fails_before_activation(self):
         self.write_runtime_locks(core_deps={"@earendil-works/pi-coding-agent": "0.84.0"})

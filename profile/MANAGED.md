@@ -113,7 +113,7 @@ retained releases are larger than npm-only core installs. Provenance is recorded
 in `pi/core.json`.
 
 Plugin paths retain their source layout, including
-`plugins/rpiv-mono/packages/rpiv-todo`. Allowlisted plugin configs from
+`plugins/attro-rpiv/packages/rpiv-todo`. Allowlisted plugin configs from
 `config/` are flattened by basename into release `config/`. New Attro releases
 do not copy Quattro theme files from `themes/` or pass `--theme` flags; upstream
 Pi built-in themes, Attro's built-in Obsidian theme, and personal theme files under `~/.attro/agent` remain

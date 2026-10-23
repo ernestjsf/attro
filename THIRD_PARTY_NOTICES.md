@@ -13,11 +13,11 @@ Exact origin URLs and reviewed commits are recorded in `sources.lock.json`.
 | Source | Authoritative license |
 | --- | --- |
 | attro-core (Pi monorepo) | `plugins/attro-core/LICENSE` and per-package notices under `plugins/attro-core/packages/` |
-| Lens | `plugins/pi-lens/LICENSE` |
-| rpiv mono / selected todo package | `plugins/rpiv-mono/LICENSE` |
+| Lens | `plugins/attro-lens/LICENSE` |
+| rpiv mono / selected todo package | `plugins/attro-rpiv/LICENSE` |
 | Web access (npm) | upstream `pi-web-access@0.27.0` package LICENSE |
 | Ask user (npm) | upstream `pi-ask-user@0.14.0` package LICENSE |
-| Subagents | `plugins/pi-subagents/LICENSE` |
+| Subagents | `plugins/attro-subagents/LICENSE` |
 
 Attro **0.2.0** builds Pi core from the pinned `plugins/attro-core` source tree
 (`ernestjsf/attro-core`, upstream Pi **1.0.0**; see
@@ -44,7 +44,7 @@ Additional upstream notices inside those trees remain authoritative:
   Attro does not ship a separate `pi-zentui` recipe package. Archived former
   recipe defaults: `docs/archive/zentui-display-defaults-retired.json`.
 - Lens coderabbit rules:
-  `plugins/pi-lens/rules/ast-grep-rules/coderabbit/LICENSE` (Apache-2.0).
+  `plugins/attro-lens/rules/ast-grep-rules/coderabbit/LICENSE` (Apache-2.0).
 Source-core preparation downloads the hash-pinned upstream **1.0.0** model-data
 archive declared in `attro.json`; that asset carries its own upstream provenance
 and must be retained in audit material for prebuilt releases.

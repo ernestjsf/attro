@@ -1,13 +1,16 @@
-[submodule "plugins/pi-lens"]
-	path = plugins/pi-lens
-	url = https://github.com/ernestjsf/attro-lens.git
-[submodule "plugins/rpiv-mono"]
-	path = plugins/rpiv-mono
-	url = https://github.com/ernestjsf/attro-rpiv.git
-[submodule "plugins/pi-subagents"]
-	path = plugins/pi-subagents
-	url = https://github.com/ernestjsf/attro-subagents.git
 [submodule "plugins/attro-core"]
 	path = plugins/attro-core
 	url = https://github.com/ernestjsf/attro-core.git
+	branch = main
+[submodule "plugins/attro-lens"]
+	path = plugins/attro-lens
+	url = https://github.com/ernestjsf/attro-lens.git
+	branch = main
+[submodule "plugins/attro-rpiv"]
+	path = plugins/attro-rpiv
+	url = https://github.com/ernestjsf/attro-rpiv.git
+	branch = main
+[submodule "plugins/attro-subagents"]
+	path = plugins/attro-subagents
+	url = https://github.com/ernestjsf/attro-subagents.git
 	branch = main

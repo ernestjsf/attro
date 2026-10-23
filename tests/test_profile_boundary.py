@@ -148,9 +148,9 @@ class ProfileBoundaryTests(unittest.TestCase):
 
     def test_managed_plugin_themes_are_not_quattro_recipe(self) -> None:
         managed_packages = [
-            ROOT / "plugins/pi-lens/package.json",
-            ROOT / "plugins/pi-subagents/package.json",
-            ROOT / "plugins/rpiv-mono/packages/rpiv-todo/package.json",
+            ROOT / "plugins/attro-lens/package.json",
+            ROOT / "plugins/attro-subagents/package.json",
+            ROOT / "plugins/attro-rpiv/packages/rpiv-todo/package.json",
         ]
         for path in managed_packages:
             if not path.is_file():

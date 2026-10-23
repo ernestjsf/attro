@@ -12,7 +12,7 @@ from attro.constants import NPM_CI
 from attro.paths import safe_child
 from attro.validate import ValidationError, assert_copy_allowed, load_json, relative_path, run_command, sha256_file, validate_public_npm_lock
 
-RPIV_PATH = "plugins/rpiv-mono"
+RPIV_PATH = "plugins/attro-rpiv"
 LOCK_SOURCE = "runtime/rpiv-todo"
 RECIPE = "rpiv-todo-v1"
 PACKAGES = {

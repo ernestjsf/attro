@@ -58,7 +58,7 @@ Attro does not install fonts or require an icon font.
 ## Development boundary
 
 Core UI changes belong in `plugins/attro-core`, and agent dashboard changes in
-`plugins/pi-subagents`. Prepared releases are immutable: source edits do not
+`plugins/attro-subagents`. Prepared releases are immutable: source edits do not
 change a running installation. Prepare a new release to adopt committed changes;
 `/reload` cannot replace the running core. Existing personal themes remain valid.
 

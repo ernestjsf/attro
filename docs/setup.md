@@ -22,8 +22,8 @@ The manual equivalent is:
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git \
-  ~/projects/pi-customizations
-cd ~/projects/pi-customizations
+  ~/projects/attro
+cd ~/projects/attro
 ./install
 ```
 
@@ -75,8 +75,8 @@ URLs require no GitHub account or token:
 
 ```sh
 git clone --recurse-submodules https://github.com/ernestjsf/attro.git \
-  ~/projects/pi-customizations
-cd ~/projects/pi-customizations
+  ~/projects/attro
+cd ~/projects/attro
 ```
 
 If an existing clone was not recursive, use `git submodule update --init --recursive`.
@@ -91,15 +91,15 @@ provenance remotes to a fresh clone:
 
 ```sh
 git -C plugins/attro-core remote add upstream https://github.com/earendil-works/pi.git
-git -C plugins/pi-lens remote add upstream https://github.com/apmantza/pi-lens.git
-git -C plugins/rpiv-mono remote add upstream https://github.com/juicesharp/rpiv-mono.git
-git -C plugins/pi-subagents remote add upstream https://github.com/williamcr01/pi-subagents.git
+git -C plugins/attro-lens remote add upstream https://github.com/apmantza/pi-lens.git
+git -C plugins/attro-rpiv remote add upstream https://github.com/juicesharp/rpiv-mono.git
+git -C plugins/attro-subagents remote add upstream https://github.com/williamcr01/pi-subagents.git
 ```
 
 Install each lockfile-bearing source independently, without lifecycle scripts:
 
 ```sh
-for p in plugins/pi-lens plugins/rpiv-mono; do
+for p in plugins/attro-lens plugins/attro-rpiv; do
   (cd "$p" && npm ci --ignore-scripts --no-audit --no-fund)
 done
 ```
@@ -167,7 +167,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 npm run build:offline
 ```
 
-Lens is the other generated-runtime preparation step. From `plugins/pi-lens`, run
+Lens is the other generated-runtime preparation step. From `plugins/attro-lens`, run
 these commands in this order:
 
 ```sh
@@ -218,11 +218,11 @@ replacement full settings JSON:
 | --- | --- |
 | `pi-zentui` | native attro-core (no separate recipe package) |
 | `pi-cc-extensions` | selected features native in managed Attro; no separate recipe package |
-| `pi-lens` | `~/projects/pi-customizations/plugins/pi-lens` |
-| `@juicesharp/rpiv-todo` | `~/projects/pi-customizations/plugins/rpiv-mono/packages/rpiv-todo` |
+| `pi-lens` | `~/projects/attro/plugins/attro-lens` |
+| `@juicesharp/rpiv-todo` | `~/projects/attro/plugins/attro-rpiv/packages/rpiv-todo` |
 | `pi-web-access` | npm pin `pi-web-access@0.27.0` (see `runtime/npm`) |
 | `pi-ask-user` | npm pin `pi-ask-user@0.14.0` (see `runtime/npm`) |
-| `@williamcr01/pi-subagents` | `~/projects/pi-customizations/plugins/pi-subagents` |
+| `@williamcr01/pi-subagents` | `~/projects/attro/plugins/attro-subagents` |
 
 Pi core itself is **not** migrated through this table; Attro builds it from
 `plugins/attro-core` during release preparation.

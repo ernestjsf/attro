@@ -54,7 +54,7 @@
       "provenance": "docs/core-provenance.md"
     },
     {
-      "path": "plugins/pi-lens",
+      "path": "plugins/attro-lens",
       "name": "pi-lens",
       "origin": "https://github.com/ernestjsf/attro-lens.git",
       "upstream": "https://github.com/apmantza/pi-lens.git",
@@ -78,7 +78,7 @@
       "provenance": "QUATTRO.md"
     },
     {
-      "path": "plugins/rpiv-mono",
+      "path": "plugins/attro-rpiv",
       "name": "rpiv-mono",
       "origin": "https://github.com/ernestjsf/attro-rpiv.git",
       "upstream": "https://github.com/juicesharp/rpiv-mono.git",
@@ -103,7 +103,7 @@
       "provenance": "QUATTRO.md"
     },
     {
-      "path": "plugins/pi-subagents",
+      "path": "plugins/attro-subagents",
       "name": "@williamcr01/pi-subagents",
       "origin": "https://github.com/ernestjsf/attro-subagents.git",
       "upstream": "https://github.com/williamcr01/pi-subagents.git",
