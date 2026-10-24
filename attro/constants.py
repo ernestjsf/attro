@@ -5,6 +5,7 @@ ATTRO_DESCRIPTOR_SCHEMA = 1
 ATTRO_MANIFEST_SCHEMA = 1
 SUPPORTED_PLATFORMS = frozenset({"darwin", "linux"})
 PREPARED_MARKER = ".prepared"
+VERIFIED_STAMP = ".attro-verified"
 OPERATIONS_LOCK = ".operations.lock"
 STATE_FILE = "state.json"
 MANIFEST_FILE = "manifest.json"

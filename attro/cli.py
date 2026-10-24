@@ -175,7 +175,7 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
     if args.dry_run:
         state = load_state(args.root)
         _, release = resolve(state)
-        manifest = prepared_manifest(release, release.name)
+        manifest = prepared_manifest(release, release.name, quick=not trial)
         pi_bin = resolve_pi_binary(release, manifest=manifest)
         full_command = [*managed_resource_args(release, manifest=manifest), *command]
         env = build_try_env(release, Path(tempfile.gettempdir()) / "attro-try-<temporary>" / "agent", manifest=manifest) if trial else build_exec_env(release, manifest=manifest)
@@ -186,7 +186,7 @@ def _launch(args: argparse.Namespace, trial: bool) -> int:
             state = load_state(args.root)
             release_id, release = resolve(state)
             lease = leases.enter_context(release_lease(release, inheritable=True))
-            manifest = prepared_manifest(release, release_id)
+            manifest = prepared_manifest(release, release_id, quick=not trial)
             pi_bin = resolve_pi_binary(release, manifest=manifest)
             full_command = [*managed_resource_args(release, manifest=manifest), *command]
             warnings = request_cleanup(args.root)

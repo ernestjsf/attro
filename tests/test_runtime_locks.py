@@ -272,7 +272,8 @@ install_deps()
         self.assertFalse((rpiv / "packages/rpiv-config").exists())
         self.assertEqual([cmd for cmd, _ in calls].count(PACK), 3)
         self.assertEqual([cwd.name for cmd, cwd in calls if cmd[:2] == ["npm", "ci"]], ["attro-rpiv"])
-        self.assertEqual(self.npm_calls().count("npm ci --ignore-scripts --no-audit --no-fund"), 2)
+        self.assertEqual(self.npm_calls().count("npm ci --ignore-scripts --no-audit --no-fund"), 1)
+        self.assertIn("npm ci --ignore-scripts --no-audit --no-fund --omit=peer", self.npm_calls())
         self.assertIn("npm ci --ignore-scripts --no-audit --no-fund --omit=dev --legacy-peer-deps", self.npm_calls())
         prepared_manifest(release)
 
@@ -289,6 +290,28 @@ install_deps()
         helper.symlink_to(rpiv / "LICENSE")
         with self.assertRaisesRegex(ValidationError, "refusing symlink"):
             prepared_manifest(release)
+
+    def test_quick_validation_skips_deep_checks_only_with_matching_stamp(self):
+        manifest, _ = self.prepare_todo_recipe()
+        release = self.state / "releases" / manifest["releaseId"]
+        stamp = release / ".attro-verified"
+        self.assertTrue(stamp.is_file())
+        payload = release / "plugins/attro-rpiv/packages/rpiv-todo/index.ts"
+        original = payload.read_bytes()
+        payload.write_text("tampered\n")
+        self.assertEqual(prepared_manifest(release, quick=True)["releaseId"], manifest["releaseId"])
+        with self.assertRaisesRegex(ValidationError, "inventory/digest mismatch"):
+            prepared_manifest(release)
+        self.assertFalse(stamp.exists(), "a failed full verification must drop the stamp")
+        with self.assertRaisesRegex(ValidationError, "inventory/digest mismatch"):
+            prepared_manifest(release, quick=True)
+        payload.write_bytes(original)
+        prepared_manifest(release)
+        self.assertTrue(stamp.is_file())
+        payload.write_text("tampered\n")
+        (release / "manifest.json").write_text((release / "manifest.json").read_text() + "\n")
+        with self.assertRaisesRegex(ValidationError, "inventory/digest mismatch"):
+            prepared_manifest(release, quick=True)
 
     def test_prepared_release_with_retired_rpiv_path_still_validates(self):
         manifest, _ = self.prepare_todo_recipe()
@@ -339,6 +362,7 @@ install_deps()
         manifest = json.loads(output)
         calls = self.npm_calls()
         self.assertIn("npm ci --ignore-scripts --no-audit --no-fund", calls)
+        self.assertIn("npm ci --ignore-scripts --no-audit --no-fund --omit=peer", calls)
         self.assertNotIn("npm install --ignore-scripts --no-audit --no-fund", calls)
         core = manifest["provenance"]["core"]
         npm = manifest["provenance"]["npmPackages"][0]

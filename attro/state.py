@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from attro.constants import CORE_CLI_REL, CORE_SOURCE_SUBMODULE, MANIFEST_FILE, PREPARED_MARKER
+from attro.constants import CORE_CLI_REL, CORE_SOURCE_SUBMODULE, MANIFEST_FILE, PREPARED_MARKER, VERIFIED_STAMP
 from attro.core_source import validate_installed_workspace_links, validate_source_core_layout
 from attro.paths import release_dir, safe_child, state_path
 from attro.profile import initialize_shared_agent, require_shared_release, validate_profile_tree, validate_shared_agent
@@ -39,11 +39,37 @@ def save_state(state_root: Path, data: dict[str, Any]) -> None:
     write_json_atomic(state_path(state_root), data)
 
 
-def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: Path | None = None) -> dict[str, Any]:
+def _manifest_signature(path: Path) -> dict[str, Any]:
+    manifest = safe_child(path, MANIFEST_FILE)
+    try:
+        meta = manifest.stat()
+        return {"manifestSha256": sha256_file(manifest), "size": meta.st_size, "mtimeNs": meta.st_mtime_ns, "inode": meta.st_ino}
+    except OSError as exc:
+        raise ValidationError(f"cannot read manifest: {manifest}: {exc}") from exc
+
+
+def _stamp_matches(path: Path, signature: dict[str, Any]) -> bool:
+    try:
+        return load_json(safe_child(path, VERIFIED_STAMP)) == signature
+    except (ValidationError, OSError):
+        return False
+
+
+def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: Path | None = None, quick: bool = False) -> dict[str, Any]:
+    """Validate a release. With quick=True, a stamp left by an earlier full verification of this exact
+    manifest skips the whole-tree source hashes, symlink walk and RPIV inventory; otherwise verify fully and stamp."""
     if path.is_symlink() or not path.is_dir():
         raise ValidationError(f"release missing or symlinked: {path}")
     path = path.resolve()
     final = final_root or path
+    signature = _manifest_signature(path)
+    deep = not (quick and _stamp_matches(path, signature))
+    if deep:
+        # A failed full verification must not leave an earlier stamp that lets launches skip it.
+        try:
+            safe_child(path, VERIFIED_STAMP).unlink(missing_ok=True)
+        except (ValidationError, OSError):
+            pass
     manifest = load_json(safe_child(path, MANIFEST_FILE))
     validate_manifest(manifest)
     if manifest["releaseId"] != (release_id or path.name):
@@ -87,10 +113,11 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
             if sha256_file(safe_child(path, "pi/package-lock.json")) != record["lockSha256"]:
                 raise ValidationError("installed dependency lock digest mismatch")
             install_root = safe_child(path, "pi")
-            validate_installed_workspace_links(install_root, safe_child(install_root, "package-lock.json"))
-            runtime_hashes = validate_source_core_layout(install_root, package=record["package"], version=version)
-            if record.get("runtimeHashes") != runtime_hashes:
-                raise ValidationError("source core runtime digest mismatch")
+            if deep:
+                validate_installed_workspace_links(install_root, safe_child(install_root, "package-lock.json"))
+                runtime_hashes = validate_source_core_layout(install_root, package=record["package"], version=version)
+                if record.get("runtimeHashes") != runtime_hashes:
+                    raise ValidationError("source core runtime digest mismatch")
             try:
                 executable = os.access(safe_child(path, expected["piBinary"]), os.X_OK)
             except OSError as exc:
@@ -129,7 +156,7 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
         for name in entry["runtimeEntryFiles"]:
             if not safe_child(path, entry["path"], name).is_file():
                 raise ValidationError(f"release runtime entry missing: {entry['path']}/{name}")
-    if "rpivTodoRuntime" in provenance:
+    if deep and "rpivTodoRuntime" in provenance:
         from attro.rpiv_runtime import validate_rpiv_runtime
 
         rpiv = next((entry for entry in sources["submodules"] if entry.get("name") == "rpiv-mono"), None)
@@ -154,6 +181,11 @@ def prepared_manifest(path: Path, release_id: str | None = None, *, final_root: 
                 resource = Path(value)
                 if not resource.is_absolute() or not resource.is_relative_to(final) or not safe_child(path, str(resource.relative_to(final))).exists():
                     raise ValidationError(f"release resource missing or outside release: {value}")
+    if deep:
+        try:
+            write_json_atomic(safe_child(path, VERIFIED_STAMP), signature)
+        except (ValidationError, OSError):
+            pass  # best effort: without a stamp, launches simply verify fully
     return manifest
 
 
