@@ -799,6 +799,7 @@ process.stdin.destroy();
         self.assertFalse((lens / "dist/index.js").exists())
         self.assertFalse((lens / "grammars/tree-sitter-typescript.wasm").exists())
         calls = self.npm_calls()
+        self.assertIn("npm ci --ignore-scripts --no-audit --no-fund --omit=dev", calls)
         build_idx = next(i for i, line in enumerate(calls) if line == "npm run build:dist")
         check_idx = next(i for i, line in enumerate(calls) if line == "npm run check:grammars")
         self.assertLess(build_idx, check_idx)

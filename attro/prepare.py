@@ -30,6 +30,8 @@ def _install_packages(
     lock_rel: str | None = None,
 ) -> list[dict[str, Any]]:
     name = "pi" if core else "npm"
+    # The host Pi aliases @earendil-works/* and typebox for extensions, so descriptor packages need no peer copy.
+    omit = [] if core else ["--omit=peer"]
     install_root = stage / name
     install_root.mkdir()
     lock_source = None
@@ -45,14 +47,14 @@ def _install_packages(
         input_lock_sha = sha256_file(lock_file)
         shutil.copyfile(package_json, install_root / "package.json")
         shutil.copyfile(lock_file, install_root / "package-lock.json")
-        run_command(NPM_CI, install_root)
+        run_command([*NPM_CI, *omit], install_root)
         lock = safe_child(install_root, "package-lock.json")
         if sha256_file(lock) != input_lock_sha:
             raise ValidationError(f"dependency lock changed during npm ci: {name}")
         lock_source = lock_rel
     else:
         write_json_atomic(install_root / "package.json", {"name": f"attro-release-{name}", "private": True, "dependencies": npm_dependencies_from_entries(entries)})
-        run_command(NPM_INSTALL, install_root)
+        run_command([*NPM_INSTALL, *omit], install_root)
         lock = safe_child(install_root, "package-lock.json")
         if not lock.is_file():
             raise ValidationError(f"npm did not create a dependency lock in {install_root}")
@@ -151,7 +153,7 @@ def prepare_release(checkout_root: Path, *, state_root: Path) -> dict[str, Any]:
                 if not lock_path.is_file():
                     raise ValidationError(f"dependency lock missing: {entry['path']}")
                 digest = sha256_file(lock_path)
-                run_command(NPM_CI, dst)
+                run_command([*NPM_CI, "--omit=dev"], dst)
                 if sha256_file(lock_path) != digest:
                     raise ValidationError(f"dependency lock changed during npm ci: {entry['path']}")
                 dependency_locks.append({"path": str(final / entry["path"] / lock), "sha256": digest})
