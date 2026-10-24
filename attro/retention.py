@@ -269,8 +269,13 @@ def archive_sessions(state_root: Path, *, now: float | None = None) -> int:
             target = safe_child(archive, *source.relative_to(sessions).parts)
             if target.exists():
                 continue
-            target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            # mkdir(parents=True) applies the mode to the leaf only; create every component as 0o700.
+            parent = archive
+            for part in (ARCHIVE_DIR_NAME, *target.parent.relative_to(archive).parts):
+                parent = archive if part == ARCHIVE_DIR_NAME else parent / part
+                parent.mkdir(mode=0o700, exist_ok=True)
             os.rename(source, target)
+            os.chmod(target, 0o600)
             moved += 1
         except (OSError, ValidationError):
             continue
