@@ -72,6 +72,19 @@ contain credentials, private prompts, file contents, and command output. Never
 attach a whole profile or session to a public issue without reviewing and
 redacting it.
 
+### Session archiving
+
+A background task, at most once a day after a launch, moves session files
+(`*.jsonl`) under `~/.attro/agent/sessions/` that have not been modified for 60
+days to `~/.attro/sessions-archive/`, keeping the same relative path. Nothing is
+deleted or overwritten. Set `sessionArchiveDays` in `~/.attro/agent/.attro-profile.json`
+to change the age; `0` disables archiving. To bring a session back, move it into
+`agent/sessions/` again.
+
+```json
+{"agentDir": "...", "agentMode": "shared-v1", "schemaVersion": 1, "sessionArchiveDays": 30}
+```
+
 ## Update deliberately
 
 There is no automatic stable update feed. `attro update` prepares an explicit,

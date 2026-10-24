@@ -15,6 +15,8 @@ from attro.validate import ValidationError, assert_copy_allowed, fsync_dir, load
 RESOURCE_FLAGS = {"packages": "-e", "extensions": "-e", "skills": "--skill", "prompts": "--prompt-template", "themes": "--theme"}
 PROFILE_MARKER = ".attro-profile.json"
 LEGACY_PROFILE_MARKER = ".piattro-profile.json"
+SESSION_ARCHIVE_KEY = "sessionArchiveDays"
+DEFAULT_SESSION_ARCHIVE_DAYS = 60
 SEED_FILES = frozenset({
     "AGENTS.md", "CLAUDE.md", "SYSTEM.md", "APPEND_SYSTEM.md", "models.json", "keybindings.json",
     "subagents.json", "rpiv-todo.json", "claude-plugins.json", "cursor-sdk.json", "cursor-sdk-context-windows.json",
@@ -80,6 +82,14 @@ def _read_profile_marker(agent: Path) -> dict[str, Any] | None:
     return None
 
 
+def session_archive_days(agent: Path) -> int:
+    """Days of inactivity before a session file is archived; 0 disables. Optional key in the profile marker."""
+    days = (_read_profile_marker(agent) or {}).get(SESSION_ARCHIVE_KEY, DEFAULT_SESSION_ARCHIVE_DAYS)
+    if type(days) is not int or days < 0:
+        raise ValidationError(f"{SESSION_ARCHIVE_KEY} in {PROFILE_MARKER} must be a non-negative integer")
+    return days
+
+
 def validate_shared_agent(state_root: Path, *, required: bool = True) -> Path:
     agent = shared_agent_dir(state_root)
     if not agent.exists():
@@ -101,7 +111,7 @@ def validate_shared_agent(state_root: Path, *, required: bool = True) -> Path:
         if path.is_symlink() or (path.is_file() and path.stat().st_nlink != 1):
             raise ValidationError(f"shared sessions must not alias external state: {path}")
     marker = _read_profile_marker(agent)
-    if marker != _profile_marker_payload(agent):
+    if marker is None or {key: value for key, value in marker.items() if key != SESSION_ARCHIVE_KEY} != _profile_marker_payload(agent):
         raise ValidationError(f"refusing existing unmanaged shared agent directory: {agent}; preserve it and choose an empty managed root")
     return agent
 

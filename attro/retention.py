@@ -17,11 +17,15 @@ from typing import Iterator
 
 from attro.lock import OperationBusy, operation_lock
 from attro.paths import release_dir, repo_root, safe_child, validate_state_root
+from attro.profile import session_archive_days, shared_agent_dir, validate_shared_agent
 from attro.validate import ValidationError
 
 LEASE_NAME = ".attro-lease"
 REAPER_LOCK_NAME = ".retention-reaper.lock"
 PENDING_NAME = ".retention-pending"
+ARCHIVE_STAMP_NAME = ".sessions-archived"
+ARCHIVE_DIR_NAME = "sessions-archive"
+ARCHIVE_INTERVAL = 24 * 3600
 REAPER_INTERVAL = 7.0
 _reapers: list[subprocess.Popen] = []
 
@@ -232,6 +236,47 @@ def _cleanup_pass(state_root: Path) -> CleanupResult:
     return result
 
 
+def _archive_due(state_root: Path) -> bool:
+    agent = shared_agent_dir(state_root)
+    if session_archive_days(agent) == 0 or not (agent / "sessions").is_dir():
+        return False
+    try:
+        return time.time() - safe_child(state_root, ARCHIVE_STAMP_NAME).stat().st_mtime > ARCHIVE_INTERVAL
+    except FileNotFoundError:
+        return True
+
+
+def archive_sessions(state_root: Path, *, now: float | None = None) -> int:
+    """Move session files idle for sessionArchiveDays to <state>/sessions-archive/<same relative path>."""
+    agent = validate_shared_agent(state_root, required=False)
+    days = session_archive_days(agent)
+    if days == 0:
+        return 0
+    stamp = safe_child(state_root, ARCHIVE_STAMP_NAME)
+    os.close(_open_lock(stamp))
+    os.utime(stamp)
+    sessions = agent / "sessions"
+    if not sessions.is_dir():
+        return 0
+    cutoff = (time.time() if now is None else now) - days * 86400
+    archive = safe_child(state_root, ARCHIVE_DIR_NAME)
+    moved = 0
+    for source in sessions.rglob("*.jsonl"):
+        try:
+            metadata = source.lstat()
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1 or metadata.st_mtime >= cutoff:
+                continue
+            target = safe_child(archive, *source.relative_to(sessions).parts)
+            if target.exists():
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            os.rename(source, target)
+            moved += 1
+        except (OSError, ValidationError):
+            continue
+    return moved
+
+
 def request_cleanup(state_root: Path) -> list[str]:
     """Request background work only. Caller holds operation_lock through spawning."""
     from attro.state import load_state
@@ -239,7 +284,7 @@ def request_cleanup(state_root: Path) -> list[str]:
     try:
         state = load_state(state_root)
         if not any(rid != state["active"] and entry.get("retention") == "retired"
-                   for rid, entry in state["releases"].items()):
+                   for rid, entry in state["releases"].items()) and not _archive_due(state_root):
             return []
         os.close(_open_lock(safe_child(state_root, PENDING_NAME)))
         if not start_reaper(state_root):
@@ -342,7 +387,12 @@ def reconcile_and_maybe_reap(state_root: Path) -> list[str]:
 
 def _reaper_main(state_root: Path) -> int:
     try:
-        _run_cleanup(validate_state_root(state_root), background=True)
+        root = validate_state_root(state_root)
+        try:
+            archive_sessions(root)
+        except (OSError, ValidationError):
+            pass  # archiving is best effort and must not block release cleanup
+        _run_cleanup(root, background=True)
         return 0
     except (OSError, ValidationError):
         return 1

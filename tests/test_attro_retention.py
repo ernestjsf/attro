@@ -25,6 +25,8 @@ from attro.retention import (
     LeaseBusy,
     _reaper_main,
     _reapers,
+    archive_sessions,
+    ARCHIVE_STAMP_NAME,
     PENDING_NAME,
     REAPER_LOCK_NAME,
     request_cleanup,
@@ -834,6 +836,79 @@ class RetentionTests(unittest.TestCase):
         self.assertIn("cleanup process could not start", stderr)
         self.assertTrue(old.exists())
         self.assertTrue((self.state / PENDING_NAME).exists())
+
+    def _session_agent(self) -> Path:
+        release = self._prunable("attro-0.1.0-sessions0000", "s")
+        register_release(self.state, release.name, release)
+        activate_release(self.state, release.name)
+        return self.state / "agent"
+
+    def _session(self, agent: Path, name: str, age_days: float, project: str = "--proj--") -> Path:
+        path = agent / "sessions" / project / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n")
+        stamp = time.time() - age_days * 86400
+        os.utime(path, (stamp, stamp))
+        return path
+
+    def test_archive_sessions_moves_only_idle_session_files_keeping_layout(self) -> None:
+        agent = self._session_agent()
+        old = self._session(agent, "old.jsonl", 90)
+        fresh = self._session(agent, "fresh.jsonl", 1)
+        other = self._session(agent, "old.txt", 90)
+        self.assertEqual(archive_sessions(self.state), 1)
+        self.assertFalse(old.exists())
+        self.assertEqual((self.state / "sessions-archive/--proj--/old.jsonl").read_text(), "{}\n")
+        self.assertTrue(fresh.exists() and other.exists())
+        self.assertTrue((self.state / ARCHIVE_STAMP_NAME).exists())
+
+    def test_archive_sessions_honours_profile_key_and_keeps_marker_valid(self) -> None:
+        agent = self._session_agent()
+        marker = agent / ".attro-profile.json"
+        data = json.loads(marker.read_text())
+        old = self._session(agent, "old.jsonl", 20)
+        marker.write_text(json.dumps({**data, "sessionArchiveDays": 10}))
+        self.assertEqual(archive_sessions(self.state), 1)
+        self.assertFalse(old.exists())
+        again = self._session(agent, "again.jsonl", 20)
+        marker.write_text(json.dumps({**data, "sessionArchiveDays": 0}))
+        self.assertEqual(archive_sessions(self.state), 0)
+        self.assertTrue(again.exists())
+        marker.write_text(json.dumps({**data, "sessionArchiveDays": -1}))
+        with self.assertRaisesRegex(ValidationError, "sessionArchiveDays"):
+            archive_sessions(self.state)
+
+    def test_archive_sessions_refuses_symlinks_and_never_overwrites(self) -> None:
+        agent = self._session_agent()
+        old = self._session(agent, "old.jsonl", 90)
+        archived = self.state / "sessions-archive/--proj--/old.jsonl"
+        archived.parent.mkdir(parents=True)
+        archived.write_text("kept\n")
+        self.assertEqual(archive_sessions(self.state), 0)
+        self.assertEqual(archived.read_text(), "kept\n")
+        self.assertTrue(old.exists())
+        (agent / "sessions/--proj--/link.jsonl").symlink_to(old)
+        with self.assertRaisesRegex(ValidationError, "alias external state"):
+            archive_sessions(self.state)
+
+    def test_request_cleanup_spawns_reaper_once_per_day_for_session_archive(self) -> None:
+        agent = self._session_agent()
+        with mock.patch("attro.retention.start_reaper", return_value=True) as spawn:
+            self.assertEqual(request_cleanup(self.state), [])
+            spawn.assert_not_called()
+        (agent / "sessions").mkdir()
+        with mock.patch("attro.retention.start_reaper", return_value=True) as spawn:
+            self.assertEqual(request_cleanup(self.state), [])
+            spawn.assert_called_once_with(self.state)
+        archive_sessions(self.state)
+        with mock.patch("attro.retention.start_reaper", return_value=True) as spawn:
+            self.assertEqual(request_cleanup(self.state), [])
+            spawn.assert_not_called()
+        stamp = self.state / ARCHIVE_STAMP_NAME
+        os.utime(stamp, (time.time() - 2 * 86400,) * 2)
+        with mock.patch("attro.retention.start_reaper", return_value=True) as spawn:
+            request_cleanup(self.state)
+            spawn.assert_called_once_with(self.state)
 
 
 if __name__ == "__main__":
